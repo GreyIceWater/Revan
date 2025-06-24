@@ -171,18 +171,18 @@ document.addEventListener('DOMContentLoaded', function () {
 //Show and hide contact preference section based on the selection
 document.addEventListener('DOMContentLoaded', function () {
     // Function to toggle the contact preference display based on trip type selection
-    function toggleContactPreferenceDisplay() {
-        // Select the contact preference section
-        var contactPreferenceSection = document.querySelector('.contact-preference');
+    //function toggleContactPreferenceDisplay() {
+    //    // Select the contact preference section
+    //    var contactPreferenceSection = document.querySelector('.contact-preference');
 
-        // Check if any trip type is selected
-        var isAnyTripTypeSelected = document.getElementById('RoundTrip').checked ||
-            document.getElementById('OneWay').checked ||
-            document.getElementById('Friday').checked;
+    //    // Check if any trip type is selected
+    //    var isAnyTripTypeSelected = document.getElementById('RoundTrip').checked ||
+    //        document.getElementById('OneWay').checked ||
+    //        document.getElementById('Friday').checked;
 
-        // Show the contact preference section if any trip type is selected
-        contactPreferenceSection.style.display = isAnyTripTypeSelected ? 'block' : 'none';
-    }
+    //    // Show the contact preference section if any trip type is selected
+    //    contactPreferenceSection.style.display = isAnyTripTypeSelected ? 'block' : 'none';
+    //}
 
     // Get the trip type radio buttons by ID
     var roundTripRadio = document.getElementById('RoundTrip');

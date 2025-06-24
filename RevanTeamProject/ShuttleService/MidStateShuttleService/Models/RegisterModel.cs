@@ -55,8 +55,7 @@ namespace MidStateShuttleService.Models
         //[Required(ErrorMessage = "Friday Trip Type is required")]
         public string? FridayTripType { get; set; }
 
-        [Required]
-        public string ContactPreference { get; set; }
+        public string? ContactPreference { get; set; }
 
         [Required]
         public bool AgreeTerms { get; set; } = false;//  true/false for agreement

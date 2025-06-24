@@ -17,7 +17,7 @@
         var otherMustArriveBy = $('#otherMustArriveBy').val() || 'Not specified';
         var otherCanLeaveAfter = $('#otherCanLeaveAfter').val() || 'Not specified';
         var needTransportation = $('#NeedTransportation').val() || 'Not specified';
-        var contactPreference = $('[name="ContactPreference"]:checked').val();
+        //var contactPreference = $('[name="ContactPreference"]:checked').val();
 
         // Fetch selected location names directly from the option text
         var pickUpLocationName = $('#PickUpLocation option:selected').text();
@@ -200,7 +200,7 @@
             }
         }
 
-        confirmationContent += `<p>Contact Preference: ${contactPreference}</p>`;
+        /*confirmationContent += `<p>Contact Preference: ${contactPreference}</p>`;*/
 
         // Display the constructed confirmation content in the modal body
         $('.modal-body').html(confirmationContent);

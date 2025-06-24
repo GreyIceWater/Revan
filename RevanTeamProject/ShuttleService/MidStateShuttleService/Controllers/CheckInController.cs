@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
+using MidStateShuttleService.Services;
+using MidStateShuttleService.ViewModels;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -33,16 +35,31 @@ namespace MidStateShuttleService.Controllers
 
         public ActionResult EditCheckIn(int id)
         {
-            CheckInServices cs = new CheckInServices(_context);
-            CheckIn model = cs.GetEntityById(id);
-
-            LocationServices ls = new LocationServices(_context);
-            ViewBag.Locations = ls.GetAllEntities().Select(x => new SelectListItem { Text = x.Name, Value = x.LocationId.ToString() });
+            var cs = new CheckInServices(_context);
+            var model = cs.GetEntityById(id);
 
             if (model == null)
                 return FailedCheckIn("Check-in Not Found");
 
-            return View(model);
+            var ls = new LocationServices(_context);
+            var locationOptions = ls.GetAllEntities()
+                .Select(x => new SelectListItem { Text = x.Name, Value = x.LocationId.ToString() })
+                .ToList();
+
+            var viewModel = new CheckInViewModel
+            {
+                CheckInId = model.CheckInId,
+                Name = model.Name,
+                UtcDate = model.Date,
+                Comments = model.Comments,
+                FirstTime = model.FirstTime,
+                LocationId = model.LocationId,
+                IsActive = model.IsActive,
+                LocationOptions = locationOptions
+                // CentralDateTime will auto-convert from UtcDate via getter in ViewModel
+            };
+
+            return View(viewModel);
         }
 
         // POST: CheckInController/Create
@@ -51,10 +68,7 @@ namespace MidStateShuttleService.Controllers
         [AllowAnonymous]
         public ActionResult CheckIn(CheckIn checkIn)
         {
-                   
-
-            //date
-            checkIn.Date = DateTime.Now;
+            checkIn.Date = DateTime.UtcNow;
             CheckInServices cs = new CheckInServices(_context);
             checkIn.IsActive = true;
             cs.AddEntity(checkIn);
@@ -73,15 +87,28 @@ namespace MidStateShuttleService.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditCheckIn(CheckIn checkIn)
+        public ActionResult EditCheckIn(CheckInViewModel model)
         {
-            CheckInServices cs = new CheckInServices(_context);
-            if (checkIn == null)
+            if (model == null)
                 return FailedCheckIn("Updates to check-in could not be applied");
 
-            //not all values comming over from form
-            checkIn.IsActive = true;
-            cs.UpdateEntity(checkIn);
+            var cs = new CheckInServices(_context);
+            var existingCheckIn = cs.GetEntityById(model.CheckInId);
+
+            if (existingCheckIn == null)
+                return FailedCheckIn("Check-in not found");
+
+            // Update other fields
+            existingCheckIn.Name = model.Name;
+            existingCheckIn.Comments = model.Comments;
+            existingCheckIn.FirstTime = model.FirstTime;
+            existingCheckIn.LocationId = model.LocationId;
+            existingCheckIn.IsActive = true;
+
+            // Use UtcDate from ViewModel (which is kept in sync when CentralDateTime is set)
+            existingCheckIn.Date = model.UtcDate;
+
+            cs.UpdateEntity(existingCheckIn);
 
             return RedirectToAction("Index", "Dashboard");
         }

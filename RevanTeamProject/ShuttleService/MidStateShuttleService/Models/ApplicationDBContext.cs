@@ -409,7 +409,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(20);
 
             entity.Property(e => e.ContactPreference)
-                .IsRequired()
+                //.IsRequired()
                 .HasMaxLength(20);
 
             entity.Property(e => e.AgreeTerms)
