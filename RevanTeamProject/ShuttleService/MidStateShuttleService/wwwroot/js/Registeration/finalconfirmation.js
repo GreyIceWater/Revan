@@ -3,9 +3,11 @@
         e.preventDefault(); // Prevent form submit
 
         // Gather form data
+        var schoolTerm = $('#SchoolTerm').val();
         var studentId = $('#StudentId').val();
         var firstName = $('#FirstName').val();
         var lastName = $('#LastName').val();
+        var isAdult = $('#IsAdult').is(':checked');
         var email = $('#Email').val();
         var phoneNumber = $('#PhoneNumber').val();
         var tripType = $('[name="TripType"]:checked').val();
@@ -17,7 +19,7 @@
         var otherMustArriveBy = $('#otherMustArriveBy').val() || 'Not specified';
         var otherCanLeaveAfter = $('#otherCanLeaveAfter').val() || 'Not specified';
         var needTransportation = $('#NeedTransportation').val() || 'Not specified';
-        var contactPreference = $('[name="ContactPreference"]:checked').val();
+        //var contactPreference = $('[name="ContactPreference"]:checked').val();
 
         // Fetch selected location names directly from the option text
         var pickUpLocationName = $('#PickUpLocation option:selected').text();
@@ -58,9 +60,11 @@
 
         // Start building the confirmationContent
         var confirmationContent = `
+            <p>School Term: ${schoolTerm}</p>
             <p>Student ID: ${studentId}</p>
             <p>First Name: ${firstName}</p>
             <p>Last Name: ${lastName}</p>
+            <p>I am 18 or older: ${isAdult}</p>
             <p>Email: ${email}</p>
             <p>Phone Number: ${phoneNumber}</p>
             <p>Trip Type: ${tripType}</p>
@@ -93,7 +97,7 @@
                 <p>Must Arrive Time: ${otherMustArriveBy}</p>
                 <p>Can Leave Time: ${otherCanLeaveAfter}</p>
                 <p>Pick Up Location: ${pickUpLocationName}</p>
-                <p>Speical Drop Off Location: ${specialDropOffLocation}</p>
+                <p>Special Drop Off Location: ${specialDropOffLocation}</p>
                 <p>Need Transportation Detail: ${needTransportation}</p>
             `;
             }
@@ -102,8 +106,8 @@
                 <p>Special Request: ${otherSpecialRequest}</p>
                 <p>Must Arrive Time: ${otherMustArriveBy}</p>
                 <p>Can Leave Time: ${otherCanLeaveAfter}</p>
-                <p>Speical Pick Up Location: ${specialPickUpLocation}</p>
-                <p>Speical Drop Off Location: ${specialDropOffLocation}</p>
+                <p>Special Pick Up Location: ${specialPickUpLocation}</p>
+                <p>Special Drop Off Location: ${specialDropOffLocation}</p>
                 <p>Need Transportation Detail: ${needTransportation}</p>
             `;
             }
@@ -160,7 +164,7 @@
                 <p>Special Request: ${otherSpecialRequest}</p>
                 <p>Must Arrive Time: ${otherMustArriveBy}</p>
                 <p>Pick Up Location: ${pickUpLocationName}</p>
-                <p>Speical Drop Off Location: ${specialDropOffLocation}</p>
+                <p>Special Drop Off Location: ${specialDropOffLocation}</p>
                 <p>Need Transportation Detail: ${needTransportation}</p>
             `;
             }
@@ -168,8 +172,8 @@
                 confirmationContent += `
                 <p>Special Request: ${otherSpecialRequest}</p>
                 <p>Must Arrive Time: ${otherMustArriveBy}</p>
-                <p>Speical Pick Up Location: ${specialPickUpLocation}</p>
-                <p>Speical Drop Off Location: ${specialDropOffLocation}</p>
+                <p>Special Pick Up Location: ${specialPickUpLocation}</p>
+                <p>Special Drop Off Location: ${specialDropOffLocation}</p>
                 <p>Need Transportation Detail: ${needTransportation}</p>
             `;
             }
@@ -200,7 +204,7 @@
             }
         }
 
-        confirmationContent += `<p>Contact Preference: ${contactPreference}</p>`;
+        /*confirmationContent += `<p>Contact Preference: ${contactPreference}</p>`;*/
 
         // Display the constructed confirmation content in the modal body
         $('.modal-body').html(confirmationContent);

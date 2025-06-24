@@ -409,7 +409,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(20);
 
             entity.Property(e => e.ContactPreference)
-                .IsRequired()
+                //.IsRequired()
                 .HasMaxLength(20);
 
             entity.Property(e => e.AgreeTerms)
@@ -450,6 +450,9 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(e => e.FridayDropOffLocationID)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Registration_FridayDropOffLocation");
+            
+            entity.Property(x => x.Term)
+                .HasConversion<string>();
         });
     }
 }

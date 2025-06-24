@@ -5,6 +5,20 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MidStateShuttleService.Models
 {
+    public enum SchoolTerm
+    {
+        [Display(Name = "Spring")]
+        Spring,
+
+        [Display(Name = "Summer")]
+        Summer,
+
+        [Display(Name = "Fall")]
+        Fall,
+
+        [Display(Name = "Winter Interim")]
+        Winterim
+    }
 
     // !!**** Temporarily disabled validations, to be addressed in the next sprint. ****!!//
     [Table("Registration")]
@@ -55,8 +69,7 @@ namespace MidStateShuttleService.Models
         //[Required(ErrorMessage = "Friday Trip Type is required")]
         public string? FridayTripType { get; set; }
 
-        [Required]
-        public string ContactPreference { get; set; }
+        public string? ContactPreference { get; set; }
 
         [Required]
         public bool AgreeTerms { get; set; } = false;//  true/false for agreement
@@ -118,6 +131,11 @@ namespace MidStateShuttleService.Models
         /// The date and time the record was last edited.
         /// </summary>
         public DateTime? EditDateTime { get; set; }
+
+        public bool IsAdult { get; set; }
+
+        [Required(ErrorMessage = "Term is required.")]
+        public SchoolTerm? Term { get; set; }
     }
 
 }

@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
+using MidStateShuttleService.Services;
 using System.Data;
 using System.Diagnostics;
 
@@ -42,6 +43,14 @@ namespace MidStateShuttleService.Controllers
 
             CheckInServices cis = new CheckInServices(_context);
             allModels.CheckIn = cis.GetAllEntities();
+
+            if (allModels.CheckIn != null)
+            {
+                foreach (var checkIn in allModels.CheckIn)
+                {
+                    checkIn.Date = TimeService.ConvertUtcToCentral(checkIn.Date);
+                }
+            }
 
             MessageServices ms = new MessageServices(_context);
             allModels.Message = ms.GetAllEntities();

@@ -17,7 +17,6 @@
 
 
 <body>
-
     <div class="wrapper wrapper--w680">
         <div class="form form-1">
             <div class="form-body">
@@ -55,17 +54,26 @@
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="successModalLabel">Check-in Successful</h5>
+                                    <h5 class="modal-title" id="successModalLabel">Request Successfully Submitted</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                                    Your check-in has been successfully submitted. Thank you!
+                                    Your request has been successfully submitted. Thank you!
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="Route-schedule">
+                        <div class="input-fields">
+                            <div class="dropdown">
+                                @Html.DropDownListFor(x => x.Term, (IEnumerable<SelectListItem>)ViewBag.Terms, "Select Term", new { @class = "form-control", @id = "SchoolTerm", @name = "SchoolTerm", required = "required" })
+                                <span id="SchoolTerm-validation-message" class="validation-message text-danger" style="display:none;"></span>
                             </div>
                         </div>
                     </div>
@@ -351,7 +359,7 @@
                                         @Html.RadioButtonFor(model => model.SpecialRequest, false, new { id = "specialNo", @class = "special-request-input" }) <label for="specialNo">No</label>
                                     </div>
                                 <p class="special-request-info">Your Friday* selection requires a special request. Would you like to provide additional information and submit a request to the Shuttle Coordinator?</p>
-                                <div id="FridaySpecialRequest-validation-message" class="validation-message">Please select speical quest</div>
+                                <div id="FridaySpecialRequest-validation-message" class="validation-message">Please select special quest</div>
 
                             <!--Speical Request Time Preferences -->
                             <div class="special-request-time-preferences" style="display: none;">
@@ -465,11 +473,15 @@
                                         <div class="form-line"></div>
                                         <div id="LastName-validation-message" class="validation-message">Must be characters</div>
                                     </div>
+                                    <div class="input-fields">
+                                        @Html.CheckBoxFor(model => model.IsAdult, new { @class = "input--style-1" })
+                                        <label class="form-check-label" for="IsAdult">I am 18 or older</label>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="input-fields">
-                                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "input--style-1", placeholder = "Email" } })
+                                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "input--style-1", placeholder = "Email", id = "Email" } })
                                 <div class="form-line"></div>
                                 <div id="Email-validation-message" class="validation-message">Must be characters</div>
                             </div>
@@ -482,7 +494,7 @@
                             </div>
                         </div>
 
-                        <div class="contact-preference">
+                        @* <div class="contact-preference">
                             <div class="input-fields">
                                 <p class="contact-preference-label">Contact Preference</p>
                                 <div class="radio-options">
@@ -491,10 +503,10 @@
                                     @Html.RadioButtonFor(model => model.ContactPreference, "Text", new { id = "Text" }) <label for="Text">Text</label>
                                 </div>
                                 <div class="form-line"></div>
-                                @*                                 <div id="ContactPreference-validation-message" class="validation-message"></div> *@
+                                                                <div id="ContactPreference-validation-message" class="validation-message"></div>
                                 <p class="contact-preference-guide">*Any communication would be directly related to the shuttle service or route updates.</p>
                             </div>
-                        </div>
+                        </div> *@
                     </div>
 
 
