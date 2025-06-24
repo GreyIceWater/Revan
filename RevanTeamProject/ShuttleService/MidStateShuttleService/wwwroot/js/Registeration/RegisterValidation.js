@@ -88,25 +88,12 @@
                 }
             }
 
-            // Email validation (matches common email patterns more accurately) ......... 
-            // This is commented out because the validation doens't let it pass even if the email is valid I tried so many ways and can't find solution yet.
-
-            //if (fieldId === 'Email') {
-            //    var emailValue = $field.val().trim(); // Trim whitespace from the value
-            //    console.log("Validating Email: ", emailValue); // Debug: Log the value being validated
-
-            //    // Simplified and more commonly used email regex pattern
-            //    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-            //    if (!emailPattern.test(emailValue)) {
-            //        console.log("Invalid Email Detected"); // Debug: Log when an invalid email is detected
-            //        $(validationMessageId).text('Please enter a valid email address').show();
-            //        isValid = false;
-            //    } else {
-            //        console.log("Valid Email"); // Debug: Log when an email is valid
-            //        $(validationMessageId).hide(); // Make sure to hide the validation message when the email is valid
-            //    }
-            //}
+            if (fieldId === 'Email') {
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($field.val())) {
+                    $(validationMessageId).text('Must be a valid email').show();
+                    isValid = false;
+                }
+            }
 
 
             // Phone Number validation (digits only)

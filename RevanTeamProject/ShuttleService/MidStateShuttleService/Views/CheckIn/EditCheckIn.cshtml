@@ -1,4 +1,5 @@
-﻿@model MidStateShuttleService.Models.CheckIn
+﻿@* @model MidStateShuttleService.Models.CheckIn *@
+@model MidStateShuttleService.ViewModels.CheckInViewModel
 
 <link rel="stylesheet" href="/css/CheckIn.css" />
 
@@ -23,7 +24,7 @@
                         <div class="input-fields">
                             <h6>Pick-up Location</h6>
                             <select asp-for="LocationId"
-                                    asp-items="ViewBag.Locations"
+                                    asp-items="Model.LocationOptions"
                                     class="form-control input--style-1" required>
                                 <option selected="selected" value="" required>--Select--</option>
                             </select>
@@ -51,6 +52,20 @@
                     </div>
                 </div>
 
+                <!-- Adding in the time -->
+                <div class="input-fields">
+                    <p class="typetrip">Check-in Date</p>
+
+                    <input asp-for="CentralDateTime" type="datetime-local" 
+                        class="form-control input--style-1" 
+                        id="checkInTime"
+                        value="@Model.CentralDateTime.ToString("yyyy-MM-ddTHH:mm")" />
+                    <div class="div-line"></div>
+                    <div class="invalid-feedback">
+                        Max 255 characters
+                    </div>
+                </div>
+
                 <div class="input-fields">
                     <h6>Rider Comments / Suggestions</h6>
                     <textarea asp-for="Comments" class="form-control input--style-1" id="feedback" placeholder="Share your experience" rows="4" cols="50" maxlength="255"></textarea>
@@ -61,7 +76,7 @@
                 </div>
 
                 <input hidden asp-for="CheckInId" value="@Model.CheckInId"/>
-                <input hidden type="datetime" asp-for="Date" value="@Model.Date" />
+                <input hidden type="datetime" asp-for="CentralDate" value="@Model.CentralDate" />
 
                 <div class="p-t-20">
                     <button type="submit" class="btn btn--radius btn--green">Save</button>
