@@ -450,6 +450,9 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(e => e.FridayDropOffLocationID)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Registration_FridayDropOffLocation");
+            
+            entity.Property(x => x.Term)
+                .HasConversion<string>();
         });
     }
 }

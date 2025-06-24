@@ -17,7 +17,6 @@
 
 
 <body>
-
     <div class="wrapper wrapper--w680">
         <div class="form form-1">
             <div class="form-body">
@@ -66,6 +65,15 @@
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="Route-schedule">
+                        <div class="input-fields">
+                            <div class="dropdown">
+                                @Html.DropDownListFor(x => x.Term, (IEnumerable<SelectListItem>)ViewBag.Terms, "Select Term", new { @class = "form-control", @id = "SchoolTerm", @name = "SchoolTerm", required = "required" })
+                                <span id="SchoolTerm-validation-message" class="validation-message text-danger" style="display:none;"></span>
                             </div>
                         </div>
                     </div>
@@ -465,11 +473,15 @@
                                         <div class="form-line"></div>
                                         <div id="LastName-validation-message" class="validation-message">Must be characters</div>
                                     </div>
+                                    <div class="input-fields">
+                                        @Html.CheckBoxFor(model => model.IsAdult, new { @class = "input--style-1" })
+                                        <label class="form-check-label" for="IsAdult">I am 18 or older</label>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="input-fields">
-                                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "input--style-1", placeholder = "Email" } })
+                                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "input--style-1", placeholder = "Email", id = "Email" } })
                                 <div class="form-line"></div>
                                 <div id="Email-validation-message" class="validation-message">Must be characters</div>
                             </div>

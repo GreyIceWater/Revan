@@ -3,9 +3,11 @@
         e.preventDefault(); // Prevent form submit
 
         // Gather form data
+        var schoolTerm = $('#SchoolTerm').val();
         var studentId = $('#StudentId').val();
         var firstName = $('#FirstName').val();
         var lastName = $('#LastName').val();
+        var isAdult = $('#IsAdult').is(':checked');
         var email = $('#Email').val();
         var phoneNumber = $('#PhoneNumber').val();
         var tripType = $('[name="TripType"]:checked').val();
@@ -58,9 +60,11 @@
 
         // Start building the confirmationContent
         var confirmationContent = `
+            <p>School Term: ${schoolTerm}</p>
             <p>Student ID: ${studentId}</p>
             <p>First Name: ${firstName}</p>
             <p>Last Name: ${lastName}</p>
+            <p>I am 18 or older: ${isAdult}</p>
             <p>Email: ${email}</p>
             <p>Phone Number: ${phoneNumber}</p>
             <p>Trip Type: ${tripType}</p>

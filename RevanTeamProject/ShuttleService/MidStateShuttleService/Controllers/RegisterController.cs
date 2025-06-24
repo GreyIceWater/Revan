@@ -5,6 +5,9 @@ using MidStateShuttleService.Service;
 using MidStateShuttleService.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Reflection;
+using System.ComponentModel.DataAnnotations;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -20,6 +23,26 @@ namespace MidStateShuttleService.Controllers
             _context = context; // Assign the injected ApplicationDbContext to the _context field
         }
 
+        private List<SelectListItem> GetSchoolTermSelectList()
+        {
+            return Enum.GetValues(typeof(SchoolTerm))
+                .Cast<SchoolTerm>()
+                .Select(term => new SelectListItem
+                {
+                    Text = GetEnumDisplayName(term),
+                    Value = term.ToString()
+                }).ToList();
+        }
+
+        private string GetEnumDisplayName(Enum enumValue)
+        {
+            return enumValue.GetType()
+                .GetMember(enumValue.ToString())
+                .First()
+                .GetCustomAttribute<DisplayAttribute>()?
+                .GetName() ?? enumValue.ToString();
+        }
+
         [AllowAnonymous]
         public IActionResult Index()
         {
@@ -27,6 +50,7 @@ namespace MidStateShuttleService.Controllers
 
             var model = new RegisterModel();
             model.LocationNames = ls.GetLocationNames();
+            ViewBag.Terms = GetSchoolTermSelectList();
             return View(model);
         }
 
@@ -49,6 +73,7 @@ namespace MidStateShuttleService.Controllers
 
             var model = new RegisterModel();
             model.LocationNames = ls.GetLocationNames();
+            ViewBag.Terms = GetSchoolTermSelectList();
             return View("Index", model);
         }
 
@@ -104,6 +129,7 @@ namespace MidStateShuttleService.Controllers
                 }
             }
 
+            ViewBag.Terms = GetSchoolTermSelectList();
 
             return View("Index", model);
         }
@@ -176,6 +202,7 @@ namespace MidStateShuttleService.Controllers
 
             ViewBag.SelectedPickupRoute = student.SelectedRouteDetail;
             ViewBag.SelectedReturnRoute = student.ReturnSelectedRouteDetail;
+            ViewBag.Terms = GetSchoolTermSelectList();
 
             // Return the location names for each route
             foreach(Routes route in ViewBag.RouteList)
@@ -207,6 +234,7 @@ namespace MidStateShuttleService.Controllers
             
             if (!ModelState.IsValid)
             {
+                ViewBag.Terms = GetSchoolTermSelectList();
                 return View(student); // Return the view with validation errors
             }
 
@@ -225,6 +253,9 @@ namespace MidStateShuttleService.Controllers
                 LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context); // Log SQL exception
                 _logger.LogError(ex, "An error occurred while updating student.");
                 ModelState.AddModelError("", "An unexpected error occurred, please try again.");
+
+                ViewBag.Terms = GetSchoolTermSelectList();
+
                 return View(student); // Return the view with an error message
             }
         }
@@ -317,65 +348,17 @@ namespace MidStateShuttleService.Controllers
                     initialRoute = this.ParseInitialResult(actionResult, initialRoute);
 
                     return BuildEmailConfirmationBody(
-                    model.StudentId,
-                    model.FirstName,
-                    model.LastName,
-                    model.Email,
-                    model.PhoneNumber,
-                    initialRoute,
-                    model.TripType,
-                    model.SelectedDaysOfWeek,
-                    model.FirstDayExpectingToRide);
-
-
-
-                    // Extract the JSON content from ActionResult
-                    //if (actionResult is JsonResult jsonResult)
-                    //{
-                    //    string jsonString = JsonSerializer.Serialize(jsonResult.Value);
-
-                    //    // Parse the JSON string
-                    //    using JsonDocument doc = JsonDocument.Parse(jsonString);
-
-                    //    // Assuming the first route in the list is required
-                    //    initialRoute = doc.RootElement[0].GetProperty("Detail").GetString();
-                    //}
-
-
-
-                    //return $@"
-                    //<html>
-                    //<head>
-                    //    <style>
-                    //        body {{ font-family: Arial, sans-serif; }}
-                    //        .email-container {{ max-width: 600px; margin: auto; padding: 20px; }}
-                    //        .header {{ text-align: center; }}
-                    //        .content {{ margin-top: 20px; }}
-                    //        .footer {{ margin-top: 30px; text-align: center; font-size: 12px; color: gray; }}
-                    //    </style>
-                    //</head>
-                    //<body>
-                    //    <div class='email-container'>
-                    //        <div class='header'>
-                    //            <h2>MSTC Shuttle Service Request Confirmation</h2>
-                    //        </div>
-                    //        <div class='content'>
-                    //            <p><strong>Student ID:</strong> {model.StudentId}</p>
-                    //            <p><strong>First Name:</strong> {model.FirstName}</p>
-                    //            <p><strong>Last Name:</strong> {model.LastName}</p>
-                    //            <p><strong>Email:</strong> {model.Email}</p>
-                    //            <p><strong>Phone Number:</strong> {model.PhoneNumber}</p>
-                    //            <p><strong>Initial Route:</strong> {initialRoute}</p>
-                    //            <p><strong>Trip Type:</strong> {model.TripType}</p>
-                    //            <p><strong>Days of the Week Needed:</strong> {string.Join(", ", model.SelectedDaysOfWeek)}</p>
-                    //            <p><strong>First Day Expecting to Ride:</strong> {model.FirstDayExpectingToRide?.ToString("MM-dd-yyyy")}</p>
-                    //        </div>
-                    //        <div class='footer'>
-                    //            <p>If you have any questions, please call or text: <strong>715-581-9284</strong></p>
-                    //        </div>
-                    //    </div>
-                    //</body>
-                    //</html>";
+                        model.Term.ToString(),
+                        model.StudentId,
+                        model.FirstName,
+                        model.LastName,
+                        model.IsAdult.ToString(),
+                        model.Email,
+                        model.PhoneNumber,
+                        initialRoute,
+                        model.TripType,
+                        model.SelectedDaysOfWeek,
+                        model.FirstDayExpectingToRide);
                 }
             }
             catch (Exception ex)
@@ -451,9 +434,11 @@ namespace MidStateShuttleService.Controllers
             initialRoute = ParseInitialResult(finalList, initialRoute);
 
             return BuildEmailConfirmationBody(
+                model.Term.Value.ToString(),
                 model.StudentId,
                 model.FirstName,
                 model.LastName,
+                model.IsAdult.ToString(),
                 model.Email,
                 model.PhoneNumber,
                 initialRoute,
@@ -535,7 +520,7 @@ namespace MidStateShuttleService.Controllers
         /// <param name="selectedDaysOfWeek">Days of the week riding.</param>
         /// <param name="firstDayExpectingToRide">First day the route plans to be used.</param>
         /// <returns></returns>
-        private string BuildEmailConfirmationBody(string studentId, string firstName, string lastName, string email, 
+        private string BuildEmailConfirmationBody(string term, string studentId, string firstName, string lastName, string isAdult, string email, 
             string phoneNumber, string initialRoute, string tripType, List<string> selectedDaysOfWeek, DateOnly? firstDayExpectingToRide = null)
         {
             return $@"
@@ -555,9 +540,11 @@ namespace MidStateShuttleService.Controllers
                                 <h2>MSTC Shuttle Service Request Confirmation</h2>
                             </div>
                             <div class='content'>
+                                <p><strong>School Term:</strong> {term}</p>
                                 <p><strong>Student ID:</strong> {studentId}</p>
                                 <p><strong>First Name:</strong> {firstName}</p>
                                 <p><strong>Last Name:</strong> {lastName}</p>
+                                <p><strong>I am 18 or older:</strong> {isAdult}</p>
                                 <p><strong>Email:</strong> {email}</p>
                                 <p><strong>Phone Number:</strong> {phoneNumber}</p>
                                 <p><strong>Initial Route:</strong> {initialRoute}</p>
