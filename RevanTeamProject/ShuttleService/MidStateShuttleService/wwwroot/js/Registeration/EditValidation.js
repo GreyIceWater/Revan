@@ -1,5 +1,5 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
-    const studentId = document.getElementById('StudentId'); // Removing per kathy on 2025-01-15
+    //const studentId = document.getElementById('StudentId'); // Removing per kathy on 2025-01-15
     const name = document.getElementById('firstName');
     const lastName = document.getElementById('lastName');
     const phone = document.getElementById('phone');
@@ -16,7 +16,7 @@
     // Validation functions
     function validateForm() {
         let isFormValid = true;
-        isFormValid &= validateString(studentId); // Removing per kathy on 2025-01-15
+        //isFormValid &= validateString(studentId); // Removing per kathy on 2025-01-15
         isFormValid &= validateString(name);
         isFormValid &= validateString(lastName);
         isFormValid &= validateString(phone);

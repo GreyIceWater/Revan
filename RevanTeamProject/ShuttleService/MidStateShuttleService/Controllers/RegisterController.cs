@@ -352,7 +352,7 @@ namespace MidStateShuttleService.Controllers
                         model.StudentId,
                         model.FirstName,
                         model.LastName,
-                        model.IsAdult.ToString(),
+                        model.IsAdult,
                         model.Email,
                         model.PhoneNumber,
                         initialRoute,
@@ -438,7 +438,7 @@ namespace MidStateShuttleService.Controllers
                 model.StudentId,
                 model.FirstName,
                 model.LastName,
-                model.IsAdult.ToString(),
+                model.IsAdult,
                 model.Email,
                 model.PhoneNumber,
                 initialRoute,
@@ -520,9 +520,10 @@ namespace MidStateShuttleService.Controllers
         /// <param name="selectedDaysOfWeek">Days of the week riding.</param>
         /// <param name="firstDayExpectingToRide">First day the route plans to be used.</param>
         /// <returns></returns>
-        private string BuildEmailConfirmationBody(string term, string studentId, string firstName, string lastName, string isAdult, string email, 
+        private string BuildEmailConfirmationBody(string term, string studentId, string firstName, string lastName, bool isAdult, string email, 
             string phoneNumber, string initialRoute, string tripType, List<string> selectedDaysOfWeek, DateOnly? firstDayExpectingToRide = null)
         {
+            string isAdultText = isAdult ? "Yes" : "No";
             return $@"
                     <html>
                     <head>
@@ -544,7 +545,7 @@ namespace MidStateShuttleService.Controllers
                                 <p><strong>Student ID:</strong> {studentId}</p>
                                 <p><strong>First Name:</strong> {firstName}</p>
                                 <p><strong>Last Name:</strong> {lastName}</p>
-                                <p><strong>I am 18 or older:</strong> {isAdult}</p>
+                                <p><strong>I am 18 years of age or older:</strong> {isAdultText}</p>
                                 <p><strong>Email:</strong> {email}</p>
                                 <p><strong>Phone Number:</strong> {phoneNumber}</p>
                                 <p><strong>Initial Route:</strong> {initialRoute}</p>

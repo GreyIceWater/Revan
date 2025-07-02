@@ -1,9 +1,9 @@
-﻿// ** Commented out the some validation fields to work witht the rest of the form in next sprint **//
+﻿// ** Commented out the some validation fields to work with the rest of the form in next sprint **//
 //This file does not seem to be used, use RegisterValidation.js
 
 document.addEventListener('DOMContentLoaded', function () {
     const schoolTerm = document.getElementById('SchoolTerm');
-    const studentId = document.getElementById('StudentId');
+    //const studentId = document.getElementById('StudentId');
     const firstName = document.getElementById('FirstName');
     const lastName = document.getElementById('LastName');
     const email = document.getElementById('Email');
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Attach event listeners for real-time validation
     schoolTerm.addEventListener('change', () => validateDropdown(schoolTerm, 'SchoolTerm'));
     phoneNumber.addEventListener('input', () => validateField(phoneNumber, /^[0-9]{10}$/, 'PhoneNumber'));
-    studentId.addEventListener('input', () => validateField(studentId, /^\d{8}$/, 'StudentId'));
+    //studentId.addEventListener('input', () => validateField(studentId, /^\d{8}$/, 'StudentId'));
     firstName.addEventListener('input', () => validateField(firstName, /^[A-Za-z\s'-]+$/, 'FirstName'));
     lastName.addEventListener('input', () => validateField(lastName, /^[A-Za-z\s'-]+$/, 'LastName'));
     email.addEventListener('input', () => validateField(email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Email')); // Email validation regex
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function validateForm() {
         const isSchoolTermValid = validateDropdown(schoolTerm, 'SchoolTerm');
         const isPhoneNumberValid = validateField(phoneNumber, /^[0-9]{10}$/, 'PhoneNumber');
-        const isStudentIdValid = validateField(studentId, /^\d{8}$/, 'StudentId');
+        //const isStudentIdValid = validateField(studentId, /^\d{8}$/, 'StudentId');
         const isFirstNameValid = validateField(firstName, /^[A-Za-z\s'-]+$/, 'FirstName');
         const isLastNameValid = validateField(lastName, /^[A-Za-z\s'-]+$/, 'LastName');
         const isEmailValid = validateField(email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Email');
