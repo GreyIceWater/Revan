@@ -86,7 +86,7 @@
                                 <div class="radio-options">
                                     @Html.RadioButtonFor(model => model.TripType, "RoundTrip", new { id = "RoundTrip" }) <label for="RoundTrip">Round Trip</label>
                                     @Html.RadioButtonFor(model => model.TripType, "OneWay", new { id = "OneWay" }) <label for="OneWay">One Way</label>
-                                    @Html.RadioButtonFor(model => model.TripType, "Friday", new { id = "Friday" }) <label for="Friday">Friday<sup>*</sup></label>
+                                    @* @Html.RadioButtonFor(model => model.TripType, "Friday", new { id = "Friday" }) <label for="Friday">Friday<sup>*</sup></label> *@
                                 </div>
                                 <div class="form-line"></div>
                                 <p class="trip-info">Friday routes are by reservation only and can be customized for your schedule.</p>
@@ -272,7 +272,8 @@
                                         </div>
                                     </div>
 
-                                    <div class="stops-available">
+                                    @* JTJ remove these, not necessary anymore *@
+                                    @* <div class="stops-available">
                                         <div class="input-fields">
                                             <h2 class="section-title">Between Wisconsin Rapids & Adams</h2>
                                             <ul class="stops-list">
@@ -307,7 +308,7 @@
                                                 <li>AMETA&trade; Center (5000 Coye Drive, Steven Point)</li>
                                             </ul>
                                         </div>
-                                    </div>
+                                    </div> *@
 
                                     <div class="other-pickup-dropoff-location">
                                         <div class="other-pickup">
@@ -461,7 +462,7 @@
                                     <div class="input-fields">
                                         @Html.EditorFor(model => model.StudentId, new { htmlAttributes = new { @class = "input--style-1", placeholder = "Student ID", id = "StudentId" } })
                                         <div class="form-line"></div>
-                                        <div id="StudentId-validation-message" class="validation-message">Must be exactly 8 digits</div>
+                                        @* <div id="StudentId-validation-message" class="validation-message">Must be exactly 8 digits</div> *@
                                     </div>
                                     <div class="input-fields">
                                         @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "input--style-1", placeholder = "First Name" } })
@@ -474,9 +475,17 @@
                                         <div id="LastName-validation-message" class="validation-message">Must be characters</div>
                                     </div>
                                     <div class="input-fields">
-                                        @Html.CheckBoxFor(model => model.IsAdult, new { @class = "input--style-1" })
-                                        <label class="form-check-label" for="IsAdult">I am 18 or older</label>
+                                        <label>I am 18 years of age or older:</label>
+                                        <div class="form-check">
+                                            @Html.RadioButtonFor(model => model.IsAdult, true, new { @class = "form-check-input", id = "IsAdult_True" })
+                                            <label class="form-check-label" for="IsAdult_True">Yes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            @Html.RadioButtonFor(model => model.IsAdult, false, new { @class = "form-check-input", id = "IsAdult_False" })
+                                            <label class="form-check-label" for="IsAdult_False">No</label>
+                                        </div>
                                     </div>
+                                    <p class="is-adult-info">*Liability waiver needed if under 18.</p>
                                 </div>
                             </div>
 

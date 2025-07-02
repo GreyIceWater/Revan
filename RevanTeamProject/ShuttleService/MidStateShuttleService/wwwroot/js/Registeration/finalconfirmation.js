@@ -7,7 +7,11 @@
         var studentId = $('#StudentId').val();
         var firstName = $('#FirstName').val();
         var lastName = $('#LastName').val();
-        var isAdult = $('#IsAdult').is(':checked');
+
+        // grabbing the isadult value and setting string yes or no
+        var isAdult = $('input[name="IsAdult"]:checked').val();
+        var displayText = isAdult === "True" ? "Yes" : "No";
+
         var email = $('#Email').val();
         var phoneNumber = $('#PhoneNumber').val();
         var tripType = $('[name="TripType"]:checked').val();
@@ -64,7 +68,7 @@
             <p>Student ID: ${studentId}</p>
             <p>First Name: ${firstName}</p>
             <p>Last Name: ${lastName}</p>
-            <p>I am 18 or older: ${isAdult}</p>
+            <p>I am 18 years of age or older: ${displayText}</p>
             <p>Email: ${email}</p>
             <p>Phone Number: ${phoneNumber}</p>
             <p>Trip Type: ${tripType}</p>
