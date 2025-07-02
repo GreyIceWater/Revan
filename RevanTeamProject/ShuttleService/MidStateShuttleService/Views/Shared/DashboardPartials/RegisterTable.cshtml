@@ -1,5 +1,124 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model MidStateShuttleService.Models.AllModels
+
+<div class="cardHeader">
+    <h2>Requests</h2>
+    <!--search
+        <div class="search">
+        <label>
+            <input id="registrationSearch" type="text" placeholder="Search" />
+            <i class="bi bi-search"></i>
+        </label>
+    </div>
+    -->
+
+</div>
+<table>
+    <thead>
+        <tr>
+            <td>Name</td>
+            <td>Date</td>
+            <td>Pick up location</td>
+            <td>Drop off location</td>
+            <td>Pick up time</td>
+            <td>Drop off time</td>
+            <td>Request type</td>
+            <td>Request Status</td>
+        </tr>
+    </thead>
+    <tbody id="registrationsTableBody">
+        @if (Model.Register == null)
+        {
+            // Changing registrions to requests
+            <tr><td colspan="4" class="text-center">There are Currently No Requests</td></tr>
+        }
+        else
+        {
+            @foreach (var registration in Model.Register.OrderByDescending(r => r.RegistrationId))
+            {
+                <tr class="registrationRow">
+                    <td>@(registration.FirstName) @(registration.LastName)</td>
+                    <td>@registration.FirstDayExpectingToRide</td>
+                    <td>@registration.PickUpLocationID</td>
+                    @if (!string.IsNullOrEmpty(registration.WhichFriday))
+                    {
+                        <td>@registration.FridayMustArriveTime</td>
+                        <td>@registration.FridayCanLeaveTime</td>
+                        <td>
+                            @if (registration.WhichFriday.Length > 10)
+                            {
+                                @registration.WhichFriday.Substring(0, 10)
+                                <span class="ellipsis">...</span>
+                            }
+                            else
+                            {
+                                @registration.WhichFriday
+                            }
+                        </td>
+                        <td>
+                            <a class="viewButton" href="#"
+                               data-toggle="modal"
+                               data-target="#specialRequestDetailsModal"
+                               data-message-id="@registration.RegistrationId"
+                               data-full-message="@registration.WhichFriday">View</a>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>@registration.MustArriveTime</td>
+                        <td>@registration.CanLeaveTime</td>
+                        <td>
+                            @if (registration.NeedTransportation != null && registration.NeedTransportation.Length > 10)
+                            {
+                                @registration.NeedTransportation.Substring(0, 10)
+                                <span class="ellipsis">...</span>
+                            }
+                            else
+                            {
+                                @registration.NeedTransportation
+                            }
+                        </td>
+                        <td>
+                            <a class="viewButton" href="#"
+                               data-toggle="modal"
+                               data-target="#specialRequestDetailsModal"
+                               data-message-id="@registration.RegistrationId"
+                               data-full-message="@registration.NeedTransportation">View</a>
+                        </td>
+                    }
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<div class="modal fade" id="specialRequestDetailsModal" tabindex="-1" role="dialog" aria-labelledby="specialRequestDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="specialRequestDetailsModalLabel">Special Request Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="specialRequestDetailsContent">
+                    <!-- Special request details will be displayed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<tr>
+    <div id="pagination-controls-registration" class="pagination">
+        <!-- Pagination buttons will be created by JavaScript here -->
+    </div>
+</tr>
+
+<script src="~/js/tablePagination.js"></script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="~/js/RequestModal.js"></script>

@@ -81,12 +81,13 @@
                 }
             }
 
-            if (fieldId === 'StudentId') {
-                if (!/^\d{8}$/.test($field.val())) {
-                    $(validationMessageId).text('Must be exactly 8 digits').show();
-                    isValid = false;
-                }
-            }
+            // Removing requirements for student id
+            //if (fieldId === 'StudentId') {
+            //    if (!/^\d{8}$/.test($field.val())) {
+            //        $(validationMessageId).text('Must be exactly 8 digits').show();
+            //        isValid = false;
+            //    }
+            //}
 
             if (fieldId === 'Email') {
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($field.val())) {
