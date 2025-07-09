@@ -76,7 +76,6 @@
 
 $(document).ready(function () {
     // === Helper Functions ===
-
     function getTripType() {
         return $('input[name="TripType"]:checked').val();
     }
@@ -111,7 +110,6 @@ $(document).ready(function () {
     }
 
     // === UI Update Functions ===
-
     function updateReturnRouteVisibility() {
         if (isRoundTrip() && isRouteSelected()) {
             $('.return-select-route').show();
@@ -130,7 +128,6 @@ $(document).ready(function () {
             $('.other-special-request').hide();
         } else {
             $('.schedule-date').hide();
-            // Optional: you can decide what to do with `.other-special-request` when not enough is selected
         }
     }
 
@@ -146,7 +143,14 @@ $(document).ready(function () {
         updateConditionalVisibility();
     });
 
-    $(document).on('change', '#routeOptions input[type="radio"], #returnRouteOptions input[type="radio"]', function () {
+    $(document).on('change', '#routeOptions input[type="radio"]', function () {
+        updateHiddenFields();
+        updateReturnRouteVisibility();
+        updateConditionalVisibility();
+    });
+
+    $(document).on('change', '#returnRouteOptions input[type="radio"]', function () {
+        updateHiddenFields();
         updateConditionalVisibility();
     });
 
