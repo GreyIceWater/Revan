@@ -8,6 +8,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Reflection;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -150,12 +152,32 @@ namespace MidStateShuttleService.Controllers
         //retrieves route options based on selected pick-up and drop-off locations from a database and returns them as JSON.
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult GetRoutes(int pickUpLocationId, int dropOffLocationId)
+        public ActionResult GetRoutes(RegisterModel model)
         {
+            var initial = true;
+            var returnNeeded = false;
+
             RouteServices rs = new RouteServices(_context);
             // This call will now also check the IsActive property of each route
-            var routesList = rs.GetRoutesByLocations(pickUpLocationId, dropOffLocationId)
+            List<Routes> routesList = rs.GetRoutesByLocations(model.PickUpLocationID.Value, model.DropOffLocationID.Value)
                                .Where(route => route.IsActive).ToList();
+            
+            if (model.TripType == "RoundTrip" && model.ReturnSelectedRouteDetail != null)
+            {
+                
+
+                int returnLocationId = int.Parse(model.ReturnSelectedRouteDetail);
+
+                List<Routes> returnRoute = rs.GetRoutesByLocations(model.DropOffLocationID.Value, returnLocationId)
+                                         .Where(route => route.IsActive).ToList();
+
+                if (returnRoute.Count > 0)
+                {
+                    returnNeeded = true;
+                    routesList.AddRange(returnRoute);
+                }
+            }
+
             LocationServices ls = new LocationServices(_context);
 
             var formattedRoutesList = new List<object>();
@@ -164,10 +186,16 @@ namespace MidStateShuttleService.Controllers
                 if (r.AdditionalDetails != null)
                     formattedRoutesList.Add(new {
                         r.RouteID,
+                        TripType = model.TripType,
+                        routeStart = initial,
+                        routeReturn = returnNeeded,
                         Detail = $"Leave {ls.getLocationNameById(r.PickUpLocationID)} at {r.ToStringPickUpTime()} ({r.AdditionalDetails}), Arrive at {ls.getLocationNameById(r.DropOffLocationID)} at {r.ToStringDropOffTime()}" });
                 else
                     formattedRoutesList.Add(new {
                         r.RouteID,
+                        TripType = model.TripType,
+                        routeStart = initial,
+                        routeReturn = returnNeeded,
                         Detail = $"Leave {ls.getLocationNameById(r.PickUpLocationID)} at {r.ToStringPickUpTime()}, Arrive at {ls.getLocationNameById(r.DropOffLocationID)} at {r.ToStringDropOffTime()}"
                     });
             }
@@ -321,6 +349,7 @@ namespace MidStateShuttleService.Controllers
             try
             {
                 string initialRoute = "Unknown";
+                string returnRoute = "Unknown";
 
                 // Check if the pick-up and drop-off locations are valid
                 if (model.PickUpLocationID == null || model.DropOffLocationID == null)
@@ -335,7 +364,7 @@ namespace MidStateShuttleService.Controllers
                     {
                         if (model.SpecialRequest.Value == true)
                         {
-                            return SpecialRequestRoute(model);
+                            //return SpecialRequestRoute(model);
                         }                        
                         else
                         {
@@ -344,21 +373,17 @@ namespace MidStateShuttleService.Controllers
                     }
 
                     model.SpecialRequest = false; // Default to false if SpecialRequest is null
-                    actionResult = GetRoutes(model.PickUpLocationID.Value, model.DropOffLocationID.Value);
+                    
+                    actionResult = GetRoutes(model);
+                    
                     initialRoute = this.ParseInitialResult(actionResult, initialRoute);
 
-                    return BuildEmailConfirmationBody(
-                        model.Term.ToString(),
-                        model.StudentId,
-                        model.FirstName,
-                        model.LastName,
-                        model.IsAdult,
-                        model.Email,
-                        model.PhoneNumber,
-                        initialRoute,
-                        model.TripType,
-                        model.SelectedDaysOfWeek,
-                        model.FirstDayExpectingToRide);
+                    if (model.TripType == "RoundTrip")
+                    {
+                        returnRoute = this.ParseReturnResult(actionResult, returnRoute);
+                    }                    
+
+                    return BuildEmailConfirmationBody(model, initialRoute, returnRoute);
                 }
             }
             catch (Exception ex)
@@ -375,77 +400,67 @@ namespace MidStateShuttleService.Controllers
         /// </summary>
         /// <param name="model">Model of the request.</param>
         /// <returns>The email confirmation body for a special request.</returns>
-        private string SpecialRequestRoute(RegisterModel model)
-        {
-            string initialRoute = "Unknown";
-            string pickupLocationName = "Unknown";
-            string dropoffLocationName = "Unknown";
-            string pickupTime = TimeOnly.MaxValue.ToShortTimeString();
-            string dropoffTime = TimeOnly.MaxValue.ToShortTimeString();
-            List<object> formattedRoutesList = new List<object>();
-            LocationServices ls = new LocationServices(_context);
+        //private string SpecialRequestRoute(RegisterModel model)
+        //{
+        //    string initialRoute = "Unknown";
+        //    string pickupLocationName = "Unknown";
+        //    string dropoffLocationName = "Unknown";
+        //    string pickupTime = TimeOnly.MaxValue.ToShortTimeString();
+        //    string dropoffTime = TimeOnly.MaxValue.ToShortTimeString();
+        //    List<object> formattedRoutesList = new List<object>();
+        //    LocationServices ls = new LocationServices(_context);
 
-            if (model.PickUpLocationID.HasValue)
-            {
-                var x = ls.getLocationNameById(model.PickUpLocationID.Value);
-                if (x.ToLower() == "other")
-                {
-                    // Other routes
-                    pickupLocationName = model.SpecialPickUpLocation;
-                    pickupTime = ToStringRideTimes(model.MustArriveTime.Value);
-                }
-                else
-                {
-                    // Standard routes
-                    //pickupLocationName = model.PickUpLocationID.HasValue ? ls.getLocationNameById(model.PickUpLocationID.Value) : "Unknown";
-                    //pickupTime = ToStringRideTimes(model.MustArriveTime.Value);
+        //    if (model.PickUpLocationID.HasValue)
+        //    {
+        //        var x = ls.getLocationNameById(model.PickUpLocationID.Value);
+        //        if (x.ToLower() == "other")
+        //        {
+        //            // Other routes
+        //            pickupLocationName = model.SpecialPickUpLocation;
+        //            pickupTime = ToStringRideTimes(model.MustArriveTime.Value);
+        //        }
+        //        else
+        //        {
+        //            // Standard routes
+        //            //pickupLocationName = model.PickUpLocationID.HasValue ? ls.getLocationNameById(model.PickUpLocationID.Value) : "Unknown";
+        //            //pickupTime = ToStringRideTimes(model.MustArriveTime.Value);
 
-                    var routeInfo = GetRouteInfo(model.PickUpLocationID.Value, model.DropOffLocationID.Value);
+        //            var routeInfo = GetRouteInfo(model.PickUpLocationID.Value, model.DropOffLocationID.Value);
 
-                    pickupLocationName = "";
-                }
-            }
+        //            pickupLocationName = "";
+        //        }
+        //    }
 
-            if (model.DropOffLocationID.HasValue)
-            {
-                var x = ls.getLocationNameById(model.DropOffLocationID.Value);
-                if (x.ToLower() == "other")
-                {
-                    // Other routes
-                    dropoffLocationName = model.SpecialDropOffLocation;
-                    dropoffTime = ToStringRideTimes(model.CanLeaveTime.Value);
-                }
-                else
-                {
-                    // Standard routes
-                    dropoffLocationName = model.DropOffLocationID.HasValue ? ls.getLocationNameById(model.DropOffLocationID.Value) : "Unknown";
-                    dropoffTime = ToStringRideTimes(model.CanLeaveTime.Value);
-                }
-            }
+        //    if (model.DropOffLocationID.HasValue)
+        //    {
+        //        var x = ls.getLocationNameById(model.DropOffLocationID.Value);
+        //        if (x.ToLower() == "other")
+        //        {
+        //            // Other routes
+        //            dropoffLocationName = model.SpecialDropOffLocation;
+        //            dropoffTime = ToStringRideTimes(model.CanLeaveTime.Value);
+        //        }
+        //        else
+        //        {
+        //            // Standard routes
+        //            dropoffLocationName = model.DropOffLocationID.HasValue ? ls.getLocationNameById(model.DropOffLocationID.Value) : "Unknown";
+        //            dropoffTime = ToStringRideTimes(model.CanLeaveTime.Value);
+        //        }
+        //    }
 
-            formattedRoutesList.Add(new
-            {
-                RouteID = "other",
-                Detail = $"Leave {dropoffLocationName} at {pickupTime}, Arrive at {dropoffLocationName} at {dropoffTime}"
-            });
+        //    formattedRoutesList.Add(new
+        //    {
+        //        RouteID = "other",
+        //        Detail = $"Leave {dropoffLocationName} at {pickupTime}, Arrive at {dropoffLocationName} at {dropoffTime}"
+        //    });
 
-            JsonResult finalList = Json(formattedRoutesList);
+        //    JsonResult finalList = Json(formattedRoutesList);
 
-            initialRoute = ParseInitialResult(finalList, initialRoute);
+        //    initialRoute = ParseInitialResult(finalList, initialRoute);
+        //    string returnRoute = null;
 
-            return BuildEmailConfirmationBody(
-                model.Term.Value.ToString(),
-                model.StudentId,
-                model.FirstName,
-                model.LastName,
-                model.IsAdult,
-                model.Email,
-                model.PhoneNumber,
-                initialRoute,
-                model.TripType,
-                model.SelectedDaysOfWeek,
-                model.FirstDayExpectingToRide);
-        }
+        //    return BuildEmailConfirmationBody(model, initialRoute, returnRoute);
+        //}
 
         private JsonResult GetRouteInfo(int pickUpLocationId, int dropOffLocationId)
         {
@@ -491,7 +506,7 @@ namespace MidStateShuttleService.Controllers
         /// <param name="actionResult">ActionResult object to parse</param>
         /// <param name="initialRoute">The initialized route to modify.</param>
         /// <returns>The final route to be displayed in email.</returns>
-        private string ParseInitialResult(ActionResult actionResult, string initialRoute)
+        private string ParseInitialResult(ActionResult actionResult, string route)
         {
             if (actionResult is JsonResult jsonResult)
             {
@@ -501,10 +516,34 @@ namespace MidStateShuttleService.Controllers
                 using JsonDocument doc = JsonDocument.Parse(jsonString);
 
                 // Assuming the first route in the list is required
-                initialRoute = doc.RootElement[0].GetProperty("Detail").GetString();
+                route = doc.RootElement[0].GetProperty("Detail").GetString();
             }
 
-            return initialRoute;
+            return route;
+        }
+
+        private string ParseReturnResult(ActionResult actionResult, string route)
+        {
+            if (actionResult is JsonResult jsonResult)
+            {
+                string jsonString = JsonSerializer.Serialize(jsonResult.Value);
+
+                // Parse the JSON string
+                using JsonDocument doc = JsonDocument.Parse(jsonString);
+
+                foreach (JsonElement element in doc.RootElement.EnumerateArray())
+                {
+                    if (element.TryGetProperty("routeReturn", out JsonElement isReturnRoute)
+                        && isReturnRoute.ValueKind == JsonValueKind.True
+                        && element.TryGetProperty("Detail", out JsonElement detailElement))
+                    {
+                        route = detailElement.GetString();
+                        break;
+                    }
+                }
+            }
+
+            return route;
         }
 
         /// <summary>
@@ -520,10 +559,16 @@ namespace MidStateShuttleService.Controllers
         /// <param name="selectedDaysOfWeek">Days of the week riding.</param>
         /// <param name="firstDayExpectingToRide">First day the route plans to be used.</param>
         /// <returns></returns>
-        private string BuildEmailConfirmationBody(string term, string studentId, string firstName, string lastName, bool isAdult, string email, 
-            string phoneNumber, string initialRoute, string tripType, List<string> selectedDaysOfWeek, DateOnly? firstDayExpectingToRide = null)
+
+        //private string BuildEmailConfirmationBody(string term, string studentId, string firstName, string lastName, bool isAdult, string email, 
+        //    string phoneNumber, string initialRoute, string returnRoute, string tripType, List<string> selectedDaysOfWeek, DateOnly? firstDayExpectingToRide = null)
+        private string BuildEmailConfirmationBody(RegisterModel model, string initialRoute, string returnRoute = null)
         {
-            string isAdultText = isAdult ? "Yes" : "No";
+            string isAdultText = model.IsAdult ? "Yes" : "No";
+            string returnRouteHtml = string.IsNullOrEmpty(returnRoute)
+                ? ""
+                : $"<p><strong>Return Route:</strong> {returnRoute}</p>";
+
             return $@"
                     <html>
                     <head>
@@ -541,17 +586,18 @@ namespace MidStateShuttleService.Controllers
                                 <h2>MSTC Shuttle Service Request Confirmation</h2>
                             </div>
                             <div class='content'>
-                                <p><strong>School Term:</strong> {term}</p>
-                                <p><strong>Student ID:</strong> {studentId}</p>
-                                <p><strong>First Name:</strong> {firstName}</p>
-                                <p><strong>Last Name:</strong> {lastName}</p>
+                                <p><strong>School Term:</strong> {model.Term.ToString()}</p>
+                                <p><strong>Student ID:</strong> {model.StudentId}</p>
+                                <p><strong>First Name:</strong> {model.FirstName}</p>
+                                <p><strong>Last Name:</strong> {model.LastName}</p>
                                 <p><strong>I am 18 years of age or older:</strong> {isAdultText}</p>
-                                <p><strong>Email:</strong> {email}</p>
-                                <p><strong>Phone Number:</strong> {phoneNumber}</p>
+                                <p><strong>Email:</strong> {model.Email}</p>
+                                <p><strong>Phone Number:</strong> {model.PhoneNumber}</p>
                                 <p><strong>Initial Route:</strong> {initialRoute}</p>
-                                <p><strong>Trip Type:</strong> {tripType}</p>
-                                <p><strong>Days of the Week Needed:</strong> {string.Join(", ", selectedDaysOfWeek)}</p>
-                                <p><strong>First Day Expecting to Ride:</strong> {firstDayExpectingToRide?.ToString("MM-dd-yyyy")}</p>
+                                {returnRouteHtml}
+                                <p><strong>Trip Type:</strong> {model.TripType}</p>
+                                <p><strong>Days of the Week Needed:</strong> {string.Join(", ", model.SelectedDaysOfWeek)}</p>
+                                <p><strong>First Day Expecting to Ride:</strong> {model.FirstDayExpectingToRide?.ToString("MM-dd-yyyy")}</p>
                             </div>
                             <div class='footer'>
                                 <p>Thank you for submitting your shuttle request. Your ride is <strong>NOT</strong> confirmed yet. The Mid-State shuttle team will review your request, and a response will be shared via email. Thank you!</p>
