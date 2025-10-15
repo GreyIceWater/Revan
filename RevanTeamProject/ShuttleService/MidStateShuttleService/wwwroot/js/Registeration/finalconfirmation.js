@@ -92,7 +92,7 @@
                 <p>Can Leave Time: ${otherCanLeaveAfter}</p>
                 <p>Special Pick Up Location: ${specialPickUpLocation}</p>
                 <p>Drop Off Location: ${dropOffLocationName}</p>
-                <p>Need Transportation Detail: ${needTransportation}</p>
+                <p>Special Transportation Request: ${needTransportation}</p>
             `;
             }
             else if (otherSpecialRequest === "Yes" && dropOffLocationName === 'Other' && pickUpLocationName !== 'Other') {
@@ -102,7 +102,7 @@
                 <p>Can Leave Time: ${otherCanLeaveAfter}</p>
                 <p>Pick Up Location: ${pickUpLocationName}</p>
                 <p>Special Drop Off Location: ${specialDropOffLocation}</p>
-                <p>Need Transportation Detail: ${needTransportation}</p>
+                <p>Special Transportation Request: ${needTransportation}</p>
             `;
             }
             else if (otherSpecialRequest === "Yes" && pickUpLocationName === 'Other' && dropOffLocationName === 'Other') {
@@ -112,7 +112,7 @@
                 <p>Can Leave Time: ${otherCanLeaveAfter}</p>
                 <p>Special Pick Up Location: ${specialPickUpLocation}</p>
                 <p>Special Drop Off Location: ${specialDropOffLocation}</p>
-                <p>Need Transportation Detail: ${needTransportation}</p>
+                <p>Special Transportation Request: ${needTransportation}</p>
             `;
             }
             else if (otherSpecialRequest === "Yes" && (pickUpLocationName && dropOffLocationName) && !initialRoute) {
@@ -122,7 +122,7 @@
                 <p>Drop Off Location: ${dropOffLocationName}</p>
                 <p>Must Arrive Time: ${otherMustArriveBy}</p>
                 <p>Can Leave Time: ${otherCanLeaveAfter}</p>
-                <p>Need Transportation Detail: ${needTransportation}</p>
+                <p>Special Transportation Request: ${needTransportation}</p>
             `;
             }
             else if (otherSpecialRequest === "Yes" && initialRoute && !returnRoute) {
@@ -131,7 +131,7 @@
                 <p>Initial Route: ${initialRoute}</p>
                 <p>Must Arrive Time: ${otherMustArriveBy}</p>
                 <p>Can Leave Time: ${otherCanLeaveAfter}</p>
-                <p>Need Transportation Detail: ${needTransportation}</p>
+                <p>Special Transportation Request: ${needTransportation}</p>
             `;
             }
         }
@@ -151,7 +151,7 @@
                 <p>Pick Up Location: ${pickUpLocationName}</p>
                 <p>Drop Off Location: ${dropOffLocationName}</p>
                 <p>Must Arrive Time: ${otherMustArriveBy}</p>
-                <p>Need Transportation Detail: ${needTransportation}</p>
+                <p>Special Transportation Request: ${needTransportation}</p>
             `;
             }
             else if (otherSpecialRequest === "Yes" && pickUpLocationName === 'Other' && dropOffLocationName !== 'Other') {
@@ -160,7 +160,7 @@
                 <p>Must Arrive Time: ${otherMustArriveBy}</p>
                 <p>Special Pick Up Location: ${specialPickUpLocation}</p>
                 <p>Drop Off Location: ${dropOffLocationName}</p>
-                <p>Need Transportation Detail: ${needTransportation}</p>
+                <p>Special Transportation Request: ${needTransportation}</p>
             `;
             }
             else if (otherSpecialRequest === "Yes" && dropOffLocationName === 'Other' && pickUpLocationName !== 'Other') {
@@ -169,7 +169,7 @@
                 <p>Must Arrive Time: ${otherMustArriveBy}</p>
                 <p>Pick Up Location: ${pickUpLocationName}</p>
                 <p>Special Drop Off Location: ${specialDropOffLocation}</p>
-                <p>Need Transportation Detail: ${needTransportation}</p>
+                <p>Special Transportation Request: ${needTransportation}</p>
             `;
             }
             else if (otherSpecialRequest === "Yes" && pickUpLocationName === 'Other' && dropOffLocationName === 'Other') {
@@ -178,7 +178,7 @@
                 <p>Must Arrive Time: ${otherMustArriveBy}</p>
                 <p>Special Pick Up Location: ${specialPickUpLocation}</p>
                 <p>Special Drop Off Location: ${specialDropOffLocation}</p>
-                <p>Need Transportation Detail: ${needTransportation}</p>
+                <p>Special Transportation Request: ${needTransportation}</p>
             `;
             }
         }

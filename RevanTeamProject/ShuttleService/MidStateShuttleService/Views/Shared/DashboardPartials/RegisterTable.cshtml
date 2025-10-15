@@ -17,15 +17,18 @@
         <tr>
             <td>Name</td>
             <td>Date</td>
-            <td>Pick up location</td>
-            <td>Drop off location</td>
-            <td>Pick up time</td>
-            <td>Drop off time</td>
-            <td>Request type</td>
-            <td>Request Status</td>
+            <td>Pick Up Route</td>
+            <td>Pick Up / Drop Off</td>
+            <td>Return Route</td>
+            <td>Return Pick Up / Drop Off</td>
+            <td>Info</td>
+            <td>Type</td>
+            <td>Status</td>
+            <td></td>
         </tr>
     </thead>
     <tbody id="registrationsTableBody">
+
         @if (Model.Register == null)
         {
             // Changing registrions to requests
@@ -33,58 +36,63 @@
         }
         else
         {
-            @foreach (var registration in Model.Register.OrderByDescending(r => r.RegistrationId))
+            var routeDict = Model.Route.ToDictionary(r => r.RouteID);
+
+            @foreach (var registration in Model.Register.OrderByDescending(r => r.FirstDayExpectingToRide))
             {
+                int routeId = 0;
+                int returnRouteId = 0;
+                int.TryParse(registration.SelectedRouteDetail, out routeId);
+                int.TryParse(registration.ReturnSelectedRouteDetail, out returnRouteId);
+
+                routeDict.TryGetValue(routeId, out var route);
+                routeDict.TryGetValue(returnRouteId, out var returnRoute);
+
+                var pickUp = route?.PickUpTime?.ToString(@"hh\:mm") ?? "";
+                var dropOff = route?.DropOffTime?.ToString(@"hh\:mm") ?? "";
+                var returnPickUp = returnRoute?.PickUpTime?.ToString(@"hh\:mm") ?? "";
+                var returnDropOff = returnRoute?.DropOffTime?.ToString(@"hh\:mm") ?? "";
+
+                if (route?.PickUpTime != null)
+                    pickUp = DateTime.Today.Add(route.PickUpTime.Value).ToString("h:mm tt");
+                if (route?.DropOffTime != null)
+                    dropOff = DateTime.Today.Add(route.DropOffTime.Value).ToString("h:mm tt");
+                if (returnRoute?.PickUpTime != null)
+                    returnPickUp = DateTime.Today.Add(returnRoute.PickUpTime.Value).ToString("h:mm tt");
+                if (returnRoute?.DropOffTime != null)
+                    returnDropOff = DateTime.Today.Add(returnRoute.DropOffTime.Value).ToString("h:mm tt");
+
                 <tr class="registrationRow">
                     <td>@(registration.FirstName) @(registration.LastName)</td>
                     <td>@registration.FirstDayExpectingToRide</td>
-                    <td>@registration.PickUpLocationID</td>
-                    @if (!string.IsNullOrEmpty(registration.WhichFriday))
-                    {
-                        <td>@registration.FridayMustArriveTime</td>
-                        <td>@registration.FridayCanLeaveTime</td>
-                        <td>
-                            @if (registration.WhichFriday.Length > 10)
-                            {
-                                @registration.WhichFriday.Substring(0, 10)
-                                <span class="ellipsis">...</span>
-                            }
-                            else
-                            {
-                                @registration.WhichFriday
-                            }
-                        </td>
-                        <td>
-                            <a class="viewButton" href="#"
-                               data-toggle="modal"
-                               data-target="#specialRequestDetailsModal"
-                               data-message-id="@registration.RegistrationId"
-                               data-full-message="@registration.WhichFriday">View</a>
-                        </td>
-                    }
-                    else
-                    {
-                        <td>@registration.MustArriveTime</td>
-                        <td>@registration.CanLeaveTime</td>
-                        <td>
-                            @if (registration.NeedTransportation != null && registration.NeedTransportation.Length > 10)
-                            {
-                                @registration.NeedTransportation.Substring(0, 10)
-                                <span class="ellipsis">...</span>
-                            }
-                            else
-                            {
-                                @registration.NeedTransportation
-                            }
-                        </td>
-                        <td>
-                            <a class="viewButton" href="#"
-                               data-toggle="modal"
-                               data-target="#specialRequestDetailsModal"
-                               data-message-id="@registration.RegistrationId"
-                               data-full-message="@registration.NeedTransportation">View</a>
-                        </td>
-                    }
+                    <td>@($"{route?.PickUpLocation?.Name ?? "Unknown"} → {route?.DropOffLocation?.Name ?? "Unknown"}")</td>
+                    <td>@($"{pickUp} / {dropOff}")</td>
+                    <td>
+                        @(returnRoute != null
+                            ? $"{returnRoute.PickUpLocation?.Name} → {returnRoute.DropOffLocation?.Name}"
+                            : "")
+                    </td>
+                    <td>@(returnRoute != null ? $"{returnPickUp} / {returnDropOff}" : "")</td>
+                    <td>
+                        @if (registration.NeedTransportation != null && registration.NeedTransportation.Length > 10)
+                        {
+                            @registration.NeedTransportation.Substring(0, 10)
+                            <span class="ellipsis">...</span>
+                        }
+                        else
+                        {
+                            @registration.NeedTransportation
+                        }
+                    </td>
+                    <td></td>
+                    <td>@(registration.RequestStatus)</td>
+                    <td>
+                        <a class="viewButton" href="#"
+                            data-toggle="modal"
+                            data-target="#specialRequestDetailsModal"
+                            data-message-id="@registration.RegistrationId"
+                            data-full-message="@registration.NeedTransportation">View</a>
+                    </td>
                 </tr>
             }
         }

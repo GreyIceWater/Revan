@@ -239,6 +239,10 @@ public partial class ApplicationDbContext : DbContext
                 .WithMany()
                 .IsRequired()
                 .HasForeignKey(e => e.LocationId);
+            entity.HasOne(e => e.DropOffLocation)
+                .WithMany()
+                .HasForeignKey(e => e.DropOffLocationId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Feedback Table
@@ -368,21 +372,15 @@ public partial class ApplicationDbContext : DbContext
 
             entity.Property(e => e.FirstName)
                 .IsRequired()
-                .HasMaxLength(255)
-                .HasAnnotation("RegularExpression", "^[A-Za-z\\s]{2,}$")
-                .HasAnnotation("ErrorMessage", "Must contain only characters and be at least 2 characters long");
+                .HasMaxLength(60);
 
             entity.Property(e => e.LastName)
                 .IsRequired()
-                .HasMaxLength(255)
-                .HasAnnotation("RegularExpression", "^[A-Za-z\\s]{2,}$")
-                .HasAnnotation("ErrorMessage", "Must contain only characters and be at least 2 characters long");
+                .HasMaxLength(60);
 
             entity.Property(e => e.PhoneNumber)
                 .IsRequired()
-                .HasMaxLength(255)
-                .HasAnnotation("RegularExpression", "^[0-9]{10}$")
-                .HasAnnotation("ErrorMessage", "Must be 10 digits");
+                .HasMaxLength(10);
 
             entity.Property(e => e.Email)
                 .IsRequired()
@@ -402,12 +400,6 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.SpecialRequest)
                 .IsRequired();
 
-            entity.Property(e => e.WhichFriday)
-                .HasMaxLength(300);
-
-            entity.Property(e => e.FridayTripType)
-                .HasMaxLength(20);
-
             entity.Property(e => e.ContactPreference)
                 //.IsRequired()
                 .HasMaxLength(20);
@@ -415,10 +407,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.AgreeTerms)
                 .IsRequired();
 
-            entity.Property(e => e.FridayAgreeTerms)
-                .IsRequired();
-
             entity.Property(b => b.IsActive)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.IsAdult)
                 .HasDefaultValue(false);
 
             entity.Ignore(e => e.LocationNames);
@@ -437,22 +429,29 @@ public partial class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Registration_DropOffLocation");
 
-            // Configure foreign key relationship for FridayPickUpLocationID
-            entity.HasOne<Location>()
+            entity.HasOne(r => r.Route)
                 .WithMany()
-                .HasForeignKey(e => e.FridayPickUpLocationID)
+                .HasForeignKey(e => e.RouteId)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_Registration_FridayPickUpLocation");
+                .HasConstraintName("FK_Registration_Route");
 
-            // Configure foreign key relationship for FridayDropOffLocationID
-            entity.HasOne<Location>()
+            entity.HasOne(r => r.ReturnRoute)
                 .WithMany()
-                .HasForeignKey(e => e.FridayDropOffLocationID)
+                .HasForeignKey(e => e.ReturnRouteId)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_Registration_FridayDropOffLocation");
-            
+                .HasConstraintName("FK_Registration_ReturnRoute");
+
             entity.Property(x => x.Term)
                 .HasConversion<string>();
+
+            entity.Property(r => r.RequestStatus)
+                .HasConversion<string>();
+
+            entity.Property(e => e.StudentId).HasMaxLength(25);
+            entity.Property(e => e.DeviceIpAddress).HasMaxLength(50);
+            entity.Property(e => e.SpecialRequestDescription).HasMaxLength(500);
+            entity.Property(e => e.RouteId).HasColumnName("RouteId");
+            entity.Property(e => e.ReturnRouteId).HasColumnName("ReturnRouteId");
         });
     }
 }

@@ -20,6 +20,21 @@ namespace MidStateShuttleService.Models
         Winterim
     }
 
+    public enum RequestStatus
+    {
+        [Display(Name = "Pending")]
+        Pending,
+
+        [Display(Name = "Approved")]
+        Approved,
+
+        [Display(Name = "Denied")]
+        Denied,
+
+        [Display(Name = "Cancelled")]
+        Cancelled
+    }
+
     // !!**** Temporarily disabled validations, to be addressed in the next sprint. ****!!//
     [Table("Registration")]
     public partial class RegisterModel
@@ -29,12 +44,12 @@ namespace MidStateShuttleService.Models
 
         [Required(ErrorMessage = "First Name is required")]
         [RegularExpression("^[A-Za-z\\s'-]+$", ErrorMessage = "Must contain only letters, spaces, dashes, or apostrophes.")]
-        [StringLength(20)]
+        [StringLength(60)]
         public string FirstName { get; set; }
 
         [Required(ErrorMessage = "Last Name is required")]
         [RegularExpression("^[A-Za-z\\s'-]+$", ErrorMessage = "Must contain only letters, spaces, dashes, or apostrophes.")]
-        [StringLength(20)]
+        [StringLength(60)]
         public string LastName { get; set; }
 
         [Required(ErrorMessage = "Phone Number is required")]
@@ -43,7 +58,7 @@ namespace MidStateShuttleService.Models
         public string PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "Email is required")]
-        [StringLength(40)]
+        [StringLength(100)]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Trip Type is required")]
@@ -63,19 +78,10 @@ namespace MidStateShuttleService.Models
         //[Required(ErrorMessage = "Special request is required")]
         public bool? SpecialRequest { get; set; } = false; // Assuming this is mandatory for registration
 
-        //[StringLength(300, ErrorMessage = "Which Friday cannot exceed 300 characters")]
-        public string? WhichFriday { get; set; }
-
-        //[Required(ErrorMessage = "Friday Trip Type is required")]
-        public string? FridayTripType { get; set; }
-
         public string? ContactPreference { get; set; }
 
         [Required]
         public bool AgreeTerms { get; set; } = false;//  true/false for agreement
-
-        [Required]
-        public bool? FridayAgreeTerms { get; set; } = false;//  true/false for agreement
 
         public IEnumerable<SelectListItem>? LocationNames { get; set; }
 
@@ -91,21 +97,6 @@ namespace MidStateShuttleService.Models
         public TimeOnly? MustArriveTime { get; set; }
 
         public TimeOnly? CanLeaveTime { get; set; }
-
-
-        public TimeOnly? FridayMustArriveTime { get; set; }
-
-        public TimeOnly? FridayCanLeaveTime { get; set; }
-
-        public string? SpecialPickUpLocation { get; set; }
-
-        public string? SpecialDropOffLocation { get; set; }
-
-        //[Required(ErrorMessage = "Pick Up Location is required")]
-        public int? FridayPickUpLocationID { get; set; }
-
-        //[Required(ErrorMessage = "Drop Off Location is required")]
-        public int? FridayDropOffLocationID { get; set; }
 
         public bool IsActive { get; set; }
         
@@ -136,6 +127,27 @@ namespace MidStateShuttleService.Models
 
         [Required(ErrorMessage = "Term is required.")]
         public SchoolTerm? Term { get; set; }
-    }
 
+        public int? ReturnPickUpLocationId { get; set; }
+
+        public int? ReturnDropOffLocationId { get; set; }
+
+        public string? SpecialRequestDescription { get; set; }
+
+        public int? RouteId { get; set; }
+        public int? ReturnRouteId { get; set; }
+
+        public RequestStatus? RequestStatus { get; set; }
+
+        [ForeignKey(nameof(RouteId))]
+        [NotMapped]
+        public virtual Routes? Route { get; set; }
+
+        [ForeignKey(nameof(ReturnRouteId))]
+        [NotMapped]
+        public virtual Routes? ReturnRoute { get; set; }
+
+        [NotMapped]
+        public List<Routes> Routes { get; set; } = new List<Routes>();
+    }
 }

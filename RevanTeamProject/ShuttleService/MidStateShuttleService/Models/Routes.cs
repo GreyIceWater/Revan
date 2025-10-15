@@ -105,8 +105,5 @@ namespace MidStateShuttleService.Models
                 return "N/A"; // Or any default value you prefer
             }
         }
-
-
-
     }
 }

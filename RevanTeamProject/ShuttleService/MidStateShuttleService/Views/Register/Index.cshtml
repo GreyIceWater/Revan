@@ -145,12 +145,11 @@
 
                                 <div class="return-select-route">
                                     <div class="row row-space" >
-
                                         <div class="col-6">
                                             <div class="input-fields">                                          
                                                 @if (Model.LocationNames != null)
                                                 {
-                                                    @Html.DropDownListFor(model => model.PickUpLocationID, Model.LocationNames, "Return Pick-Up Location", new { @class = "input--style-1", id = "ReturnPickUpLocation" })
+                                                    @Html.DropDownListFor(model => model.ReturnPickUpLocationId, Model.LocationNames, "Return Pick-Up Location", new { @class = "input--style-1", id = "ReturnPickUpLocation" })
                                                 }
                                                 else
                                                 {
@@ -164,7 +163,7 @@
                                             <div class="input-fields">
                                                 @if (Model.LocationNames != null)
                                                 {
-                                                    @Html.DropDownListFor(model => model.DropOffLocationID, Model.LocationNames, "Return Drop-Off Location", new { @class = "input--style-1", id = "ReturnDropOffLocation" })
+                                                    @Html.DropDownListFor(model => model.ReturnDropOffLocationId, Model.LocationNames, "Return Drop-Off Location", new { @class = "input--style-1", id = "ReturnDropOffLocation" })
                                                 }
                                                 else
                                                 {
@@ -229,13 +228,13 @@
                                     @Html.RadioButtonFor(model => model.SpecialRequest, true, new { id = "otherSpecialYes", @class = "other-special-request-input" }) <label for="otherSpecialYes">Yes</label>
                                     @Html.RadioButtonFor(model => model.SpecialRequest, false, new { id = "otherSpecialNo", @class = "other-special-request-input" }) <label for="otherSpecialNo">No</label>
                                 </div>
-                                <p class="other-special-request-info">Your selection of 'Other' requires a special request. Would you like to provide additional information and submit a request to the Shuttle Coordinator?</p>
+                                <p class="other-special-request-info">Don’t see a route that works? Select "Yes" to share your request with the Shuttle Coordinator.</p>
                                 <div id="OtherSpecialRequest-validation-message" class="validation-message">Please select special request</div>
 
                                 <!--Other Speical Request Time Preferences -->
                                 <div class="other-special-request-time-preferences" style="display: none;">
 
-                                    <div class="row row-space">
+                                    @* <div class="row row-space">
                                         <div class="col-6">
                                             <div class="input-fields">
                                                 <p class="must-arrive-by">Must Arrive the Campus By:</p>
@@ -256,59 +255,7 @@
                                                 <p class="special-request-guide">*eg, last class end time</p>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="toggle-switch-wrapper">
-                                        <div class="input-fields">
-                                            <p class="toggle-description">Show Additional Stops Available (not an inclusive list)</p>
-                                            <div class="toggle-switch">
-                                                <span id="toggleNo" class="toggle-label">No</span>
-                                                <label class="switch">
-                                                    <input type="checkbox" id="additionalStopsToggle">
-                                                    <span class="slider round"></span>
-                                                </label>
-                                                <span id="toggleYes" class="toggle-label">Yes</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    @* JTJ remove these, not necessary anymore *@
-                                    @* <div class="stops-available">
-                                        <div class="input-fields">
-                                            <h2 class="section-title">Between Wisconsin Rapids & Adams</h2>
-                                            <ul class="stops-list">
-                                                <li>Wisconsin Rapids south (Highway 13/Highway 73 intersection)</li>
-                                                <li>Nekoosa (Highway 73/173 intersection)</li>
-                                                <li>Port Edwards (along Highway 73)</li>
-                                                <li>Rome (Highway 13/Highway D intersection)</li>
-                                                <li>Friendship (Highway 13/Highway 21 intersection)</li>
-                                                <li>Villa Pines Living Center (Adams-Friendship)</li>
-                                                <li>Big Flats Fire Department (1104 County Road C, Arkdale)</li>
-                                            </ul>
-                                        </div>
-                                        <div class="input-fields">
-                                            <h2 class="section-title">Between Wisconsin Rapids & Marshfield</h2>
-                                            <ul class="stops-list">
-                                                <li>Rudolph (along Highway 34)</li>
-                                                <li>Vesper (along Highway 186)</li>
-                                                <li>Arpin (along Highway 186)</li>
-                                                <li>Auburndale (Highway 10/Highway K intersection)</li>
-                                                <li>Pittsville (along Highway 73)</li>
-                                                <li>Mid-State on Central (1619 North Central Avenue, Marshfield)</li>
-                                                <li>marshfield Clinic (Marshfield clinicals site)</li>
-                                                <li>Family Health Center Marshfield(Dental Asst site)</li>
-                                            </ul>
-                                        </div>
-                                        <div class="input-fields">
-                                            <h2 class="section-title">Between Wisconsin Rapids & Stevens Point</h2>
-                                            <ul class="stops-list">
-                                                <li>Whiting (along Business Highway 51 or Hoover Ave)</li>
-                                                <li>Plover (along Business Highway 51 or Hoover Ave)</li>
-                                                <li>UWSP Dorms</li>
-                                                <li>AMETA&trade; Center (5000 Coye Drive, Steven Point)</li>
-                                            </ul>
-                                        </div>
-                                    </div> *@
+                                    </div>                                     *@
 
                                     <div class="other-pickup-dropoff-location">
                                         <div class="other-pickup">
@@ -331,10 +278,10 @@
 
                                     <!-- days need transportation Field -->
                                     <div class="need-transportation-container">
-                                        <label for="NeedTransportation" class="need-transportation-label">Enter the day(s) you need transportation<sup>*</sup></label>
+                                        <label for="NeedTransportation" class="need-transportation-label">Describe the request.<sup>*</sup></label>
                                         <textarea id="NeedTransportation" name="NeedTransportation" class="need-transportation-input"></textarea>
                                         <div class="form-line"></div>
-                                        <p class="special-request-guide which-friday-guide">*Please enter the day(s) and other additional imformation might be important to our scheduler, who will respond to this request.</p>
+                                        <p class="special-request-guide which-friday-guide">*Enter the day(s), location(s), and any relevant information to help our Route Coordinator review your request.</p>
                                         <div id="NeedTransportation-validation-message" class="validation-message">Please add comment with max words of 300</div>
                                     </div>
 
@@ -364,85 +311,6 @@
 
                             <!--Speical Request Time Preferences -->
                             <div class="special-request-time-preferences" style="display: none;">
-
-                                <!-- Friday Special Request Trip Type Radio Buttons -->
-                                <div class="input-fields">
-                                    <div class="radio-options-special-request">
-                                        <!-- Round Trip Radio Button -->
-                                        @Html.RadioButtonFor(model => model.FridayTripType, "RoundTrip", new { id = "FridayRoundTrip", @class = "input--style-1" })
-                                        <label for="FridayRoundTrip">Round Trip</label>
-
-                                        <!-- One Way Radio Button -->
-                                        @Html.RadioButtonFor(model => model.FridayTripType, "OneWay", new { id = "FridayOneWay", @class = "input--style-1" })
-                                        <label for="FridayOneWay">One Way</label>
-
-                                    </div>
-                                    <div class="form-line"></div>
-                                    <div id="FridayTripType-validation-message" class="validation-message">Please select trip type</div>
-                                </div>
-
-                                <div class="row row-space">
-                                    <div class="col-6">
-                                        <div class="input-fields">
-                                            <p class="must-arrive-by">Must Arrive the Campus By:</p>
-                                            @Html.EditorFor(model => model.FridayMustArriveTime, new { htmlAttributes = new { @class = "input--style-1", type = "time", id = "friday-special-arrive", name = "FridayMustArriveTime" } })
-                                            <div class="form-line"></div>
-                                        </div>
-                                        <p class="special-request-guide">*eg, first class start time</p>
-                                        <div id="FridayMustArriveTime-validation-message" class="validation-message">Please pick arrival time</div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="leave-after">
-                                            <div class="input-fields">
-                                                <p class="must-arrive-by">Can Leave the Campus After:</p>
-                                                @Html.EditorFor(model => model.FridayCanLeaveTime, new { htmlAttributes = new { @class = "input--style-1", type = "time", id = "friday-special-leave", name = "FridayCanLeaveTime" } })
-                                                <div class="form-line"></div>
-                                            </div>
-                                            <p class="special-request-guide">*eg, last class end time</p>
-                                            <div id="FridayCanLeaveTime-validation-message" class="validation-message">Please pick depature time</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row row-space">
-                                    <div class="col-6">
-                                        <div class="input-fields">
-                                            @if (Model.LocationNames != null)
-                                            {
-                                                @Html.DropDownListFor(model => model.FridayPickUpLocationID, Model.LocationNames, "Select Pick-Up Location", new { @class = "input--style-1", id = "FridayPickUpLocation", name = "FridayPickUpLocationID" })
-                                            }
-                                            else
-                                            {
-                                                <p>Error: Location names not loaded.</p>
-                                            }
-                                            <div class="form-line"></div>
-                                            <div id="FridayPickUpLocationID-validation-message" class="validation-message">Please select pickup location</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="input-fields">
-                                            @if (Model.LocationNames != null)
-                                            {
-                                                @Html.DropDownListFor(model => model.FridayDropOffLocationID, Model.LocationNames, "Select Drop-Off Location", new { @class = "input--style-1", id = "FridayDropOffLocation", name = "FridayDropOffLocationID" })
-                                            }
-                                            else
-                                            {
-                                                <p>Error: Location names not loaded.</p>
-                                            }
-                                            <div class="form-line"></div>
-                                            <div id="FridayDropOffLocationID-validation-message" class="validation-message">Pelase select dropoff location</div>
-                                        </div>
-                                    </div>
-                                </div>     
-
-                                <!-- Which Friday Field -->
-                                <div class="which-friday-container">
-                                    <label for="WhichFriday" class="which-friday-label">Which Friday</label>
-                                    <textarea id="WhichFriday" name="WhichFriday" class="which-friday-input" ></textarea>
-                                    <p class="special-request-guide which-friday-guide">*Please enter which Friday(s) you need transportation for and other additional information that might be important to our scheduler, who will respond to this request.</p>
-                                    <div id="WhichFriday-validation-message" class="validation-message">Please add comment with 300 max words</div>
-                                </div>
-
 
                                 <!-- Terms and Conditions Checkbox -->
                                 <div class="checkbox-container">
@@ -502,20 +370,6 @@
                                 <div id="PhoneNumber-validation-message" class="validation-message">Must be 10 digits</div>
                             </div>
                         </div>
-
-                        @* <div class="contact-preference">
-                            <div class="input-fields">
-                                <p class="contact-preference-label">Contact Preference</p>
-                                <div class="radio-options">
-                                    @Html.RadioButtonFor(model => model.ContactPreference, "Email", new { id = "Email" }) <label for="Email">Email</label>
-                                    @Html.RadioButtonFor(model => model.ContactPreference, "Phone", new { id = "Phone" }) <label for="Phone">Phone</label>
-                                    @Html.RadioButtonFor(model => model.ContactPreference, "Text", new { id = "Text" }) <label for="Text">Text</label>
-                                </div>
-                                <div class="form-line"></div>
-                                                                <div id="ContactPreference-validation-message" class="validation-message"></div>
-                                <p class="contact-preference-guide">*Any communication would be directly related to the shuttle service or route updates.</p>
-                            </div>
-                        </div> *@
                     </div>
 
 
