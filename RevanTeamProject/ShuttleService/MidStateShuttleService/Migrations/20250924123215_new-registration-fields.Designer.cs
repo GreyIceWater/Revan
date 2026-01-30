@@ -4,6 +4,7 @@ using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MidStateShuttleService.Models;
 
@@ -12,9 +13,11 @@ using MidStateShuttleService.Models;
 namespace MidStateShuttleService.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250924123215_new-registration-fields")]
+    partial class newregistrationfields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -364,6 +367,26 @@ namespace MidStateShuttleService.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<bool?>("FridayAgreeTerms")
+                        .IsRequired()
+                        .HasColumnType("bit");
+
+                    b.Property<TimeOnly?>("FridayCanLeaveTime")
+                        .HasColumnType("time");
+
+                    b.Property<int?>("FridayDropOffLocationID")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly?>("FridayMustArriveTime")
+                        .HasColumnType("time");
+
+                    b.Property<int?>("FridayPickUpLocationID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FridayTripType")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<DateTime?>("InsertDateTime")
                         .HasColumnType("datetime2");
 
@@ -397,30 +420,25 @@ namespace MidStateShuttleService.Migrations
                     b.Property<int?>("PickUpLocationID")
                         .HasColumnType("int");
 
-                    b.Property<string>("RequestStatus")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("ReturnDropOffLocationId")
                         .HasColumnType("int");
 
                     b.Property<int?>("ReturnPickUpLocationId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ReturnRouteId")
-                        .HasColumnType("int")
-                        .HasColumnName("ReturnRouteId");
-
                     b.Property<string>("ReturnSelectedRouteDetail")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("RouteId")
-                        .HasColumnType("int")
-                        .HasColumnName("RouteId");
 
                     b.Property<string>("SelectedDaysOfWeek")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SelectedRouteDetail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SpecialDropOffLocation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SpecialPickUpLocation")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool?>("SpecialRequest")
@@ -444,15 +462,23 @@ namespace MidStateShuttleService.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<string>("WhichFriday")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
                     b.HasKey("RegistrationId");
 
                     b.HasIndex("DropOffLocationID");
 
+                    b.HasIndex("FridayDropOffLocationID");
+
+                    b.HasIndex("FridayPickUpLocationID");
+
                     b.HasIndex("PickUpLocationID");
 
-                    b.HasIndex("ReturnRouteId");
+                    b.HasIndex("ReturnDropOffLocationId");
 
-                    b.HasIndex("RouteId");
+                    b.HasIndex("ReturnPickUpLocationId");
 
                     b.ToTable("Registration", (string)null);
                 });
@@ -570,25 +596,33 @@ namespace MidStateShuttleService.Migrations
 
                     b.HasOne("MidStateShuttleService.Models.Location", null)
                         .WithMany()
+                        .HasForeignKey("FridayDropOffLocationID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Registration_FridayDropOffLocation");
+
+                    b.HasOne("MidStateShuttleService.Models.Location", null)
+                        .WithMany()
+                        .HasForeignKey("FridayPickUpLocationID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Registration_FridayPickUpLocation");
+
+                    b.HasOne("MidStateShuttleService.Models.Location", null)
+                        .WithMany()
                         .HasForeignKey("PickUpLocationID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("FK_Registration_PickUpLocation");
 
-                    b.HasOne("MidStateShuttleService.Models.Routes", "ReturnRoute")
+                    b.HasOne("MidStateShuttleService.Models.Location", null)
                         .WithMany()
-                        .HasForeignKey("ReturnRouteId")
+                        .HasForeignKey("ReturnDropOffLocationId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_Registration_ReturnRoute");
+                        .HasConstraintName("FK_Registration_ReturnDropOffLocation");
 
-                    b.HasOne("MidStateShuttleService.Models.Routes", "Route")
+                    b.HasOne("MidStateShuttleService.Models.Location", null)
                         .WithMany()
-                        .HasForeignKey("RouteId")
+                        .HasForeignKey("ReturnPickUpLocationId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_Registration_Route");
-
-                    b.Navigation("ReturnRoute");
-
-                    b.Navigation("Route");
+                        .HasConstraintName("FK_Registration_ReturnPickUpLocation");
                 });
 
             modelBuilder.Entity("MidStateShuttleService.Models.Routes", b =>

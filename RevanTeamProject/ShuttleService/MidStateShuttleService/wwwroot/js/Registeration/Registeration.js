@@ -199,29 +199,29 @@ document.addEventListener('DOMContentLoaded', function () {
 //});
 
 
-//Slider toggle
-document.addEventListener('DOMContentLoaded', function () {
-    var toggleInput = document.getElementById('additionalStopsToggle');
-    var toggleNoLabel = document.getElementById('toggleNo');
-    var toggleYesLabel = document.getElementById('toggleYes');
+//Slider toggle - JTJ no longer using this
+//document.addEventListener('DOMContentLoaded', function () {
+//    var toggleInput = document.getElementById('additionalStopsToggle');
+//    var toggleNoLabel = document.getElementById('toggleNo');
+//    var toggleYesLabel = document.getElementById('toggleYes');
 
-    // Function to update label styles based on the checkbox state
-    function updateToggleLabels() {
-        if (toggleInput.checked) {
-            toggleYesLabel.classList.add('active');
-            toggleNoLabel.classList.remove('active');
-        } else {
-            toggleNoLabel.classList.add('active');
-            toggleYesLabel.classList.remove('active');
-        }
-    }
+//    // Function to update label styles based on the checkbox state
+//    function updateToggleLabels() {
+//        if (toggleInput.checked) {
+//            toggleYesLabel.classList.add('active');
+//            toggleNoLabel.classList.remove('active');
+//        } else {
+//            toggleNoLabel.classList.add('active');
+//            toggleYesLabel.classList.remove('active');
+//        }
+//    }
 
-    // Event listener for the toggle input change event
-    toggleInput.addEventListener('change', updateToggleLabels);
+//    // Event listener for the toggle input change event
+//    toggleInput.addEventListener('change', updateToggleLabels);
 
-    // Initial state update
-    updateToggleLabels();
-});
+//    // Initial state update
+//    updateToggleLabels();
+//});
 
 //Show and hide additional stops section based on the selection
 document.addEventListener('DOMContentLoaded', function () {
