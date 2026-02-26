@@ -16,12 +16,14 @@ namespace MidStateShuttleService.Controllers
     {
         private readonly ILogger<DashboardController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly EmailServices _emailServices;
 
         // Inject ApplicationDbContext into the controller constructor
-        public DashboardController(ApplicationDbContext context, ILogger<DashboardController> logger)
+        public DashboardController(ApplicationDbContext context, ILogger<DashboardController> logger, EmailServices emailServices)
         {
             _context = context; // Assign the injected ApplicationDbContext to the _context field
             _logger = logger;
+            _emailServices = emailServices;
         }
 
         public IConfiguration Configuration { get; }
@@ -60,8 +62,8 @@ namespace MidStateShuttleService.Controllers
             FeedbackServices fs = new FeedbackServices(_context);
             allModels.Feedback = fs.GetAllEntities();
 
-            RegisterServices regs = new RegisterServices(_context);
-            allModels.Register = regs.GetAllEntities();
+            RegisterServices reg = new RegisterServices(_context);
+            allModels.RegistrationViewModel = reg.GetViewModels();
 
             // Retrieve the registration success flag and count from the session
             var registrationSuccess = HttpContext.Session.GetString("RegistrationSuccess") == "true";

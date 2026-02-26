@@ -31,5 +31,18 @@ namespace MidStateShuttleService.Services
             // Send the email asynchronously
             client.SendMailAsync(message);
         }
+        public void SendEmailToAdmin(string subject, string body, bool isHtml)
+        {
+            try
+            {
+                string adminEmail = _config["AdminSettings:AdminEmail"];
+
+                SendEmail(adminEmail, subject, body, isHtml);
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

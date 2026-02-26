@@ -1,4 +1,6 @@
-﻿namespace MidStateShuttleService.Models
+﻿using MidStateShuttleService.ViewModels;
+
+namespace MidStateShuttleService.Models
 {
     public class AllModels
     {
@@ -21,5 +23,7 @@
         public IEnumerable<CheckIn> CheckIn { get; set; }
 
         public IEnumerable<Feedback> Feedback { get; set; }
+
+        public IEnumerable<RegistrationViewModel> RegistrationViewModel { get; set; }
     }
 }

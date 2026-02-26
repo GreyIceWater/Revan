@@ -5,36 +5,32 @@
 namespace MidStateShuttleService.Migrations
 {
     /// <inheritdoc />
-    public partial class TripTypeNullRemoval : Migration
+    public partial class PhoneAndEmailValidation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "TripType",
+                name: "Email",
                 table: "Registration",
-                type: "nvarchar(10)",
-                maxLength: 10,
-                nullable: true,
+                type: "nvarchar(100)",
+                maxLength: 100,
+                nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(10)",
-                oldMaxLength: 10);
+                oldType: "nvarchar(max)");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "TripType",
+                name: "Email",
                 table: "Registration",
-                type: "nvarchar(10)",
-                maxLength: 10,
+                type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: "",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(10)",
-                oldMaxLength: 10,
-                oldNullable: true);
+                oldType: "nvarchar(100)",
+                oldMaxLength: 100);
         }
     }
 }

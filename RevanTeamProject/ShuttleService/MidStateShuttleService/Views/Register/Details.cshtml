@@ -1,0 +1,168 @@
+﻿@using MidStateShuttleService.Enums
+@model MidStateShuttleService.Models.RegisterModel
+
+@{
+    ViewBag.Title = "Edit Registration";
+}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/Form.css" />
+<link rel="stylesheet" href="/css/Input.css" />
+
+<div class="form-container">
+    <div class="form-paper">
+
+        <h2>Edit Registration</h2>
+
+        @using (Html.BeginForm("EditSave", "Register", FormMethod.Post, new { id = "editForm" }))
+        {
+            @Html.AntiForgeryToken()
+
+            @Html.HiddenFor(m => m.RegistrationId)
+
+            <!-- TERM -->
+            <div class="form-group">
+                @Html.DropDownListFor(x => x.Term,
+                    (IEnumerable<SelectListItem>)ViewBag.Terms,
+                    "Select Term",
+                    new { @class = "dropdown-midstate", required = "required" })
+            </div>
+
+            <!-- LENGTH -->
+            <div class="form-group">
+                <select asp-for="LengthOfRequest"
+                        class="dropdown-midstate"
+                        asp-items="Html.GetEnumSelectList<LengthOfRequest>()"
+                        required>
+                    <option value="">-- Select Length --</option>
+                </select>
+            </div>
+
+            <!-- DAY SCHEDULES -->
+            <h4 class="mt-4">Day Schedules</h4>
+
+            <div id="dayCardsContainer">
+
+                @for (int i = 0; i < Model.DaySchedules.Count; i++)
+                {
+                    <div class="day-card form-paper mb-4 p-4">
+
+                        @Html.HiddenFor(m => m.DaySchedules[i].RequestDayId)
+
+                        <!-- WEEKDAY -->
+                        <div class="form-group">
+                            <select class="dropdown-midstate"
+                                    asp-for="DaySchedules[i].WeekDay"
+                                    required>
+                                <option value="">Select Day</option>
+                                <option>Monday</option>
+                                <option>Tuesday</option>
+                                <option>Wednesday</option>
+                                <option>Thursday</option>
+                            </select>
+                        </div>
+
+                        <!-- RIDES -->
+                        <h5>Rides</h5>
+
+                        @for (int j = 0; j < Model.DaySchedules[i].Rides.Count; j++)
+                        {
+                            <div class="ride-row row mb-2">
+
+                                @Html.HiddenFor(m => m.DaySchedules[i].Rides[j].RideId)
+
+                                <div class="col-3">
+                                    <select class="dropdown-midstate"
+                                            asp-for="DaySchedules[i].Rides[j].PickUpLocationID"
+                                            asp-items="Model.LocationNames"
+                                            required>
+                                        <option value="">Pick-Up</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-3">
+                                    <select class="dropdown-midstate"
+                                            asp-for="DaySchedules[i].Rides[j].DropOffLocationID"
+                                            asp-items="Model.LocationNames"
+                                            required>
+                                        <option value="">Drop-Off</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-3">
+                                    <select class="dropdown-midstate"
+                                            asp-for="DaySchedules[i].Rides[j].DropOffTime"
+                                            asp-items="Model.TimeOptions"
+                                            required>
+                                        <option value="">Time</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                        }
+
+                    </div>
+                }
+
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email"
+                        class="form-control midstate-textinput"
+                        type="email"
+                        placeholder="Enter your email"
+                        required />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <!-- PHONE -->
+            <div class="form-group">
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone"
+                        class="form-control midstate-textinput"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        required />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+
+            <!-- AGE -->
+            <div class="form-group mt-3">
+                <input asp-for="IsAdult" type="checkbox" />
+                <label asp-for="IsAdult"></label>
+            </div>
+
+            <!-- AGREEMENT -->
+            <div class="form-group mt-3">
+                <input asp-for="AgreeTerms" type="checkbox" />
+                <label asp-for="AgreeTerms"></label>
+            </div>
+
+            <!-- SAVE BUTTON -->
+            <div class="form-group submit-group">
+                <button class="btn-midstate btn-primary" type="submit"
+                        @(User.IsInRole("Driver") || User.IsInRole("Rider") ? "disabled" : "")>
+                    Save Changes
+                </button>
+                <a asp-controller="Dashboard" 
+                   asp-action="Index"
+                   class="btn-midstate btn-secondary">
+                    Back
+                </a>
+            </div>
+
+            
+        }
+
+        <!-- ARCHIVE BUTTON -->
+            <form asp-action="ArchiveRegistration" method="post">
+                <input type="hidden" name="id" value="@Model.RegistrationId" />
+                <button type="submit" class="btn-midstate btn-warning"
+                        @(User.IsInRole("Driver") || User.IsInRole("Rider") ? "disabled" : "")>
+                    Archive
+                </button>
+            </form>
+    </div>
+</div>

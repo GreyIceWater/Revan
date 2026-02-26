@@ -10,10 +10,10 @@
     // Calculate total check-ins for the last 30 days
     var totalCheckInsLast30Days = Model.CheckIn.Where(c => c.Date >= DateTime.Today.AddDays(-30)).Count();
 
-    // Calculate total check-ins
+    // Calculate total check-insF
     var totalCheckIns = Model.CheckIn.Count();
 
-    var totalRiders = Model.Register.Count();
+    var totalRiders = Model.RegistrationViewModel.Count();
 }
 
 <div class="container1">
@@ -34,7 +34,7 @@
             
             <li>
                 <a href="#" id="special">
-                    <span class="icon"><i class="bi bi-person-raised-hand"></i></span>
+                    <span class="icon"><i class="bi bi-send-arrow-down-fill"></i></span>
                     <span class="title">Requests</span>
                 </a>
             </li>
@@ -209,7 +209,7 @@
             @await Html.PartialAsync("~/Views/Shared/DashboardPartials/FeedbackTable.cshtml")
         </div>
         <div class="recentFeedback request">
-            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/SpecialTable.cshtml")
+            @await Html.PartialAsync("~/Views/Register/_ViewRegistrations.cshtml")
         </div>
         
     </div>

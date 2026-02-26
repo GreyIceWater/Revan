@@ -12,13 +12,13 @@ public class RequestDay
     [Required]
     public WeekDay WeekDay { get; set; }
 
-    // FK → Registration
+    // FK
     [Required]
     public int RegistrationId { get; set; }
 
     [ForeignKey(nameof(RegistrationId))]
     public RegisterModel? Registration { get; set; }
 
-    // Child rides
+    // rides
     public List<Ride> Rides { get; set; } = new();
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MidStateShuttleService.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 [Table("Ride")]
@@ -16,8 +17,16 @@ public class Ride
     [Required]
     public int PickUpLocationID { get; set; }
 
+    [ForeignKey(nameof(PickUpLocationID))]
+    public Location? PickUpLocation { get; set; }
+
+
     [Required]
     public int DropOffLocationID { get; set; }
+
+    [ForeignKey(nameof(DropOffLocationID))]
+    public Location? DropOffLocation { get; set; }
+
 
     // Time they must arrive
     [Required]

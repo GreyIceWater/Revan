@@ -24,70 +24,34 @@
                 <a class="btn-midstate btn-primary"
                    asp-area=""
                    asp-controller="Register"
-                   asp-action="SpecialRequest">
+                   asp-action="Index">
                    Click Here to Go Back 
                 </a>
             </section>
 
         <h2 class="title">Request a Special Request</h2>
 
-        @using (Html.BeginForm("Request", "Request", FormMethod.Post, new { id = "requestForm" }))
+        @using (Html.BeginForm("Register", "Register", FormMethod.Post, new { id = "registrationForm" }))
         {
             @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.isCustom)
 
             <input type="hidden" id="DeviceIpAddress" name="DeviceIpAddress" />
 
             <!-- TERM -->
             <div class="form-group">
                 @Html.LabelFor(m => m.Term, "School Term")
-                <span class="help-icon" data-help="Select the current school term.">?</span>
                 @Html.DropDownListFor(m => m.Term,
                                      (IEnumerable<SelectListItem>)ViewBag.Terms,
                                      "Select Term",
                                      new { @class = "dropdown-midstate", required = "required" })
             </div>
 
-            <!-- TRIP TYPE -->
-            <div class="form-group">
-                <label>Trip Type</label>
-                <span class="help-icon" data-help="Choose One-Way for a single ride or Round Trip to schedule a return ride.">?</span>
-                <div class="radio-options">
-                    <div class="radiobtn-midstate">
-                        @Html.RadioButtonFor(m => m.TripType, "RoundTrip", new { id = "RoundTrip" })
-                        <label for="RoundTrip">Round Trip</label>
-                    </div>
-                    <div class="radiobtn-midstate">
-                        @Html.RadioButtonFor(m => m.TripType, "OneWay", new { id = "OneWay" })
-                        <label for="OneWay">One Way</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PICKUP / DROPOFF -->
-            <div class="row row-space">
-                <div class="col-6">
-                    <div class="form-group">
-                        @Html.LabelFor(m => m.customPickupLocation, "Pick-Up Location")
-                        <span class="help-icon" data-help="Enter the exact address or location where you need to be picked up.">?</span>
-                        @Html.TextBoxFor(m => m.customPickupLocation,
-                                     new { @class = "midstate-textinput", placeholder = "Enter pick-up location" })
-                    </div>
-                </div>
-
-                <div class="col-6">
-                    <div class="form-group">
-                        @Html.LabelFor(m => m.customDropoffLocation, "Drop-Off Location")
-                        <span class="help-icon" data-help="Enter the destination address or location.">?</span>
-                        @Html.TextBoxFor(m => m.customDropoffLocation,
-                                     new { @class = "midstate-textinput", placeholder = "Enter drop-off location" })
-                    </div>
-                </div>
-            </div>
-
             <!-- DATE -->
             <div class="form-group">
-                @Html.LabelFor(m => m.customDate, "Pickup Date")
-                <span class="help-icon" data-help="Select the starting date for this request.">?</span>
+                @Html.LabelFor(m => m.customDate, "Date needing Ride")
+                <span class="help-icon" data-help="Select the date needed for a ride, 
+                if you need a repeating ride (example: every Monday) select the starting date.">?</span>
                 @Html.TextBoxFor(m => m.customDate,
                                  "{0:yyyy-MM-dd}",
                                  new { @class = "midstate-date", type = "date" })
@@ -118,11 +82,43 @@
 
             <!-- NOTES -->
             <div class="form-group">
-                @Html.LabelFor(m => m.customMessage, "Additional Notes")
-                <span class="help-icon" data-help="Include any special instructions for the shuttle crew.">?</span>
+                @Html.LabelFor(m => m.customMessage, "Special Request Ride Details")
+                <span class="help-icon" data-help="Please fill out details about your request here.">?</span>
                 @Html.TextAreaFor(m => m.customMessage,
                                  5, 50,
                                  new { @class = "midstate-textinput", placeholder = "Enter additional details..." })
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email"
+                        class="form-control midstate-textinput"
+                        type="email"
+                        placeholder="Enter your email"
+                        required />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <!-- PHONE -->
+            <div class="form-group">
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone"
+                        class="form-control midstate-textinput"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        required />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+
+            <!-- Age -->
+            <div class="form-group terms-group">
+                <div class="checkbox-midstate">
+                    <input asp-for="IsAdult" type="checkbox" id="IsAdult" name="IsAdult" value="true" />
+                    <label for="IsAdult">
+                        Are you older than the age of 18?
+                    </label>
+                </div>
             </div>
 
             <!-- TERMS -->

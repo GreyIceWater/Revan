@@ -13,15 +13,15 @@ using MidStateShuttleService.Models;
 namespace MidStateShuttleService.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260220073309_RemovedPersonalInfoFromRegistration")]
-    partial class RemovedPersonalInfoFromRegistration
+    [Migration("20260226162246_AddBackPhoneEmail")]
+    partial class AddBackPhoneEmail
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -34,12 +34,10 @@ namespace MidStateShuttleService.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BusId"));
 
-                    b.Property<int?>("BusNo")
-                        .IsRequired()
+                    b.Property<int>("BusNo")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DriverId")
-                        .IsRequired()
+                    b.Property<int>("DriverId")
                         .HasColumnType("int");
 
                     b.Property<bool?>("IsActive")
@@ -47,8 +45,7 @@ namespace MidStateShuttleService.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<int?>("PassengerCapacity")
-                        .IsRequired()
+                    b.Property<int>("PassengerCapacity")
                         .HasColumnType("int");
 
                     b.HasKey("BusId");
@@ -354,11 +351,14 @@ namespace MidStateShuttleService.Migrations
                     b.Property<DateTime?>("EditDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateOnly?>("FirstDayExpectingToRide")
                         .HasColumnType("date");
 
-                    b.Property<bool?>("FridayAgreeTerms")
-                        .IsRequired()
+                    b.Property<bool>("FridayAgreeTerms")
                         .HasColumnType("bit");
 
                     b.Property<TimeOnly?>("FridayCanLeaveTime")
@@ -388,6 +388,12 @@ namespace MidStateShuttleService.Migrations
                     b.Property<bool>("IsAdult")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LengthOfRequest")
+                        .HasColumnType("int");
+
                     b.Property<TimeOnly?>("MustArriveTime")
                         .HasColumnType("time");
 
@@ -395,13 +401,17 @@ namespace MidStateShuttleService.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("PickUpLocationID")
                         .HasColumnType("int");
 
                     b.Property<string>("ReturnSelectedRouteDetail")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SelectedDaysOfWeek")
+                    b.PrimitiveCollection<string>("SelectedDaysOfWeek")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SelectedRouteDetail")
@@ -413,8 +423,7 @@ namespace MidStateShuttleService.Migrations
                     b.Property<string>("SpecialPickUpLocation")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("SpecialRequest")
-                        .IsRequired()
+                    b.Property<bool>("SpecialRequest")
                         .HasColumnType("bit");
 
                     b.Property<string>("StudentId")
@@ -426,7 +435,6 @@ namespace MidStateShuttleService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TripType")
-                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
@@ -493,8 +501,7 @@ namespace MidStateShuttleService.Migrations
                     b.Property<int>("DropOffLocationID")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan?>("DropOffTime")
-                        .IsRequired()
+                    b.Property<TimeSpan>("DropOffTime")
                         .HasColumnType("TIME")
                         .HasColumnName("DropOffTime")
                         .HasAnnotation("DataType", "Time")
@@ -511,8 +518,7 @@ namespace MidStateShuttleService.Migrations
                     b.Property<int>("PickUpLocationID")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan?>("PickUpTime")
-                        .IsRequired()
+                    b.Property<TimeSpan>("PickUpTime")
                         .HasColumnType("TIME")
                         .HasColumnName("PickUpTime")
                         .HasAnnotation("DataType", "Time")
@@ -629,13 +635,13 @@ namespace MidStateShuttleService.Migrations
                     b.HasOne("MidStateShuttleService.Models.Location", "DropOffLocation")
                         .WithMany()
                         .HasForeignKey("DropOffLocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("MidStateShuttleService.Models.Location", "Location")
                         .WithMany()
                         .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("DropOffLocation");

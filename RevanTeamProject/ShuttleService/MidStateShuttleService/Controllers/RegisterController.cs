@@ -1,16 +1,19 @@
+using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using MidStateShuttleService.Migrations;
 using MidStateShuttleService.Models;
-using System.Diagnostics;
 using MidStateShuttleService.Service;
 using MidStateShuttleService.Services;
-using Microsoft.AspNetCore.Authorization;
-using System.Text.Json;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Reflection;
+using MidStateShuttleService.ViewModels;
+using System;
 using System.ComponentModel.DataAnnotations;
-using Azure.Core;
+using System.Diagnostics;
+using System.Reflection;
 using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -30,15 +33,34 @@ namespace MidStateShuttleService.Controllers
             _logger = logger;
         }
 
+        //overload method for default
         private List<SelectListItem> GetSchoolTermSelectList()
         {
-            return Enum.GetValues(typeof(SchoolTerm))
-                .Cast<SchoolTerm>()
+            return GetSchoolTermSelectList(false);
+        }
+
+        /// <summary>
+        /// Returns the list of Terms
+        /// </summary>
+        /// <param name="getSummer"></param>
+        /// <returns></returns>
+        private List<SelectListItem> GetSchoolTermSelectList(bool isSpecial)
+        {
+            var terms = Enum.GetValues(typeof(SchoolTerm))
+                .Cast<SchoolTerm>();
+
+            if (!isSpecial)
+            {
+                terms = terms.Where(t => t != SchoolTerm.Summer && t != SchoolTerm.Other);
+            }
+
+            return terms
                 .Select(term => new SelectListItem
                 {
                     Text = GetEnumDisplayName(term),
                     Value = term.ToString()
-                }).ToList();
+                })
+                .ToList();
         }
 
         private string GetEnumDisplayName(Enum enumValue)
@@ -54,17 +76,46 @@ namespace MidStateShuttleService.Controllers
         /// Index is the form to create a registration.
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         public IActionResult Index()
         {
             LocationServices ls = new LocationServices(_context);
 
+            string email = "";
+            string phone = "";
+
+            try
+            {
+                var oidClaim = User.FindFirst("oid")
+                ?? User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier");
+
+                string userId = oidClaim?.Value;
+
+                var dbUser = _context.Users
+                .FirstOrDefault(u => u.AzureAdObjectId == userId);
+
+                phone = dbUser.PhoneNumber;
+
+                email = User.FindFirst("email")?.Value
+                            ?? User.FindFirst("preferred_username")?.Value
+                            ?? User.Identity?.Name
+                            ?? "N/A";
+            }
+            catch (Exception ex)
+            {
+                email = "";
+                phone = "";
+            }
+
             var model = new RegisterModel();
             model.LocationNames = ls.GetLocationNames();
+
+            model.Phone = phone;
+            model.Email = email;
 
             //set trip type up for now, its a legacy feature
             model.TripType = "N/A";
 
+            model.TimeOptions = GetTimeSelectList();
             ViewBag.Terms = GetSchoolTermSelectList();
             return View(model);
         }
@@ -82,12 +133,11 @@ namespace MidStateShuttleService.Controllers
 
         //Completed the backend logic for a registration form submission
         [HttpPost]
-        [AllowAnonymous]
         public ActionResult Register(RegisterModel model)
         {
             LocationServices ls = new LocationServices(_context);
             RegisterServices rs = new RegisterServices(_context);
-            
+
 
             // Repopulate LocationNames for the model in case of return to View due to invalid model state or any error.
             model.LocationNames = ls.GetLocationNames();
@@ -103,7 +153,7 @@ namespace MidStateShuttleService.Controllers
                 .FirstOrDefault(u => u.AzureAdObjectId == userId);
 
                 model.IsActive = true; // Set IsActive to true
-                model.DeviceIpAddress = model.DeviceIpAddress ?? "Unknown"; // Default to "Unknown" if IP is null
+                model.DeviceIpAddress = model.DeviceIpAddress ?? "Unknown";
                 model.InsertDateTime = DateTime.Now;
 
                 if (dbUser != null)
@@ -122,8 +172,23 @@ namespace MidStateShuttleService.Controllers
 
                     TempData["RegistrationSuccess"] = true;
 
-                    string emailBody = GenerateRegistrationEmailBody(model);
-                    //_emailServices.SendEmail(model.Email, "MSTC Shuttle Service Request", emailBody, isHtml: true);
+                    string emailBody = ""; 
+                    
+                    if (model.isCustom)
+                    {
+                        emailBody = BuildEmailForSpecialRegisterSubmit(model.RegistrationId);
+                    }
+                    else
+                    {
+                        emailBody = BuildEmailForRegisterSubmit(model.RegistrationId);
+                    }
+
+
+                    _emailServices.SendEmailToAdmin(
+                        "MSTC Shuttle Service Request Confirmation",
+                        emailBody,
+                        isHtml: true
+                    );
 
 
                     return RedirectToAction("Index");
@@ -139,20 +204,216 @@ namespace MidStateShuttleService.Controllers
             return View("Index", model);
         }
 
+        /// <summary>
+        /// This is the only Controller action to use view models
+        /// </summary>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin,Driver")]
+        public IActionResult ViewRegistrations()
+        {
+            var registrations = new RegisterServices(_context).GetViewModels();
+
+            return PartialView("~/Views/Register/_ViewRegistrations.cshtml", registrations);
+        }
+
+        // Displays the full breakdown of a single registration
+        [Authorize(Roles = "Admin,Driver")]
+        public IActionResult Details(int registrationId)
+        {
+            var registration = _context.RegisterModels
+                .Include(r => r.DaySchedules)
+                    .ThenInclude(d => d.Rides)
+                .FirstOrDefault(r => r.RegistrationId == registrationId);
+
+            if (registration == null)
+                return NotFound();
+
+            ViewBag.Terms = GetSchoolTermSelectList();
+
+            registration.TimeOptions = GetTimeSelectList();
+
+            registration.LocationNames = _context.Locations
+                .Select(l => new SelectListItem
+                {
+                    Value = l.LocationId.ToString(),
+                    Text = l.Name
+                })
+                .ToList();
+
+            return View(registration);
+        }
+
+        //displays the details for special request/registrations
+        [Authorize(Roles = "Admin,Driver")]
+        public IActionResult SpecialDetails(int registrationId)
+        {
+            var model = _context.RegisterModels
+                .FirstOrDefault(r => r.RegistrationId == registrationId);
+
+            if (model == null)
+                return NotFound();
+
+            ViewBag.Terms = GetSchoolTermSelectList(true);
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public IActionResult EditSave(RegisterModel model)
+        {
+            LocationServices ls = new LocationServices(_context);
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Terms = GetSchoolTermSelectList();
+                model.LocationNames = ls.GetLocationNames();
+                model.TimeOptions = GetTimeSelectList();
+
+                return View("Details", model);
+            }
+
+            var existing = _context.RegisterModels
+                .Include(r => r.DaySchedules)
+                    .ThenInclude(d => d.Rides)
+                .FirstOrDefault(r => r.RegistrationId == model.RegistrationId);
+
+            if (existing == null)
+                return NotFound();
+
+            // Update Registration fields
+            existing.Term = model.Term;
+            existing.LengthOfRequest = model.LengthOfRequest;
+            existing.AgreeTerms = model.AgreeTerms;
+            existing.IsAdult = model.IsAdult;
+            existing.Email = model.Email;
+            existing.Phone = model.Phone;
+
+            // Update DaySchedules and Rides
+            for (int i = 0; i < existing.DaySchedules.Count; i++)
+            {
+                var existingDay = existing.DaySchedules[i];
+                var modelDay = model.DaySchedules[i];
+
+                existingDay.WeekDay = modelDay.WeekDay;
+
+                for (int j = 0; j < existingDay.Rides.Count; j++)
+                {
+                    var existingRide = existingDay.Rides[j];
+                    var modelRide = modelDay.Rides[j];
+
+                    existingRide.PickUpLocationID = modelRide.PickUpLocationID;
+                    existingRide.DropOffLocationID = modelRide.DropOffLocationID;
+                    existingRide.DropOffTime = modelRide.DropOffTime;
+                }
+            }
+
+            _context.SaveChanges();
+
+            return RedirectToAction("Details",
+                new { registrationId = existing.RegistrationId });
+        }
+
+        /// <summary>
+        /// Editing a Special Request
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public IActionResult SpecialEditSave(RegisterModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Terms = GetSchoolTermSelectList(true);
+                return View("SpecialDetails", model);
+            }
+
+            var existing = _context.RegisterModels
+                .FirstOrDefault(r => r.RegistrationId == model.RegistrationId);
+
+            if (existing == null)
+                return NotFound();
+
+            // Update only special request fields
+            existing.Term = model.Term;
+            existing.customDate = model.customDate;
+            existing.customTime1 = model.customTime1;
+            existing.customTime2 = model.customTime2;
+            existing.customMessage = model.customMessage;
+            existing.AgreeTerms = model.AgreeTerms;
+            existing.IsAdult = model.IsAdult;
+            existing.Email = model.Email;
+            existing.Phone = model.Phone;
+
+            _context.SaveChanges();
+
+            return RedirectToAction("SpecialDetails",
+                new { registrationId = existing.RegistrationId });
+        }
+
+        private List<SelectListItem> GetTimeSelectList()
+        {
+            var times = new List<SelectListItem>();
+
+            var start = new TimeOnly(7, 30);
+            var end = new TimeOnly(16, 0);
+
+            for (var time = start; time <= end; time = time.AddMinutes(30))
+            {
+                times.Add(new SelectListItem
+                {
+                    Value = time.ToString("h:mm tt"),
+                    Text = time.ToString("h:mm tt")
+                });
+            }
+
+            return times;
+        }
+
         [HttpGet]
-        [AllowAnonymous]
         public ActionResult SpecialRequest()
         {
             LocationServices ls = new LocationServices(_context);
 
+            string email = "";
+            string phone = "";
+
+            try
+            {
+                var oidClaim = User.FindFirst("oid")
+                ?? User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier");
+
+                string userId = oidClaim?.Value;
+
+                var dbUser = _context.Users
+                .FirstOrDefault(u => u.AzureAdObjectId == userId);
+
+                phone = dbUser.PhoneNumber;
+
+                email = User.FindFirst("email")?.Value
+                            ?? User.FindFirst("preferred_username")?.Value
+                            ?? User.Identity?.Name
+                            ?? "N/A";
+            }
+            catch (Exception ex)
+            {
+                email = "";
+                phone = "";
+            }
+
             var model = new RegisterModel();
             model.isCustom = true;
             model.LocationNames = ls.GetLocationNames();
-            ViewBag.Terms = GetSchoolTermSelectList();
+            model.Email = email;
+            model.Phone = phone;
+            ViewBag.Terms = GetSchoolTermSelectList(true);
             return View("SpecialRequest", model);
         }
 
-        [AllowAnonymous]
+        [Authorize]
         public ActionResult RegisterConfirmation(RegisterModel model)
         {
             if (ModelState.IsValid)
@@ -176,14 +437,17 @@ namespace MidStateShuttleService.Controllers
             LocationServices ls = new LocationServices(_context);
 
             var formattedRoutesList = new List<object>();
-            foreach( var r in routesList)
-            {                
+            foreach (var r in routesList)
+            {
                 if (r.AdditionalDetails != null)
-                    formattedRoutesList.Add(new {
+                    formattedRoutesList.Add(new
+                    {
                         r.RouteID,
-                        Detail = $"Leave {ls.getLocationNameById(r.PickUpLocationID)} at {r.ToStringPickUpTime()} ({r.AdditionalDetails}), Arrive at {ls.getLocationNameById(r.DropOffLocationID)} at {r.ToStringDropOffTime()}" });
+                        Detail = $"Leave {ls.getLocationNameById(r.PickUpLocationID)} at {r.ToStringPickUpTime()} ({r.AdditionalDetails}), Arrive at {ls.getLocationNameById(r.DropOffLocationID)} at {r.ToStringDropOffTime()}"
+                    });
                 else
-                    formattedRoutesList.Add(new {
+                    formattedRoutesList.Add(new
+                    {
                         r.RouteID,
                         Detail = $"Leave {ls.getLocationNameById(r.PickUpLocationID)} at {r.ToStringPickUpTime()}, Arrive at {ls.getLocationNameById(r.DropOffLocationID)} at {r.ToStringDropOffTime()}"
                     });
@@ -192,7 +456,7 @@ namespace MidStateShuttleService.Controllers
             return Json(formattedRoutesList);
         }
 
-        // GET: RegisterController/Edit/5
+        //THIS IS UNUSED
         public ActionResult Edit(int id)
         {
             LocationServices ls = new LocationServices(_context);
@@ -222,7 +486,7 @@ namespace MidStateShuttleService.Controllers
             ViewBag.Terms = GetSchoolTermSelectList();
 
             // Return the location names for each route
-            foreach(Routes route in ViewBag.RouteList)
+            foreach (Routes route in ViewBag.RouteList)
             {
                 route.PickUpLocation = ls.GetEntityById(route.PickUpLocationID);
                 route.DropOffLocation = ls.GetEntityById(route.DropOffLocationID);
@@ -231,9 +495,7 @@ namespace MidStateShuttleService.Controllers
             return View(student);
         }
 
-
-        // POST: RegisterController/Edit/5
-        // POST: RegisterController/Edit/5
+        //THIS IS UNUSED
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, RegisterModel student)
@@ -248,7 +510,7 @@ namespace MidStateShuttleService.Controllers
             {
                 student.ReturnSelectedRouteDetail = null;
             }
-            
+
             if (!ModelState.IsValid)
             {
                 ViewBag.Terms = GetSchoolTermSelectList();
@@ -277,55 +539,21 @@ namespace MidStateShuttleService.Controllers
             }
         }
 
-        // GET: RegisterController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            try
-            {
-                var student = _context.RegisterModels.Find(id);
-
-                if (student != null)
-                {
-                    student.IsActive = !student.IsActive; // Toggle IsActive from true to false or false to true
-                    _context.SaveChanges();
-                }
-                else
-                {
-                    // Handle the case where the student with the specified id is not found
-                    ModelState.AddModelError("", "Student not found.");
-                    return View();
-                }
-
-                return RedirectToAction("Index", "Dashboard"); // Redirect after toggling IsActive
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                //LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
-                _logger.LogError(ex, "An error occurred while toggling IsActive of the student.");
-
-                // Optionally add a model error for displaying an error message to the user
-                ModelState.AddModelError("", "An unexpected error occurred while toggling IsActive of the student, please try again.");
-
-                // Return the view with an error message
-                return View();
-            }
-
-        }
-
-        // POST: RegisterController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public IActionResult ArchiveRegistration(int id)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            var registration = _context.RegisterModels.FirstOrDefault(r => r.RegistrationId == id);
+            if (registration == null)
+                return NotFound();
+
+            if (!User.IsInRole("Admin"))
+                return Forbid();
+
+            registration.IsArchived = true;
+            _context.SaveChanges();
+
+            return RedirectToAction("ViewRegistrations");
         }
 
         /// <summary>
@@ -353,7 +581,7 @@ namespace MidStateShuttleService.Controllers
                         if (model.SpecialRequest.Value == true)
                         {
                             return SpecialRequestRoute(model);
-                        }                        
+                        }
                         else
                         {
                             ModelState.AddModelError("", "Could not create special request. Check your request and try again.");
@@ -373,7 +601,7 @@ namespace MidStateShuttleService.Controllers
                 //LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
                 _logger.LogError(ex, "An error occurred while generating request email body.");
                 return "An error occurred while generating request email body.";
-            }            
+            }
         }
 
         /// <summary>
@@ -505,56 +733,146 @@ namespace MidStateShuttleService.Controllers
         /// <summary>
         /// Builds the email confirmation body for a registration request.
         /// </summary>
-        /// <param name="studentId">Id of the student.</param>
-        /// <param name="firstName">First name of the student.</param>
-        /// <param name="lastName">Last name of the student.</param>
-        /// <param name="email">Email of the student.</param>
-        /// <param name="phoneNumber">Phone number of the student.</param>
-        /// <param name="initialRoute">Initial route the student is taking.</param>
-        /// <param name="tripType">Trip type, one way or round trip</param>
-        /// <param name="selectedDaysOfWeek">Days of the week riding.</param>
-        /// <param name="firstDayExpectingToRide">First day the route plans to be used.</param>
-        /// <returns></returns>
-        private string BuildEmailConfirmationBody(string term, string studentId, string firstName, string lastName, bool isAdult, string email, 
-            string phoneNumber, string initialRoute, string tripType, List<string> selectedDaysOfWeek, DateOnly? firstDayExpectingToRide = null)
+        private string BuildEmailForRegisterSubmit(int id)
         {
-            string isAdultText = isAdult ? "Yes" : "No";
-            return $@"
-                    <html>
-                    <head>
-                        <style>
-                            body {{ font-family: Arial, sans-serif; }}
-                            .email-container {{ max-width: 600px; margin: auto; padding: 20px; }}
-                            .header {{ text-align: center; }}
-                            .content {{ margin-top: 20px; }}
-                            .footer {{ margin-top: 30px; text-align: center; font-size: 12px; color: gray; }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class='email-container'>
-                            <div class='header'>
-                                <h2>MSTC Shuttle Service Request Confirmation</h2>
-                            </div>
-                            <div class='content'>
-                                <p><strong>School Term:</strong> {term}</p>
-                                <p><strong>Student ID:</strong> {studentId}</p>
-                                <p><strong>First Name:</strong> {firstName}</p>
-                                <p><strong>Last Name:</strong> {lastName}</p>
-                                <p><strong>I am 18 years of age or older:</strong> {isAdultText}</p>
-                                <p><strong>Email:</strong> {email}</p>
-                                <p><strong>Phone Number:</strong> {phoneNumber}</p>
-                                <p><strong>Initial Route:</strong> {initialRoute}</p>
-                                <p><strong>Trip Type:</strong> {tripType}</p>
-                                <p><strong>Days of the Week Needed:</strong> {string.Join(", ", selectedDaysOfWeek)}</p>
-                                <p><strong>First Day Expecting to Ride:</strong> {firstDayExpectingToRide?.ToString("MM-dd-yyyy")}</p>
-                            </div>
-                            <div class='footer'>
-                                <p>Thank you for submitting your shuttle request. Your ride is <strong>NOT</strong> confirmed yet. The Mid-State shuttle team will review your request, and a response will be shared via email. Thank you!</p>
-                                <p>If you have any questions, please call or text: <strong>715-581-9284</strong></p>
-                            </div>
-                        </div>
-                    </body>
-                    </html>";
+            var registration = _context.RegisterModels
+            .Include(r => r.DaySchedules)
+                .ThenInclude(d => d.Rides)
+                    .ThenInclude(r => r.PickUpLocation)
+            .Include(r => r.DaySchedules)
+                .ThenInclude(d => d.Rides)
+                    .ThenInclude(r => r.DropOffLocation)
+            .FirstOrDefault(r => r.RegistrationId == id);
+
+            if (registration == null)
+                return "<p>Registration not found.</p>";
+
+            string isAdultText = registration.IsAdult
+                ? "The Rider is an Adult"
+                : "The Rider is NOT an Adult";
+
+            string html = $@"
+        <html>
+        <body style='font-family: Arial, sans-serif;'>
+            <h2>MSTC Shuttle Service Request Confirmation</h2>
+            <p><strong>Email:</strong> {registration.Email}</p>
+            <p><strong>Phone:</strong> {registration.Phone}</p>
+            <p><strong>Status:</strong> {isAdultText}</p>
+            <hr/>
+            ";
+
+            if (registration.DaySchedules != null)
+            {
+                foreach (var day in registration.DaySchedules)
+                {
+                    html += $"<h3>Day: {day.WeekDay}</h3>";
+
+                    if (day.Rides != null && day.Rides.Any())
+                    {
+                        html += @"
+                    <table border='1' cellpadding='6' cellspacing='0' style='border-collapse: collapse; margin-bottom:15px;'>
+                        <tr style='background-color:#f2f2f2;'>
+                            <th>Pick-Up</th>
+                            <th>Drop-Off</th>
+                            <th>Time</th>
+                        </tr>
+                        ";
+
+                        foreach (var ride in day.Rides)
+                        {
+                            html += $@"
+                        <tr>
+                            <td>{ride.PickUpLocation?.Name ?? "Unknown"}</td>
+                            <td>{ride.DropOffLocation?.Name ?? "Unknown"}</td>
+                            <td>{ride.DropOffTime}</td>
+                        </tr>
+                    ";
+                        }
+
+                        html += "</table>";
+                    }
+                    else
+                    {
+                        html += "<p>No rides scheduled for this day.</p>";
+                    }
+                }
+            }
+
+            html += @"
+            <hr/>
+            <p>This request will be reviewed by the shuttle program and is not guaranteed.</p>
+        </body>
+        </html>
+            ";
+
+            return html;
+        }
+
+        /// <summary>
+        /// Builds the email confirmation body for a SPECIAL registration request.
+        /// </summary>
+        private string BuildEmailForSpecialRegisterSubmit(int id)
+        {
+            var registration = _context.RegisterModels
+                .FirstOrDefault(r => r.RegistrationId == id);
+
+            if (registration == null)
+                return "<p>Registration not found.</p>";
+
+            string isAdultText = registration.IsAdult
+                ? "The Rider is an Adult"
+                : "The Rider is NOT an Adult";
+
+            string dateText = registration.customDate.HasValue
+                ? registration.customDate.Value.ToString("MMMM dd, yyyy")
+                : "Not Provided";
+
+            string time1Text = registration.customTime1.HasValue
+                ? registration.customTime1.Value.ToString("hh:mm tt")
+                : "Not Provided";
+
+            string time2Text = registration.customTime2.HasValue
+                ? registration.customTime2.Value.ToString("hh:mm tt")
+                : null;
+
+            string html = $@"
+                <html>
+                <body style='font-family: Arial, sans-serif;'>
+                    <h2>MSTC Shuttle Service SPECIAL Request Confirmation</h2>
+
+                    <p><strong>Email:</strong> {registration.Email}</p>
+                    <p><strong>Phone:</strong> {registration.Phone}</p>
+                    <p><strong>Status:</strong> {isAdultText}</p>
+
+                    <hr/>
+
+                    <h3>Special Ride Details</h3>
+
+                    <p><strong>Date:</strong> {dateText}</p>
+                    <p><strong>Time:</strong> {time1Text}</p>
+                ";
+
+            if (!string.IsNullOrEmpty(time2Text))
+            {
+                html += $"<p><strong>Return Time:</strong> {time2Text}</p>";
+            }
+
+            if (!string.IsNullOrWhiteSpace(registration.customMessage))
+            {
+                html += $@"
+                    <hr/>
+                    <h3>Additional Details</h3>
+                    <p>{registration.customMessage}</p>
+                    ";
+                        }
+
+                        html += @"
+                    <hr/>
+                </body>
+                </html>
+                ";
+
+            return html;
         }
     }
 }

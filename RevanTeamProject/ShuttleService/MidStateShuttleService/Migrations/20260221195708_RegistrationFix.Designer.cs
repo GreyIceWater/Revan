@@ -4,6 +4,7 @@ using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MidStateShuttleService.Models;
 
@@ -12,9 +13,11 @@ using MidStateShuttleService.Models;
 namespace MidStateShuttleService.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260221195708_RegistrationFix")]
+    partial class RegistrationFix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -348,11 +351,6 @@ namespace MidStateShuttleService.Migrations
                     b.Property<DateTime?>("EditDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<DateOnly?>("FirstDayExpectingToRide")
                         .HasColumnType("date");
 
@@ -386,22 +384,12 @@ namespace MidStateShuttleService.Migrations
                     b.Property<bool>("IsAdult")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsArchived")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("LengthOfRequest")
-                        .HasColumnType("int");
-
                     b.Property<TimeOnly?>("MustArriveTime")
                         .HasColumnType("time");
 
                     b.Property<string>("NeedTransportation")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PickUpLocationID")
                         .HasColumnType("int");
@@ -612,10 +600,6 @@ namespace MidStateShuttleService.Migrations
 
                     b.HasKey("RideId");
 
-                    b.HasIndex("DropOffLocationID");
-
-                    b.HasIndex("PickUpLocationID");
-
                     b.HasIndex("RequestDayId");
 
                     b.ToTable("Ride");
@@ -741,27 +725,11 @@ namespace MidStateShuttleService.Migrations
 
             modelBuilder.Entity("Ride", b =>
                 {
-                    b.HasOne("MidStateShuttleService.Models.Location", "DropOffLocation")
-                        .WithMany()
-                        .HasForeignKey("DropOffLocationID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MidStateShuttleService.Models.Location", "PickUpLocation")
-                        .WithMany()
-                        .HasForeignKey("PickUpLocationID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("RequestDay", "RequestDay")
                         .WithMany("Rides")
                         .HasForeignKey("RequestDayId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("DropOffLocation");
-
-                    b.Navigation("PickUpLocation");
 
                     b.Navigation("RequestDay");
                 });

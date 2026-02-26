@@ -17,13 +17,6 @@
     <div class="form-container">
         <div class="form-paper">
 
-            <!-- Intro Note -->
-            <section class="form-section intro-section">
-                <p>
-                    This form is for requesting shuttle service. Fill it out for each day you need a ride, so we can plan the best routes for students.
-                </p>
-            </section>
-
             <!-- Special Request -->
             <section class="form-section special-request">
                 <h5>Need to Schedule a Special Ride?</h5>
@@ -57,15 +50,60 @@
                             new { @class = "dropdown-midstate", required = "required" })
                     </div>
 
+                    <!-- LENGTH OF REQUEST -->
+                    <div class="form-group">
+                        <label asp-for="LengthOfRequest" class="control-label"></label>
+                        <select asp-for="LengthOfRequest"
+                                class="form-control  dropdown-midstate"
+                                asp-items="Html.GetEnumSelectList<LengthOfRequest>()">
+                            <option value="">-- Select Length --</option>
+                        </select>
+                        <span asp-validation-for="LengthOfRequest" class="text-danger"></span>
+                    </div>
+
                     <!-- ADD DAY BUTTON -->
                     <div class="form-group">
+                        
                         <button type="button" class="btn-midstate btn-primary" id="addDayBtn">
                             Add Day +
                         </button>
+                        <span class="help-icon" data-help="Add a Day of the week to make rides for.">?</span>
                     </div>
 
                     <!-- DAY CARDS CONTAINER -->
                     <div id="dayCardsContainer"></div>
+
+                    <!-- EMAIL -->
+                    <div class="form-group">
+                        <label asp-for="Email" class="control-label"></label>
+                        <input asp-for="Email"
+                               class="form-control midstate-textinput"
+                               type="email"
+                               placeholder="Enter your email"
+                               required />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <!-- PHONE -->
+                    <div class="form-group">
+                        <label asp-for="Phone" class="control-label"></label>
+                        <input asp-for="Phone"
+                               class="form-control midstate-textinput"
+                               type="tel"
+                               placeholder="Enter your phone number"
+                               required />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+
+                    <!-- Age -->
+                    <div class="form-group terms-group">
+                        <div class="checkbox-midstate">
+                            <input asp-for="IsAdult" type="checkbox" id="IsAdult" name="IsAdult" value="true" />
+                            <label for="IsAdult">
+                                Are you older than the age of 18?
+                            </label>
+                        </div>
+                    </div>
 
                     <!-- TERMS -->
                     <div class="form-group terms-group">
@@ -131,7 +169,8 @@
 
             <div class="col-3">
                 <select class="dropdown-midstate"
-                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].PickUpLocationID">
+                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].PickUpLocationID"
+                        required>
                     <option value="">Pick-Up</option>
                     @foreach (var loc in Model.LocationNames)
                     {
@@ -142,7 +181,8 @@
 
             <div class="col-3">
                 <select class="dropdown-midstate"
-                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffLocationID">
+                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffLocationID"
+                        required>
                     <option value="">Drop-Off</option>
                     @foreach (var loc in Model.LocationNames)
                     {
@@ -153,8 +193,17 @@
 
             <div class="col-3">
                 <select class="dropdown-midstate"
-                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffTime" required>
+                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffTime"
+                        required>
                     <option value="">Time</option>
+                    @if(Model.TimeOptions != null)
+                    {
+                       @foreach (var time in Model.TimeOptions)
+                        {
+                            <option value="@time.Value">@time.Text</option>
+                        } 
+                    }
+                    
                 </select>
             </div>
 

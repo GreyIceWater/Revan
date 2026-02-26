@@ -1,0 +1,129 @@
+﻿@using MidStateShuttleService.Enums
+@model MidStateShuttleService.Models.RegisterModel
+@using Microsoft.AspNetCore.Identity
+@{
+    ViewBag.Title = "Special Request Details";
+}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/Form.css" />
+<link rel="stylesheet" href="/css/Input.css" />
+
+<div class="form-container">
+    <div class="form-paper">
+
+        <h2 class="title">Special Request Details</h2>
+
+        @using (Html.BeginForm("SpecialEditSave", "Register", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            @Html.HiddenFor(m => m.RegistrationId)
+
+            <!-- TERM -->
+            <div class="form-group">
+                @Html.LabelFor(m => m.Term)
+                @Html.DropDownListFor(m => m.Term,
+                    (IEnumerable<SelectListItem>)ViewBag.Terms,
+                    new { @class = "dropdown-midstate" })
+            </div>
+
+            <!-- DATE -->
+            <div class="form-group">
+                @Html.LabelFor(m => m.customDate, "Pickup Date")
+                @Html.TextBoxFor(m => m.customDate,
+                    "{0:yyyy-MM-dd}",
+                    new { @class = "midstate-date", type = "date" })
+            </div>
+
+            <!-- TIMES -->
+            <div class="row row-space">
+                <div class="col-6">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.customTime1, "First Ride Time")
+                        @Html.TextBoxFor(m => m.customTime1,
+                            "{0:HH\\:mm}",
+                            new { @class = "midstate-textinput", type = "time" })
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.customTime2, "Return Ride Time")
+                        @Html.TextBoxFor(m => m.customTime2,
+                            "{0:HH\\:mm}",
+                            new { @class = "midstate-textinput", type = "time" })
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTES -->
+            <div class="form-group">
+                @Html.LabelFor(m => m.customMessage, "Additional Notes")
+                @Html.TextAreaFor(m => m.customMessage,
+                    5, 50,
+                    new { @class = "midstate-textinput" })
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email"
+                        class="form-control midstate-textinput"
+                        type="email"
+                        placeholder="Rider Email"
+                        required />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <!-- PHONE -->
+            <div class="form-group">
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone"
+                        class="form-control midstate-textinput"
+                        type="tel"
+                        placeholder="Rider Phone"
+                        required />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+
+            <!-- AGE -->
+            <div class="form-group mt-3">
+                <input asp-for="IsAdult" type="checkbox" />
+                <label asp-for="IsAdult"></label>
+            </div>
+
+            <!-- TERMS AGREEMENT -->
+            <div class="form-group">
+                <input asp-for="AgreeTerms" type="checkbox" />
+                <label asp-for="AgreeTerms">
+                    User agreed to special request terms
+                </label>
+            </div>
+
+            <!-- SAVE BUTTON -->
+            <div class="form-group submit-group">
+                <button class="btn-midstate btn-primary" type="submit"
+                        @(User.IsInRole("Driver") || User.IsInRole("Rider") ? "disabled" : "")>
+                    Save Changes
+                </button>
+                <a asp-controller="Dashboard" 
+                   asp-action="Index"
+                   class="btn-midstate btn-secondary">
+                    Back
+                </a>
+            </div>
+
+            
+        }
+
+        <!-- ARCHIVE BUTTON -->
+            <form asp-action="ArchiveRegistration" method="post">
+                <input type="hidden" name="id" value="@Model.RegistrationId" />
+                <button type="submit" class="btn-midstate btn-warning"
+                        @(User.IsInRole("Driver") || User.IsInRole("Rider") ? "disabled" : "")>
+                    Archive
+                </button>
+            </form>
+    </div>
+</div>
