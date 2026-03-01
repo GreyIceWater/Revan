@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 <link rel="stylesheet" href="~/css/Form.css" />
 <link rel="stylesheet" href="~/css/Input.css" />
+<link rel="stylesheet" href="~/css/RegistrationManagement.css" /> 
 
 <div class="form-container">
     <div class="form-paper">
@@ -15,6 +16,40 @@
             <h2>All Shuttle Registrations</h2>
             <p>Below is a list of all submitted ride requests.</p>
         </section>
+
+        <!-- Search / Filter / Sort -->
+        <div class="form-paper mb-3 p-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="mb-1"><strong>Search</strong></label>
+                    <input id="regSearch"
+                           type="text"
+                           class="form-control"
+                           placeholder="Search by name, student ID, or term..." />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="mb-1"><strong>Filter</strong></label>
+                    <select id="regFilter" class="form-control">
+                        <option value="all">All Requests</option>
+                        <option value="custom">Special Requests Only</option>
+                        <option value="standard">Standard Requests Only</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="mb-1"><strong>Sort</strong></label>
+                    <select id="regSort" class="form-control">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="ridesDesc">Most Rides</option>
+                        <option value="ridesAsc">Least Rides</option>
+                    </select>
+                </div>
+            </div>
+
+            <small class="text-muted d-block mt-2" id="regCount"></small>
+        </div>
 
         @if (Model == null || !Model.RegistrationViewModel.Any())
         {
@@ -29,11 +64,17 @@
                 var dayCount = registration.RequestDays?.Count ?? 0;
 
                 var rideCount = registration.RequestDays?
-                    .Where(d => d.Rides != null)
-                    .SelectMany(d => d.Rides)
-                    .Count() ?? 0;
+                .Where(d => d.Rides != null)
+                .SelectMany(d => d.Rides)
+                .Count() ?? 0;
 
-                <div class="form-paper mb-4 p-4 position-relative @(registration.IsCustom == true ? "custom-card" : "")">
+                <div class="form-paper mb-4 p-4 position-relative reg-card @(registration.IsCustom == true ? "custom-card" : "")"
+                     data-name="@registration.UserName"
+                     data-studentid="@registration.StudentId"
+                     data-term="@registration.Term"
+                     data-iscustom="@(registration.IsCustom == true ? "true" : "false")"
+                     data-created="@registration.dateCreated.ToString("yyyyMMddHHmmss")"
+                     data-rides="@rideCount">
 
                     @if (registration.IsCustom == true)
                     {
@@ -41,7 +82,6 @@
                     }
 
                     <div class="d-flex justify-content-between align-items-center">
-
                         <div>
                             <h4 class="mb-1">@registration.UserName</h4>
 
@@ -59,10 +99,12 @@
                                 }
                                 else
                                 {
-                                    <strong>Days:</strong> @dayCount
+                                    <strong>Days:</strong> 
+                                    @dayCount
                                     <span> | </span>
 
-                                    <strong>Total Rides:</strong> @rideCount
+                                    <strong>Total Rides:</strong> 
+                                    @rideCount
                                     <span> | </span>
                                 }
 
@@ -72,13 +114,12 @@
 
                         <div>
                             <a asp-controller="Register"
-                                asp-action="@(registration.IsCustom == true ? "SpecialDetails" : "Details")"
-                                asp-route-registrationId="@registration.RegistrationId"
-                                class="btn-midstate btn btn-secondary">
+                               asp-action="@(registration.IsCustom == true ? "SpecialDetails" : "Details")"
+                               asp-route-registrationId="@registration.RegistrationId"
+                               class="btn-midstate btn btn-secondary">
                                 View Details
                             </a>
                         </div>
-
                     </div>
 
                 </div>
@@ -88,20 +129,6 @@
     </div>
 </div>
 
-<style>
-    .custom-card {
-    background-color: #deb3bb;
-    border: 1px solid #42161f;
-}
-
-.custom-star {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 22px;
-    color: black;
-}
-</style>
-
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/RegistrationManagement.js"></script> <!-- ✅ NEW -->
