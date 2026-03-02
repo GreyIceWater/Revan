@@ -39,8 +39,8 @@ namespace MidStateShuttleService.Service
                 {
                     RegistrationId = r.RegistrationId,
 
-                    UserName = r.User != null ? r.User.FirstName : "Unknown",
-                    StudentId = r.User != null ? r.User.StudentId : "N/A",
+                    UserName = r.Name != null ? r.Name : "Unknown",
+                    StudentId = r.StudentId != null ? r.StudentId : "No ID",
 
                     Term = r.Term ?? SchoolTerm.Fall,
 
@@ -65,6 +65,36 @@ namespace MidStateShuttleService.Service
                 });
 
             return registrations;
+        }
+
+        public int GetRegistrationCount(string range)
+        {
+            var today = DateTime.Today;
+            DateTime start;
+            DateTime end;
+
+            switch (range?.ToLower())
+            {
+                case "day":
+                    start = today;
+                    end = today.AddDays(1);
+                    break;
+
+                case "week":
+                    int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                    start = today.AddDays(-diff);
+                    end = start.AddDays(7);
+                    break;
+
+                default:
+                    return 0;
+            }
+
+            return _context.RegisterModels
+                .Where(r => r.InsertDateTime.HasValue &&
+                            r.InsertDateTime.Value >= start &&
+                            r.InsertDateTime.Value < end)
+                .Count();
         }
     }
 }

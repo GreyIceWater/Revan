@@ -67,12 +67,13 @@ namespace MidStateShuttleService.Controllers
 
             // Retrieve the registration success flag and count from the session
             var registrationSuccess = HttpContext.Session.GetString("RegistrationSuccess") == "true";
-            int registrationCountFromSession = HttpContext.Session.GetInt32("RegistrationCount") ?? 0;
+            int newRegistrations = HttpContext.Session.GetInt32("RegistrationCount") ?? 0;
 
             // You can now use registrationSuccess and registrationCountFromSession as needed
             // For instance, passing them to the view via ViewData or ViewBag, if your view logic depends on these values
             ViewData["RegistrationSuccess"] = registrationSuccess;
-            ViewData["RegistrationCount"] = registrationCountFromSession;
+            ViewData["RegistrationCount"] = newRegistrations;
+            ViewData["PastWeekRegistrations"] = reg.GetRegistrationCount("week");
 
             // Retrieve the check-in count from the session
             int checkInCountFromSession = HttpContext.Session.GetInt32("CheckInCount") ?? 0;

@@ -103,12 +103,13 @@ namespace MidStateShuttleService.Models
         public int? FridayDropOffLocationID { get; set; }
 
         public bool IsActive { get; set; }
-        
+
         /// <summary>
         /// The student ID of the student associated with the registration.
         /// </summary>
-        [StringLength(25)]
-        //[RegularExpression(@"^\d{8}$", ErrorMessage = "The StudentID must be exactly 8 digits.")]
+        //Mid-State Student ID
+        [RegularExpression(@"^$|^\d{8}$",
+        ErrorMessage = "Student ID must be exactly 8 digits if provided.")]
         public string? StudentId {get; set; }
 
         /// <summary>
@@ -172,7 +173,7 @@ namespace MidStateShuttleService.Models
         /// <summary>
         /// The user who created the request's id
         /// </summary>
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
 
         public List<RequestDay> DaySchedules { get; set; } = new();
 
@@ -198,6 +199,9 @@ namespace MidStateShuttleService.Models
         ErrorMessage = "Phone number must be exactly 10 digits if provided. (Only Numbers, No Spaces or Dashes)")]
         [Required(ErrorMessage = "Phone is required.")]
         public string Phone { get; set; }
+
+        [Required]
+        public string Name { get; set; }
     }
 
 }

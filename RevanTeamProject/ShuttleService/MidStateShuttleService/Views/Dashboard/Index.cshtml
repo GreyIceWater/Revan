@@ -4,9 +4,6 @@
     <link rel="stylesheet" href="~/css/Dashboard.css" />
 }
 @{
-    // Calculate total check-ins for the last 7 days
-    var totalCheckInsLast7Days = Model.CheckIn.Where(c => c.Date >= DateTime.Today.AddDays(-7)).Count();
-
     // Calculate total check-ins for the last 30 days
     var totalCheckInsLast30Days = Model.CheckIn.Where(c => c.Date >= DateTime.Today.AddDays(-30)).Count();
 
@@ -148,7 +145,7 @@
     <div class="cardBox">
         <div class="card">
             <div>
-                <div class="numbers">@totalCheckInsLast7Days</div>
+                <div class="numbers">@ViewData["PastWeekRegistrations"].ToString()</div>
                 <div class="cardName">Weekly Requests</div>
             </div>
             <div class="icon">
@@ -209,7 +206,7 @@
             @await Html.PartialAsync("~/Views/Shared/DashboardPartials/FeedbackTable.cshtml")
         </div>
         <div class="recentFeedback request">
-            @await Html.PartialAsync("~/Views/Register/_ViewRegistrations.cshtml")
+            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_ViewRegistrations.cshtml")
         </div>
         
     </div>

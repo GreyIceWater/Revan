@@ -89,6 +89,25 @@
                                  new { @class = "midstate-textinput", placeholder = "Enter additional details..." })
             </div>
 
+            <!-- FULL NAME -->
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name"
+                       class="form-control midstate-textinput"
+                       placeholder="Enter your FULL NAME"
+                       required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <!-- STUDENT ID -->
+            <div class="form-group">
+                <label class="control-label">Student ID (Mid-State Students Only)</label>
+                <input asp-for="StudentId"
+                       class="form-control midstate-textinput"
+                       placeholder="Enter your 8-Digit Student ID" />
+                <span asp-validation-for="StudentId" class="text-danger"></span>
+            </div>
+
             <!-- EMAIL -->
             <div class="form-group">
                 <label asp-for="Email" class="control-label"></label>
@@ -134,7 +153,7 @@
             <!-- SUBMIT -->
             <div class="form-group submit-group">
                 <button class="btn-midstate btn-primary" type="submit">Submit</button>
-                <button class="btn-midstate btn-secondary" type="button" onclick="location.href='/Request/Request'">Cancel</button>
+                <button class="btn-midstate btn-secondary" type="button" onclick="location.href='/Home/Index'">Cancel</button>
             </div>
         }
     </div>

@@ -43,21 +43,6 @@ function addCheckInNotification(count) {
     notificationDropdown.prepend(newNotificationHtml);
 }
 
-//function addMessageNotification(count, message = 'You have a new message!') {
-//    console.log('Adding message notification with count:', count);
-//    let notificationDropdown = $('#notificationMessageDropdown');
-//    let newNotificationHtml = `
-//        <div class="notification-item message-notification">
-//            <i class="bi bi-exclamation-circle text-warning"></i>
-//            <div>
-//                <h4>New Message (${count})</h4>
-//                <p>${message}</p>
-//            </div>
-//        </div>`;
-//    notificationDropdown.prepend(newNotificationHtml);
-//    // Make sure the dropdown is visible if it was hidden
-//    notificationDropdown.show();
-//}
 function addMessageNotification(count, message = 'You have a new message!') {
     console.log('Adding message notification with count:', count);
     let notificationDropdown = $('#notificationMessageDropdown');
@@ -122,16 +107,6 @@ $(document).ready(function () {
     }
 });
 
-// Event delegation for dynamic content
-//$(document).on('click', '.feedback-notification', function () {
-//    var feedbackUrl = $(this).data('url'); // Assuming data-url attribute is set with the feedback URL
-//    console.log('Feedback notification clicked', feedbackUrl);
-//    if (feedbackUrl) {
-//        window.location.href = feedbackUrl;
-//    }
-//});
-
-
 // Event delegation for dynamic content Working
 $(document).on('click', '.feedback-notification', function () {
     var feedbackUrl = $(this).data('url'); // Assuming data-url attribute is set with the feedback URL
@@ -162,23 +137,6 @@ $(document).on('click', '.message-notification', function () {
     location.reload(true);
 
 });
-
-// Event delegation for dynamic content working by using AJAX
-//$(document).on('click', '.feedback-notification', function () {
-//    // Assuming data-url attribute is set with the feedback URL
-//    var feedbackUrl = $(this).data('url');
-//    console.log('Feedback notification clicked', feedbackUrl);
-
-//    // Trigger server-side update for feedback count
-//    $.ajax({
-//        url: '/Dashboard/FeedbackClicked', // Assuming you have a route set for this
-//        success: function () {
-//            window.location.href = feedbackUrl; // Redirect to the dashboard or specific URL
-//            location.reload(true); // Force reload to ensure all data is up to date
-//        }
-//    });
-//});
-
 
 
 // Define the function to set up the event handlers

@@ -2,6 +2,7 @@ using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.EntityFrameworkCore;
 using MidStateShuttleService.Migrations;
 using MidStateShuttleService.Models;
@@ -82,28 +83,41 @@ namespace MidStateShuttleService.Controllers
 
             string email = "";
             string phone = "";
+            string fullName = "";
+            string studentId = "";
 
             try
             {
                 var oidClaim = User.FindFirst("oid")
                 ?? User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier");
 
-                string userId = oidClaim?.Value;
+                string userId = "";
+                if (oidClaim != null)
+                {
+                    userId = oidClaim?.Value;
+                }
 
                 var dbUser = _context.Users
                 .FirstOrDefault(u => u.AzureAdObjectId == userId);
 
-                phone = dbUser.PhoneNumber;
+                if (dbUser != null)
+                {
+                    phone = dbUser.PhoneNumber;
+                    fullName = dbUser.FirstName + " " + dbUser.LastName;
+                    studentId = dbUser.StudentId;
+                }
 
                 email = User.FindFirst("email")?.Value
                             ?? User.FindFirst("preferred_username")?.Value
                             ?? User.Identity?.Name
-                            ?? "N/A";
+                            ?? "";
             }
             catch (Exception ex)
             {
                 email = "";
                 phone = "";
+                fullName = "";
+                studentId = "";
             }
 
             var model = new RegisterModel();
@@ -111,6 +125,8 @@ namespace MidStateShuttleService.Controllers
 
             model.Phone = phone;
             model.Email = email;
+            model.Name = fullName;
+            model.StudentId = studentId;
 
             //set trip type up for now, its a legacy feature
             model.TripType = "N/A";
@@ -167,10 +183,7 @@ namespace MidStateShuttleService.Controllers
                     int registrationCount = HttpContext.Session.GetInt32("RegistrationCount") ?? 0;
                     registrationCount++;
 
-                    HttpContext.Session.SetString("RegistrationSuccess", "true"); // Using session to set registration success.
                     HttpContext.Session.SetInt32("RegistrationCount", registrationCount);
-
-                    TempData["RegistrationSuccess"] = true;
 
                     string emailBody = ""; 
                     
@@ -190,12 +203,12 @@ namespace MidStateShuttleService.Controllers
                         isHtml: true
                     );
 
-
+                    TempData["Success"] = "Registration created successfully.";
                     return RedirectToAction("Index");
                 }
                 else
                 {
-                    ModelState.AddModelError("", "There was an error saving the request, please try again.");
+                    TempData["Error"] = "Something went wrong.";
                 }
             }
 
@@ -289,6 +302,8 @@ namespace MidStateShuttleService.Controllers
             existing.IsAdult = model.IsAdult;
             existing.Email = model.Email;
             existing.Phone = model.Phone;
+            existing.StudentId = model.StudentId;
+            existing.Name = model.Name;
 
             // Update DaySchedules and Rides
             for (int i = 0; i < existing.DaySchedules.Count; i++)
@@ -380,28 +395,41 @@ namespace MidStateShuttleService.Controllers
 
             string email = "";
             string phone = "";
+            string fullName = "";
+            string studentId = "";
 
             try
             {
                 var oidClaim = User.FindFirst("oid")
                 ?? User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier");
 
-                string userId = oidClaim?.Value;
+                string userId = "";
+                if (oidClaim != null)
+                {
+                    userId = oidClaim?.Value;
+                }
 
                 var dbUser = _context.Users
                 .FirstOrDefault(u => u.AzureAdObjectId == userId);
 
-                phone = dbUser.PhoneNumber;
+                if (dbUser != null)
+                {
+                    phone = dbUser.PhoneNumber;
+                    fullName = dbUser.FirstName + " " + dbUser.LastName;
+                    studentId = dbUser.StudentId;
+                }
 
                 email = User.FindFirst("email")?.Value
                             ?? User.FindFirst("preferred_username")?.Value
                             ?? User.Identity?.Name
-                            ?? "N/A";
+                            ?? "";
             }
             catch (Exception ex)
             {
                 email = "";
                 phone = "";
+                fullName = "";
+                studentId = "";
             }
 
             var model = new RegisterModel();
@@ -409,6 +437,8 @@ namespace MidStateShuttleService.Controllers
             model.LocationNames = ls.GetLocationNames();
             model.Email = email;
             model.Phone = phone;
+            model.Name = fullName;
+            model.StudentId = studentId;
             ViewBag.Terms = GetSchoolTermSelectList(true);
             return View("SpecialRequest", model);
         }
@@ -553,7 +583,7 @@ namespace MidStateShuttleService.Controllers
             registration.IsArchived = true;
             _context.SaveChanges();
 
-            return RedirectToAction("ViewRegistrations");
+            return RedirectToAction("Index", "Dashboard");
         }
 
         /// <summary>

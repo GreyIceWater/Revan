@@ -17,22 +17,15 @@
     <div class="form-container">
         <div class="form-paper">
 
-            <!-- Special Request -->
-            <section class="form-section special-request">
-                <h5>Need to Schedule a Special Ride?</h5>
-                <p>Please submit a <strong>Special Request</strong> if:</p>
-                <ul>
-                    <li>Your ride is during the <strong>summer term</strong></li>
-                    <li>Your ride is on a <strong>Friday</strong></li>
-                    <li>You only need to ride once</li>
-                </ul>
-                <a class="btn-midstate btn-primary"
-                   asp-area=""
-                   asp-controller="Register"
-                   asp-action="SpecialRequest">
-                    Submit a Special Request
-                </a>
-            </section>
+            @if (User.Identity?.IsAuthenticated == false)
+            {
+                <!-- Sign In Note if the user is not signed in -->
+                <section class="form-section special-request">
+                    <h6>Are you a student?</h6>
+                    <p>You’re welcome to submit without signing in. However, signing in helps us report accurate student usage numbers — which directly supports keeping the shuttle service available.</p>
+                </section>
+            }
+            
 
             <!-- Main Form -->
             <section class="form-section main-form">
@@ -72,6 +65,25 @@
 
                     <!-- DAY CARDS CONTAINER -->
                     <div id="dayCardsContainer"></div>
+
+                    <!-- FULL NAME -->
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name"
+                                class="form-control midstate-textinput"
+                                placeholder="Enter your FULL NAME"
+                                required />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <!-- STUDENT ID -->
+                    <div class="form-group">
+                        <label class="control-label">Student ID (Mid-State Students Only)</label>
+                        <input asp-for="StudentId"
+                               class="form-control midstate-textinput"
+                               placeholder="Enter your 8-Digit Student ID" />
+                        <span asp-validation-for="StudentId" class="text-danger"></span>
+                    </div>
 
                     <!-- EMAIL -->
                     <div class="form-group">
@@ -119,10 +131,28 @@
                     <!-- SUBMIT -->
                     <div class="form-group submit-group">
                         <button class="btn-midstate btn-primary" type="submit">Submit</button>
-                        <button class="btn-midstate btn-secondary" type="button" onclick="location.href='/Register/Register'">Cancel</button>
+                        <button class="btn-midstate btn-secondary" type="button" onclick="location.href='/Home/Index'">Cancel</button>
                     </div>
                 }
             </section>
+
+            <!-- Special Request -->
+            <section class="form-section special-request">
+                <h5>Need to Schedule a Special Ride?</h5>
+                <p>Please submit a <strong>Special Request</strong> if:</p>
+                <ul>
+                    <li>Your ride is during the <strong>summer term</strong></li>
+                    <li>Your ride is on a <strong>Friday</strong></li>
+                    <li>You only need to ride once</li>
+                </ul>
+                <a class="btn-midstate btn-primary"
+                   asp-area=""
+                   asp-controller="Register"
+                   asp-action="SpecialRequest">
+                    Submit a Special Request
+                </a>
+            </section>
+
         </div>
     </div>
 

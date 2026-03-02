@@ -106,6 +106,25 @@
 
             </div>
 
+            <!-- FULL NAME -->
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name"
+                       class="form-control midstate-textinput"
+                       placeholder="Enter Students Name"
+                       required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <!-- STUDENT ID -->
+            <div class="form-group">
+                <label class="control-label">Student ID (Mid-State Students Only)</label>
+                <input asp-for="StudentId"
+                       class="form-control midstate-textinput"
+                       placeholder="8-Digit Student ID" />
+                <span asp-validation-for="StudentId" class="text-danger"></span>
+            </div>
+
             <!-- EMAIL -->
             <div class="form-group">
                 <label asp-for="Email" class="control-label"></label>

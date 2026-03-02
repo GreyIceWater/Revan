@@ -1,0 +1,24 @@
+﻿@{
+    var success = TempData["Success"] as string;
+    var error = TempData["Error"] as string;
+}
+
+@if (!string.IsNullOrEmpty(success))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @success
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @error
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+}
