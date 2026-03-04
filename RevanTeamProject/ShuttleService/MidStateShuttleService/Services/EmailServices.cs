@@ -1,5 +1,12 @@
-﻿using System.Net;
+﻿using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using System.Net;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Claims;
+
+
 
 namespace MidStateShuttleService.Services
 {
@@ -31,13 +38,19 @@ namespace MidStateShuttleService.Services
             // Send the email asynchronously
             client.SendMailAsync(message);
         }
+
         public void SendEmailToAdmin(string subject, string body, bool isHtml)
         {
             try
             {
                 string adminEmail = _config["AdminSettings:AdminEmail"];
 
-                SendEmail(adminEmail, subject, body, isHtml);
+                if (adminEmail != null && adminEmail != "")
+                {
+                    SendEmail(adminEmail, subject, body, isHtml);
+                    return;
+                }
+
             }
             catch(Exception ex)
             {

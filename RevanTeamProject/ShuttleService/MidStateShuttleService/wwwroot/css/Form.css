@@ -71,3 +71,20 @@
     margin: 1em;
 }
 
+/* Tiled background using a 512x512 image */
+.tiled-background-1 {
+    background-image: url('/img/tiled_background_variant_1.png');
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    background-position: top left;
+    background-attachment: fixed;
+}
+
+/* Alternate tiled background */
+.tiled-background-2 {
+    background-image: url('/img/tiled_background_variant_2.png');
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    background-position: top left;
+    background-attachment: fixed;
+}

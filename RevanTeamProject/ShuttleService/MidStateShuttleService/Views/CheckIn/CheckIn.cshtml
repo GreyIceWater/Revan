@@ -6,94 +6,113 @@
 <!-- Include jQuery and Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="/css/Form.css" />
+<link rel="stylesheet" href="/css/Input.css" />
+<link rel="stylesheet" href="/css/HelpIcon.css" />
 
 
 <body>
-    <div class="wrapper wrapper--w680">
-        <form asp-controller="CheckIn" asp-action="CheckIn" method="post" class="form form-1">
-            <div class="form-body">
-                <h2 class="title">Shuttle Check-in</h2>
+    <div class="form-container tiled-background-1">
+        <div class="form-paper">
 
-                <div class="input-fields">
-                    <h6>Enter Your Student ID</h6>
-                    <input asp-for="StudentId" type="text" class="form-control input--style-1" id="studentid" placeholder="student id" />
-                    <div class="div-line"></div>
-                </div>
+            <section class="form-section">
+                <h2>Shuttle Check-In</h2>
 
-                <div class="input-fields">
-                    <h6>Enter Your Name</h6>
-                    <input asp-for="Name" type="text" class="form-control input--style-1" id="name" placeholder="name" required />
-                    <div class="div-line"></div>
-                    <div class="invalid-feedback">
-                        Please enter a valid name.
+                <form asp-controller="CheckIn"
+                      asp-action="CheckIn"
+                      method="post">
+
+                    <!-- Student ID -->
+                    <div class="form-group">
+                        <label asp-for="StudentId"></label>
+                        <input asp-for="StudentId"
+                               class="form-control midstate-textinput"
+                               placeholder="Enter your Student ID" />
                     </div>
-                </div>
 
-                <div class="row row-space">
-                    <div class="col-6">
-                        <div class="input-fields">
-                            <h6>Pick-up Location</h6>
+                    <!-- Name -->
+                    <div class="form-group">
+                        <label asp-for="Name"></label>
+                        <input asp-for="Name"
+                               class="form-control midstate-textinput"
+                               placeholder="Enter your name"
+                               required />
+                    </div>
+
+                    <!-- Locations Row -->
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label asp-for="LocationId">Pick-Up Location</label>
                             <select asp-for="LocationId"
                                     asp-items="ViewBag.Locations"
-                                    class="form-control input--style-1" required>
-                                <option selected="selected" value="" required>--Select--</option>
+                                    class="dropdown-midstate"
+                                    required>
+                                <option value="">-- Select --</option>
                             </select>
-                            <div class="div-line"></div>
-                            <div class="invalid-feedback">
-                                Please select a pick-up location
-                            </div>
                         </div>
-                    </div>
 
-                    <div class="col-6">
-                        <div class="input-fields">
-                            <h6>Drop-off Location</h6>
+                        <div class="form-group col-md-6">
+                            <label asp-for="DropOffLocationId">Drop-Off Location</label>
                             <select asp-for="DropOffLocationId"
                                     asp-items="ViewBag.Locations"
-                                    class="form-control input--style-1" required>
-                                <option selected="selected" value="" required>--Select--</option>
+                                    class="dropdown-midstate"
+                                    required>
+                                <option value="">-- Select --</option>
                             </select>
-                            <div class="div-line"></div>
-                            <div class="invalid-feedback">
-                                Please select a drop-off location
-                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="row row-space">
-                    <div class="col-6">
-                        <div class="input-fields">
-                            <h6>Is this your first time riding?</h6>
-                            <div class="form-control input--style-radio-group">
-                                <input asp-for="FirstTime" type="radio" value="true" class="form-check-input radio-style input--style-1" id="newRiderYes" required />
-                                <label class="radio-label-style" for="newRiderYes">Yes</label>
-                                <input asp-for="FirstTime" type="radio" value="false" class="form-check-input radio-style input--style-1" id="newRiderNo" checked required />
-                                <label class="radio-label-style" for="newRiderNo">No</label>
-                                <div class="div-line"></div>
-                                <div class="invalid-feedback">
-                                    Must select one
-                                </div>
-                            </div>
+                    <!-- First Time Rider -->
+                    <div class="form-group">
+                        <p>Is this your first time riding?</p>
+
+                        <div class="radiobtn-midstate">
+                            <input asp-for="FirstTime"
+                                   type="radio"
+                                   value="true"
+                                   id="newRiderYes"
+                                   required />
+                            <label for="newRiderYes">Yes</label>
+                        </div>
+
+                        <div class="radiobtn-midstate">
+                            <input asp-for="FirstTime"
+                                   type="radio"
+                                   value="false"
+                                   id="newRiderNo"
+                                   required />
+                            <label for="newRiderNo">No</label>
                         </div>
                     </div>
-                </div>                
 
-                <div class="input-fields">
-                    <h6>Rider Comments / Suggestions</h6>
-                    <textarea asp-for="Comments" class="form-control input--style-1" id="feedback" placeholder="Share your experience" rows="4" cols="50" maxlength="255"></textarea>
-                    <div class="div-line"></div>
-                    <div class="invalid-feedback">
-                        Max 255 characters
+                    <!-- Comments -->
+                    <div class="form-group">
+                        <label asp-for="Comments">Rider Comments / Suggestions</label>
+                        <textarea asp-for="Comments"
+                                  class="form-control midstate-textinput"
+                                  rows="4"
+                                  maxlength="255"
+                                  placeholder="Share your experience"></textarea>
                     </div>
-                </div>
 
-                <div class="p-t-20">
-                    <button type="submit" class="btn btn--radius btn--green">Check-in</button>
-                    <button class="btn btn--radius btn--cancel" type="button" onclick="history.go(-1)">Cancel</button>
-                </div>
-            </div>
-        </form>
+                    <!-- Buttons -->
+                    <div class="form-group submit-group">
+                        <button type="submit"
+                                class="btn-midstate btn-primary">
+                            Check-In
+                        </button>
+
+                        <button type="button"
+                                class="btn-midstate btn-secondary"
+                                onclick="history.go(-1)">
+                            Cancel
+                        </button>
+                    </div>
+
+                </form>
+            </section>
+
+        </div>
     </div>
 
     <script src="/js/CheckIn.js"></script>

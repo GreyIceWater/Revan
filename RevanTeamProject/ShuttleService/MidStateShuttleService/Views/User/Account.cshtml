@@ -5,51 +5,74 @@
 }
 
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="/css/Register.css" />
-<link rel="stylesheet" href="/css/TextInputField.css" />
+<link rel="stylesheet" href="/css/Form.css" />
+<link rel="stylesheet" href="/css/Input.css" />
 <link rel="stylesheet" href="/css/HelpIcon.css" />
+
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 <body>
-    <div class="wrapper wrapper--w680">
-        <div class="form form-1">
-            <div class="form-body">
-                <h2 class="title">Account Details</h2>
+    <div class="form-container tiled-background-2">
+        <div class="form-paper">
 
-                <div class="input-fields">
-                    <div class="form-group">
-                        <label>Name:</label>
-                        <p class="form-control-plaintext">@Model.FirstName @Model.LastName</p>
-                    </div>
+            <section class="form-section">
+                <h2>Account Details</h2>
 
-                    <div class="form-group">
-                        <label>Phone Number:</label>
-                        <p class="form-control-plaintext">@Model.PhoneNumber</p>
-                    </div>
-
-                    <div class="form-group">
-                        <label>StudentId:</label>
-                        <p class="form-control-plaintext">@Model.StudentId</p>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Email (Microsoft Account):</label>
-                        @{
-                            var email = User.FindFirst("email")?.Value
-                            ?? User.FindFirst("preferred_username")?.Value
-                            ?? User.Identity?.Name
-                            ?? "N/A";
-                        }
-                        <p class="form-control-plaintext">@email</p>
+                <!-- Name -->
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <div class="midstate-textinput" style="background-color:#f8f8f8;">
+                        @Model.FirstName @Model.LastName
                     </div>
                 </div>
 
-                <div class="p-t-20">
-                    <a class="btn btn--radius btn--submit" asp-action="AccountSetup">Edit Account</a>
+                <!-- Phone -->
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <div class="midstate-textinput" style="background-color:#f8f8f8;">
+                        @Model.PhoneNumber
+                    </div>
                 </div>
-            </div>
+
+                <!-- Student ID -->
+                <div class="form-group">
+                    <label>Student ID</label>
+                    <div class="midstate-textinput" style="background-color:#f8f8f8;">
+                        @Model.StudentId
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label>Email (Microsoft Account)</label>
+                    @{
+                        var email = User.FindFirst("email")?.Value
+                        ?? User.FindFirst("preferred_username")?.Value
+                        ?? User.Identity?.Name
+                        ?? "N/A";
+                    }
+                    <div class="midstate-textinput" style="background-color:#f8f8f8;">
+                        @email
+                    </div>
+                </div>
+
+                <!-- Button -->
+                <div class="form-group submit-group">
+                    <a class="btn-midstate btn-primary"
+                       asp-action="AccountSetup">
+                        Edit Account
+                    </a>
+
+                    <a class="btn-midstate btn-secondary"
+                       href="/">
+                        Back
+                    </a>
+                </div>
+
+            </section>
+
         </div>
     </div>
 </body>

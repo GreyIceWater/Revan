@@ -1,6 +1,9 @@
 @model MidStateShuttleService.Models.Message
 
 <link rel="stylesheet" href="../css/Communication/Communicate.css" />
+<link rel="stylesheet" href="/css/Form.css" />
+<link rel="stylesheet" href="/css/Input.css" />
+<link rel="stylesheet" href="/css/HelpIcon.css" />
 
 <!-- Include jQuery and Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
@@ -8,72 +11,127 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 <body>
-    <div>
-        <div class="wrapper wrapper--w680 mt-5">
-            <div class="card card-1">
-                <div class="card-heading"></div>
-                <div class="card-body">
-                    <h2 class="title">Send Message</h2>
+    <div class="form-container tiled-background-1">
+        <div class="form-paper">
 
-                    @* Checkbox for form display *@
-                    <div class="input-fields">
-                            <p class="typetrip">Is this message an emergency?</p>
-                            <div class="radio-options">
-                                <input type="radio" name="EmergencyToggle" id="formToggle" value="emergency" onclick="toggleForm()" />
-                                <label for="formToggle">Yes</label>
+            <section class="form-section">
+                <h2>Send Message</h2>
 
-                                <input type="radio" name="EmergencyToggle" id="formToggleNo" value="notemergency" onclick="toggleForm()" />
-                                <label for="formToggleNo">No</label>
-                            </div>
+                <!-- Emergency Toggle -->
+                <div class="form-group">
+                    <p>Is this message an emergency?</p>
+
+                    <div class="radiobtn-midstate">
+                        <input type="radio"
+                               name="EmergencyToggle"
+                               id="formToggle"
+                               value="emergency"
+                               onclick="toggleForm()" />
+                        <label for="formToggle">Yes</label>
                     </div>
 
-                    <div id="emergencyContact" style="display: none;">
-                        <span class="typetrip">For an emergency response, please call or text the following number:</span><br />
-                        @* In the future, making this a callable link shouldn't be too difficult *@
-                        <h2 class="title pt-3">715-581-9284</h2>
-                    </div>
-
-                    <div id="formContainer" style="display: none;">
-                        <form id="CommunicateForm" method="post" asp-action="StudentCommunicate">
-                            @Html.AntiForgeryToken()
-                            <div>
-                                @* Name input box *@
-                                <div class="input-fields">
-                                    <input type="text" asp-for="name" class="input--style-1 text-box single-line p-2" placeholder="Name" id="name" maxlength="50"/>
-                                    <div id="name-Validation-Message" class="validation-message"></div>
-                                </div>
-                                <div class="input-fields">
-                                    <textarea type="text" id="message" asp-for="message" class="input--style-1 text-box single-line p-2" placeholder="Enter message..." maxlength="160"></textarea>
-                                    <div id="message-Validation-Message" class="validation-message"></div>
-                                </div>
-
-                                @* Checkbox to get response *@
-                                <div class="input-fields">
-                                    <p class="typetrip">Would you like to recieve a response?</p>
-                                    <p class="trip-info">If requesting route changes, please click yes so we can confirm our changes with you.</p>
-                                    <div class="radio-options">
-                                        <input type="radio" asp-for="responseRequired" value="true" id="responseRequest" onclick="toggleDisplay()" />
-                                        <label for="responseRequest">Yes</label>
-
-                                        <input type="radio" asp-for="responseRequired" value="false" id="no" onclick="toggleDisplay()" />
-                                        <label for="no">No</label>
-                                    </div>
-                                </div>
-
-                                @* Contact info *@
-                                <div class="input-fields" id="contactInfoDiv" style="display: none;">
-                                    <p class="trip-info">Please enter an Email to recieve a response.</p>
-                                    <input type="text" asp-for="contactInfo" class="input--style-1 text-box single-line p-2" placeholder="Contact Info" id="contactInfo" maxlength="50" />
-                                    <div id="contactInfo-Validation-Message" class="validation-message"></div>
-                                </div>
-                            </div>
-                            <div class="p-t-20">
-                                <button class="btn btn--radius btn--submit" type="submit">Send</button>
-                            </div>
-                        </form>
+                    <div class="radiobtn-midstate">
+                        <input type="radio"
+                               name="EmergencyToggle"
+                               id="formToggleNo"
+                               value="notemergency"
+                               onclick="toggleForm()" />
+                        <label for="formToggleNo">No</label>
                     </div>
                 </div>
-            </div>
+
+                <!-- Emergency Contact -->
+                <div id="emergencyContact" style="display:none;" class="form-section">
+                    <p>For an emergency response, please call or text:</p>
+                    <h3 class="mt-3">715-581-9284</h3>
+                </div>
+
+                <!-- Form Container -->
+                <div id="formContainer" style="display:none;">
+
+                    <form id="CommunicateForm"
+                          method="post"
+                          asp-action="StudentCommunicate">
+
+                        @Html.AntiForgeryToken()
+
+                        <!-- Name -->
+                        <div class="form-group">
+                            <label asp-for="name">Name</label>
+                            <input asp-for="name"
+                                   class="form-control midstate-textinput"
+                                   maxlength="50"
+                                   placeholder="Enter your name" />
+                            <div id="name-Validation-Message" class="text-danger"></div>
+                        </div>
+
+                        <!-- Message -->
+                        <div class="form-group">
+                            <label asp-for="message">Message</label>
+                            <textarea asp-for="message"
+                                      class="form-control midstate-textinput"
+                                      maxlength="160"
+                                      rows="4"
+                                      placeholder="Enter message..."></textarea>
+                            <div id="message-Validation-Message" class="text-danger"></div>
+                        </div>
+
+                        <!-- Response Required -->
+                        <div class="form-group">
+                            <p>Would you like to receive a response?</p>
+                            <p style="font-size: 0.9rem; color: #666;">
+                                If requesting route changes, please select yes so we can confirm changes with you.
+                            </p>
+
+                            <div class="radiobtn-midstate">
+                                <input asp-for="responseRequired"
+                                       type="radio"
+                                       value="true"
+                                       id="responseRequest"
+                                       onclick="toggleDisplay()" />
+                                <label for="responseRequest">Yes</label>
+                            </div>
+
+                            <div class="radiobtn-midstate">
+                                <input asp-for="responseRequired"
+                                       type="radio"
+                                       value="false"
+                                       id="no"
+                                       onclick="toggleDisplay()" />
+                                <label for="no">No</label>
+                            </div>
+                        </div>
+
+                        <!-- Contact Info -->
+                        <div class="form-group" id="contactInfoDiv" style="display:none;">
+                            <label asp-for="contactInfo">Email for Response</label>
+                            <input asp-for="contactInfo"
+                                   class="form-control midstate-textinput"
+                                   maxlength="50"
+                                   placeholder="Enter your email" />
+                            <div id="contactInfo-Validation-Message" class="text-danger"></div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="form-group submit-group">
+                            <button type="submit"
+                                    class="btn-midstate btn-primary">
+                                Send
+                            </button>
+
+                            <button type="button"
+                                    class="btn-midstate btn-secondary"
+                                    onclick="history.go(-1)">
+                                Cancel
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </section>
+
         </div>
     </div>
 </body>

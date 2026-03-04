@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.DotNet.Scaffolding.Shared.Project;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using MidStateShuttleService.Migrations;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
@@ -195,7 +196,6 @@ namespace MidStateShuttleService.Controllers
                     {
                         emailBody = BuildEmailForRegisterSubmit(model.RegistrationId);
                     }
-
 
                     _emailServices.SendEmailToAdmin(
                         "MSTC Shuttle Service Request Confirmation",
@@ -781,10 +781,18 @@ namespace MidStateShuttleService.Controllers
                 ? "The Rider is an Adult"
                 : "The Rider is NOT an Adult";
 
+            string sId = "N/A";
+            if (registration.StudentId != "")
+            {
+                sId = registration.StudentId;
+            }
+
             string html = $@"
         <html>
         <body style='font-family: Arial, sans-serif;'>
             <h2>MSTC Shuttle Service Request Confirmation</h2>
+            <h3><strong>Student Name:</strong> {registration.Name}</h3>
+            <h3><strong>Student Id:</strong> {sId}</h3>
             <p><strong>Email:</strong> {registration.Email}</p>
             <p><strong>Phone:</strong> {registration.Phone}</p>
             <p><strong>Status:</strong> {isAdultText}</p>
@@ -865,11 +873,19 @@ namespace MidStateShuttleService.Controllers
                 ? registration.customTime2.Value.ToString("hh:mm tt")
                 : null;
 
+            string sId = "N/A";
+            if (registration.StudentId != "")
+            {
+                sId = registration.StudentId;
+            }
+
             string html = $@"
                 <html>
                 <body style='font-family: Arial, sans-serif;'>
                     <h2>MSTC Shuttle Service SPECIAL Request Confirmation</h2>
 
+                    <h3><strong>Student Name:</strong> {registration.Name}</h3>
+                    <h3><strong>Student Id:</strong> {sId}</h3>
                     <p><strong>Email:</strong> {registration.Email}</p>
                     <p><strong>Phone:</strong> {registration.Phone}</p>
                     <p><strong>Status:</strong> {isAdultText}</p>
