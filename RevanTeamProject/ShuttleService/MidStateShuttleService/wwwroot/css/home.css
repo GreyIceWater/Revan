@@ -52,6 +52,22 @@ body {
     height: 100vh;
     background-color: #840029;
     overflow: hidden;
+    /* ✅ NEW: background image */
+    background-image: url('/img/Shuttle Photo 6.JPG');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.hero_overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #840029;
+    opacity: 0.72; /* your override value */
+    z-index: 1;
 }
 
 @media (min-width: 1400px) {
@@ -82,19 +98,10 @@ body {
     transform: translateX(-50%) translateY(-50%);
 }
 
-.hero_overlay {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #840029;
-    opacity: 0.5;
-    z-index: 1;
-}
 
 .hero_content {
-    z-index: 1;
+    position: relative;
+    z-index: 2;
 }
 
 .hero_content-width {
@@ -335,28 +342,15 @@ body {
 
 /* --- Landing Page Cleanup Overrides --- */
 
-/* Stronger overlay = better white-text contrast */
-.hero_overlay {
-    opacity: 0.72; /* was 0.5 */
-}
+
 
 /* Slight text shadow helps on busy images without changing colors */
 .hero .text-white {
     text-shadow: 0 2px 12px rgba(0,0,0,0.55);
 }
 
-/* Reduce huge vertical whitespace from 100vh hero */
-.hero {
-    height: 70vh;
-    min-height: 520px;
-    max-height: 720px;
-}
 
-/* Make hero fit the screen minus the navbar height */
-.hero {
-    height: calc(100vh - 90px); /* adjust 90px if needed */
-    min-height: 520px;
-}
+
 
 /* Fix: don't render Steps as invisible (prevents "blank white space") */
 .steps {
