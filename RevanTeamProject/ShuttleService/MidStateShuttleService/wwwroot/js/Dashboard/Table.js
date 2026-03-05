@@ -62,5 +62,10 @@
         $('.recentFeedback.request').show(); // Show the request table
         return false;
     });
+    $('#reports').click(function () {
+        hideAllTables();
+        $('.recentFeedback.reports').show();
+        return false;
+    });
 
 });

@@ -68,6 +68,12 @@
                     <span class="title">Drivers</span>
                 </a>
             </li>
+            <li>
+                <a href="#" id="reports">
+                    <span class="icon"><i class="bi bi-bar-chart-line"></i></span>
+                    <span class="title">Reports</span>
+                </a>
+            </li>
 
 
             <li>
@@ -208,6 +214,9 @@
         </div>
         <div class="recentFeedback request">
             @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_ViewRegistrations.cshtml")
+        </div>
+        <div class="recentFeedback reports">
+            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/ReportsTable.cshtml")
         </div>
         
     </div>
