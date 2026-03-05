@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
@@ -34,6 +35,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // GET: ShuttlesController/Create
+        [Authorize(Roles = "Admin")]
         public ActionResult Create()
         {
             DriverServices ds = new DriverServices(_context);
@@ -45,6 +47,7 @@ namespace MidStateShuttleService.Controllers
         // POST: ShuttlesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public ActionResult Create(Bus bus)
         {
             if (!ModelState.IsValid)
@@ -74,6 +77,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // GET: ShuttlesController/Edit/5
+        [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id)
         {
             // Retrieve the bus from the database based on the id
@@ -94,6 +98,7 @@ namespace MidStateShuttleService.Controllers
         // POST: ShuttlesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id, Bus bus)
         {
             if (id != bus.BusId)
@@ -127,6 +132,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // GET: ShuttlesController/Delete/5
+        [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
         {
             try
@@ -162,6 +168,7 @@ namespace MidStateShuttleService.Controllers
         // POST: ShuttlesController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id, IFormCollection collection)
         {
             try

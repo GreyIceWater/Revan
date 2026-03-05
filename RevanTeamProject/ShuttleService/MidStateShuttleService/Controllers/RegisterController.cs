@@ -230,7 +230,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // Displays the full breakdown of a single registration
-        [Authorize(Roles = "Admin,Driver")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Details(int registrationId)
         {
             var registration = _context.RegisterModels

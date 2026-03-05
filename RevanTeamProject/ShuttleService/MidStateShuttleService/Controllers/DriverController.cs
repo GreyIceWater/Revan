@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using MidStateShuttleService.Models;
@@ -32,6 +33,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // GET: DriverController/Create
+        [Authorize(Roles = "Admin")]
         public ActionResult Create()
         {
             return View();
@@ -40,6 +42,7 @@ namespace MidStateShuttleService.Controllers
         // POST: DriverController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public ActionResult Create(Driver driver)
         {
             if (!ModelState.IsValid)
@@ -73,6 +76,7 @@ namespace MidStateShuttleService.Controllers
 
 
         // GET: DriverController/Edit/5
+        [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id)
         {
             // Retrieve the driver to be edited from the database
@@ -90,6 +94,7 @@ namespace MidStateShuttleService.Controllers
         // POST: DriverController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id, Driver driver)
         {
             if (id != driver.DriverId)
@@ -125,6 +130,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // GET: DriverController/Delete/5
+        [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
         {
             try
@@ -163,6 +169,7 @@ namespace MidStateShuttleService.Controllers
         // POST: DriverController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id, IFormCollection collection)
         {
             try

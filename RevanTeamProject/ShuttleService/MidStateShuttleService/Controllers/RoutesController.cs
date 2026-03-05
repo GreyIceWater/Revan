@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -38,6 +39,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // GET: RoutesController/Create
+        [Authorize(Roles = "Admin")]
         public ActionResult Create()
         {
             LocationServices ls = new LocationServices(_context);
@@ -53,6 +55,7 @@ namespace MidStateShuttleService.Controllers
 
         // POST: RoutesController/Edit/
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public ActionResult Create(Routes route)
         {
             RouteServices rs = new RouteServices(_context);
@@ -66,6 +69,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // GET: RoutesController/Edit/5
+        [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id)
         {
             var route = _context.Routes.Find(id);
@@ -93,6 +97,7 @@ namespace MidStateShuttleService.Controllers
         // POST: RoutesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id, Routes updatedRoute)
         {
             if(id != updatedRoute.RouteID)
@@ -125,6 +130,7 @@ namespace MidStateShuttleService.Controllers
 
 
         // GET: RoutesController/Delete/5
+        [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
         {
             try
@@ -163,6 +169,7 @@ namespace MidStateShuttleService.Controllers
         // POST: RoutesController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id, IFormCollection collection)
         {
             try

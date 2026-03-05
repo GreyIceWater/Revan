@@ -33,6 +33,7 @@ namespace MidStateShuttleService.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
         public ActionResult EditCheckIn(int id)
         {
             var cs = new CheckInServices(_context);
@@ -89,6 +90,7 @@ namespace MidStateShuttleService.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public ActionResult EditCheckIn(CheckInViewModel model)
         {
             if (model == null)
@@ -115,6 +117,7 @@ namespace MidStateShuttleService.Controllers
             return RedirectToAction("Index", "Dashboard");
         }
 
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteCheckIn(int id)
         {
             try
@@ -145,6 +148,7 @@ namespace MidStateShuttleService.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
         {
             return View();

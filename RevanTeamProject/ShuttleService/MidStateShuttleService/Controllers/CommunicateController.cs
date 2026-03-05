@@ -142,6 +142,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // GET: DriverController/Delete/5
+        [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
         {
             try

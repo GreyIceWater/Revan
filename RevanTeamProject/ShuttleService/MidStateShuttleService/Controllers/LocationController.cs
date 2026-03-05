@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using MidStateShuttleService.Models;
@@ -26,6 +27,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // GET: LocationController/Create
+        [Authorize(Roles = "Admin")]
         public ActionResult Create()
         {
             return View();
@@ -33,6 +35,7 @@ namespace MidStateShuttleService.Controllers
 
         // POST: LocationController/Create
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public ActionResult Create(Location location)
         {
             if (!ModelState.IsValid)
@@ -63,6 +66,7 @@ namespace MidStateShuttleService.Controllers
 
 
         // GET: LocationController/Edit/5
+        [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id)
         {
             LocationServices ls = new LocationServices(_context);
@@ -75,6 +79,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // POST: LocationController/Edit/5
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(Location model)
@@ -101,6 +106,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // GET: LocationController/Delete/5
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteLocation(int id)
         {
             try
@@ -125,6 +131,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // POST: LocationController/Delete/5
+        [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
         {
             return View();

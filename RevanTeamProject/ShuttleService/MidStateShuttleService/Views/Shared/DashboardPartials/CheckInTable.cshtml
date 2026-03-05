@@ -54,8 +54,13 @@
                             <td>No Comments</td>
                         }
                         <td>@(checkIn.FirstTime ? "Yes" : "No")</td>
-                        <td><a asp-controller="CheckIn" asp-action="EditCheckIn" asp-route-id="@checkIn.CheckInId">Update</a></td>
-                        <td><a asp-controller="CheckIn" asp-action="DeleteCheckIn" asp-route-id="@checkIn.CheckInId">Remove</a></td>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                           <td><a asp-controller="CheckIn" asp-action="EditCheckIn" asp-route-id="@checkIn.CheckInId">Update</a></td>
+                            <td><a asp-controller="CheckIn" asp-action="DeleteCheckIn" asp-route-id="@checkIn.CheckInId">Remove</a></td> 
+                        }
+                        
                     </tr>
                 }
             }
