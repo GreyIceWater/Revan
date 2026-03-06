@@ -466,10 +466,23 @@ footer {
     border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 
-.details table tr:hover {
+/* DEV NOTE: only body rows should hover, not table headers */
+.details table tbody tr:hover {
     background: #840029;
     color: white;
 }
+/* DEV NOTE: keep reports header locked to dashboard maroon header style */
+.reportsTable thead tr,
+.reportsTable thead th {
+    background: #840029 !important;
+    color: #EEEEEE !important;
+}
+
+    .reportsTable thead tr:hover,
+    .reportsTable thead th:hover {
+        background: #840029 !important;
+        color: #EEEEEE !important;
+    }
 
 .recentFeedback {
     position: relative;
@@ -553,6 +566,115 @@ footer {
     padding: 5px 15px;
 }
 
+/* =========================
+   Reports Styling (Dashboard)
+   ========================= */
+
+.reportsSection {
+    margin-top: 12px;
+}
+
+.reportBlock {
+    margin-top: 18px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+
+.reportTitleRow {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.reportTitleRow h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.reportSubtitle {
+    font-size: .9rem;
+    opacity: .7;
+}
+
+.tableWrap {
+    overflow-x: auto;
+    border-radius: 10px;
+}
+
+.reportsTable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.reportsTable thead th {
+    position: sticky;
+    top: 0;
+    background: #f3f5f7;
+    text-align: left;
+    font-weight: 700;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e4e7eb;
+    white-space: nowrap;
+}
+
+.reportsTable td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eef1f4;
+    vertical-align: top;
+}
+
+.reportsTable tbody tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+.reportsTable tbody tr:hover {
+    background: #f1f6ff;
+}
+
+.actionsCell {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn.btn-sm {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 700;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.pill-yes {
+    background: #e9f7ef;
+    color: #1e7a3a;
+}
+
+.pill-no {
+    background: #fdecec;
+    color: #b42318;
+}
+
+.truncate {
+    max-width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* practicing this way to be responsive */
 @media (max-width: 991px) {
     .navigation {
@@ -623,3 +745,92 @@ footer {
         color: white;
     }
 }
+
+/* Dashboard Reports partial helpers */
+.detailsBody {
+    padding: 12px 16px;
+}
+
+.mutedText {
+    margin: 0 0 12px;
+    opacity: .75;
+}
+
+.actionsRow {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.miniList {
+    display: grid;
+    gap: 10px;
+}
+
+.miniRow {
+    padding: 10px 12px;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.miniTitle {
+    font-weight: 800;
+}
+
+.miniDesc {
+    font-size: .9rem;
+    opacity: .7;
+}
+/* ======================================================
+   REPORTS WIDGET — CONTRAST FIX (FINAL)
+   DEV NOTE:
+   - Dashboard has a global: .details table tr:hover { background:#840029; color:white; }
+   - Reports table also had: .reportsTable tbody tr:hover { background:#f1f6ff; }
+     which caused white text on light background + button contrast issues.
+   - This block forces the Reports widget hover state to be consistent + readable.
+====================================================== */
+
+/* --- Base: make the Run/Export links always look like buttons --- */
+.details .recentFeedback.reports a.reportActionLink,
+.details .recentFeedback.reports a.reportActionLink:link,
+.details .recentFeedback.reports a.reportActionLink:visited {
+    display: inline-block !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    background: #840029 !important;
+    border: 2px solid #840029 !important;
+    color: #EEEEEE !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+}
+
+/* --- Fix: Reports row hover should NOT be light blue. Force maroon hover. --- */
+.details .recentFeedback.reports .reportsTable tbody tr:hover {
+    background: #840029 !important; /* strong contrast */
+}
+
+    /* --- Force all text inside hovered row to stay readable --- */
+    .details .recentFeedback.reports .reportsTable tbody tr:hover,
+    .details .recentFeedback.reports .reportsTable tbody tr:hover td,
+    .details .recentFeedback.reports .reportsTable tbody tr:hover strong,
+    .details .recentFeedback.reports .reportsTable tbody tr:hover .tableSubText {
+        color: #EEEEEE !important;
+    }
+
+        /* --- On hovered row: buttons become OUTLINE light (no white-on-white) --- */
+        .details .recentFeedback.reports .reportsTable tbody tr:hover a.reportActionLink,
+        .details .recentFeedback.reports .reportsTable tbody tr:hover a.reportActionLink:visited {
+            background: transparent !important;
+            border-color: #EEEEEE !important;
+            color: #EEEEEE !important;
+        }
+
+            /* --- On button hover: yellow fill for clear contrast against maroon --- */
+            .details .recentFeedback.reports .reportsTable tbody tr:hover a.reportActionLink:hover,
+            .details .recentFeedback.reports .reportsTable tbody tr:hover a.reportActionLink:focus {
+                background: #fdb71a !important;
+                border-color: #fdb71a !important;
+                color: #840029 !important;
+                text-decoration: none !important;
+            }

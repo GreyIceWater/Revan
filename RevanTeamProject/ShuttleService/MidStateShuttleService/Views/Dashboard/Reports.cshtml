@@ -1,0 +1,294 @@
+﻿@model MidStateShuttleService.Models.AllModels
+@using System.Linq
+@using MidStateShuttleService.Models
+
+@{
+    ViewData["Title"] = "Reports";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    // DEV NOTE:
+    // Controller sets ViewBag.ReportType so we know which report to display
+    var reportType = (ViewBag.ReportType as string) ?? "";
+
+    var isRequests = reportType.Equals("requests", StringComparison.OrdinalIgnoreCase);
+    var isCheckins = reportType.Equals("checkins", StringComparison.OrdinalIgnoreCase);
+
+    // DEV NOTE:
+    // Declare these ONCE so they exist everywhere in the page
+    var requestRows = (Model.Register ?? Enumerable.Empty<RegisterModel>()).ToList();
+    var checkinRows = (Model.CheckIn ?? Enumerable.Empty<CheckIn>()).ToList();
+}
+
+<link rel="stylesheet" href="~/css/Dashboard.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Reports..css" asp-append-version="true" />
+
+<div class="reportsPage">
+
+    <!-- DEV NOTE: PAGE HEADER -->
+    <div class="reportsPageTopBar">
+        <div class="reportsHeaderLeft">
+            <h2 class="reportsTitle">Reports</h2>
+            <div class="reportsHint">Run admin reports and export CSV files.</div>
+        </div>
+
+        <a class="rptBtn rptBtnGhost"
+           href="@Url.Action("Index", "Dashboard", new { section = "reports" })">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <!-- DEV NOTE: REPORT PICKER -->
+    <div class="reportCard">
+        <div class="reportCardHeader">
+            <div class="reportCardHeaderText">
+                <div class="reportCardHeaderTitle">Report Picker</div>
+                <div class="reportCardHeaderSub">Choose a report type to view results.</div>
+            </div>
+        </div>
+
+        <div class="reportCardBody">
+            <div class="reportPickerGrid">
+
+                <div class="reportOption @(isRequests ? "reportOptionActive" : "")">
+                    <div class="reportOptionTop">
+                        <div class="reportOptionText">
+                            <p class="reportOptionTitle">Rider Requests</p>
+                            <p class="reportOptionDesc">All registrations (newest first)</p>
+                        </div>
+
+                        <div class="reportOptionMeta">
+                            <span class="pill pill-neutral">All time</span>
+                        </div>
+                    </div>
+
+                    <div class="reportOptionActions">
+                        <a class="rptBtn"
+                           href="@Url.Action("Reports", "Dashboard", new { report = "requests" })">
+                            Run
+                        </a>
+
+                        <a class="rptBtn rptBtnOutline"
+                           href="@Url.Action("ExportRiderRequestsCsv", "Dashboard")">
+                            Export CSV
+                        </a>
+                    </div>
+                </div>
+
+                <div class="reportOption @(isCheckins ? "reportOptionActive" : "")">
+                    <div class="reportOptionTop">
+                        <div class="reportOptionText">
+                            <p class="reportOptionTitle">Check-ins</p>
+                            <p class="reportOptionDesc">All check-ins (newest first)</p>
+                        </div>
+
+                        <div class="reportOptionMeta">
+                            <span class="pill pill-neutral">All time</span>
+                        </div>
+                    </div>
+
+                    <div class="reportOptionActions">
+                        <a class="rptBtn"
+                           href="@Url.Action("Reports", "Dashboard", new { report = "checkins" })">
+                            Run
+                        </a>
+
+                        <a class="rptBtn rptBtnOutline"
+                           href="@Url.Action("ExportCheckInsCsv", "Dashboard")">
+                            Export CSV
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    @* DEV NOTE:
+       IMPORTANT Razor rule:
+       - NO HTML / markup / comments between @if and else if
+       - Keep them directly attached or Razor will render "else if" as text *@
+
+    @if (isRequests)
+    {
+        <div class="reportCard reportResultsBlock">
+            <div class="reportStickyBar">
+                <div class="reportStickyLeft">
+                    <h3>Rider Requests</h3>
+                    <span class="reportSubtitle">All time</span>
+                </div>
+
+                <div class="reportStickyRight">
+                    <a class="rptBtn rptBtnGhost"
+                       href="@Url.Action("Index", "Dashboard", new { section = "reports" })">
+                        ← Back
+                    </a>
+
+                    <span class="pill pill-neutral">Rows: @requestRows.Count</span>
+
+                    <a class="rptBtn rptBtnOutline"
+                       href="@Url.Action("ExportRiderRequestsCsv", "Dashboard")">
+                        Export CSV
+                    </a>
+                </div>
+            </div>
+
+            <div class="reportScrollArea">
+                <table class="reportsTable">
+                    <thead>
+                        <tr>
+                            <th>RegistrationId</th>
+                            <th>Name</th>
+                            <th>StudentId</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Over 18</th>
+                            <th>Field Trip</th>
+                            <th>Internal Inquiry</th>
+                            <th>Created</th>
+                            <th>Archived</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (!requestRows.Any())
+                        {
+                            <tr>
+                                <td colspan="10" class="emptyCell">No rider request records found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var r in requestRows)
+                            {
+                                <tr>
+                                    <td>@r.RegistrationId</td>
+                                    <td>@r.Name</td>
+                                    <td>@r.StudentId</td>
+                                    <td>@r.Email</td>
+                                    <td>@r.Phone</td>
+
+                                    <td>
+                                        <span class="pill @(r.IsAdult ? "pill-yes" : "pill-no")">
+                                            @(r.IsAdult ? "Yes" : "No")
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="pill @(IsFieldTrip(r.TripType) ? "pill-yes" : "pill-no")">
+                                            @(IsFieldTrip(r.TripType) ? "Yes" : "No")
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="pill @(IsInternalInquiry(r.TripType) ? "pill-yes" : "pill-no")">
+                                            @(IsInternalInquiry(r.TripType) ? "Yes" : "No")
+                                        </span>
+                                    </td>
+
+                                    <td>@(r.InsertDateTime?.ToString("g") ?? "")</td>
+
+                                    <td>
+                                        <span class="pill @(r.IsArchived ? "pill-no" : "pill-yes")">
+                                            @(r.IsArchived ? "Yes" : "No")
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (isCheckins)
+    {
+        <div class="reportCard reportResultsBlock">
+            <div class="reportStickyBar">
+                <div class="reportStickyLeft">
+                    <h3>Check-ins</h3>
+                    <span class="reportSubtitle">All time</span>
+                </div>
+
+                <div class="reportStickyRight">
+                    <a class="rptBtn rptBtnGhost"
+                       href="@Url.Action("Index", "Dashboard", new { section = "reports" })">
+                        ← Back
+                    </a>
+
+                    <span class="pill pill-neutral">Rows: @checkinRows.Count</span>
+
+                    <a class="rptBtn rptBtnOutline"
+                       href="@Url.Action("ExportCheckInsCsv", "Dashboard")">
+                        Export CSV
+                    </a>
+                </div>
+            </div>
+
+            <div class="reportScrollArea">
+                <table class="reportsTable">
+                    <thead>
+                        <tr>
+                            <th>CheckInId</th>
+                            <th>Name</th>
+                            <th>StudentId</th>
+                            <th>Date</th>
+                            <th>First Time</th>
+                            <th>Pick Up</th>
+                            <th>Drop Off</th>
+                            <th>Comments</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (!checkinRows.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="emptyCell">No check-in records found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var c in checkinRows)
+                            {
+                                <tr>
+                                    <td>@c.CheckInId</td>
+                                    <td>@c.Name</td>
+                                    <td>@c.StudentId</td>
+                                    <td>@c.Date.ToString("g")</td>
+
+                                    <td>
+                                        <span class="pill @(c.FirstTime ? "pill-yes" : "pill-no")">
+                                            @(c.FirstTime ? "Yes" : "No")
+                                        </span>
+                                    </td>
+
+                                    @* DEV NOTE: Requires Include() in controller to avoid null nav properties *@
+                                    <td>@(c.Location?.Name ?? $"#{c.LocationId}")</td>
+                                    <td>@(c.DropOffLocation?.Name ?? $"#{c.DropOffLocationId}")</td>
+
+                                    <td class="truncate" title="@c.Comments">@c.Comments</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+</div>
+
+@functions {
+    private bool IsFieldTrip(string? tripType)
+    {
+        if (string.IsNullOrWhiteSpace(tripType)) return false;
+        return tripType.Contains("field", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool IsInternalInquiry(string? tripType)
+    {
+        if (string.IsNullOrWhiteSpace(tripType)) return false;
+        return tripType.Contains("internal", StringComparison.OrdinalIgnoreCase)
+            || tripType.Contains("inquiry", StringComparison.OrdinalIgnoreCase);
+    }
+}

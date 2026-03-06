@@ -236,5 +236,228 @@ namespace MidStateShuttleService.Controllers
             return RedirectToAction("Index", new { section = "feedback" }); // Redirect to Index to ensure changes take effect immediately
         }
 
+        // ==========================================================
+        // REPORTS PARTIAL LOADER (Admin Only)
+        // - Called when admin clicks "Run" inside the dashboard widget
+        // - Returns ONLY the partial (no layout, no <link> tags)
+        // - ALL TIME data
+        // ==========================================================
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> ReportsPartial(string report = "")
+        {
+            var allModels = new AllModels();
+
+            if (string.Equals(report, "requests", StringComparison.OrdinalIgnoreCase))
+            {
+                allModels.Register = await _context.RegisterModels
+                    .AsNoTracking()
+                    .OrderByDescending(r => r.InsertDateTime)
+                    .ToListAsync();
+
+                ViewBag.ReportType = "requests";
+            }
+            else if (string.Equals(report, "checkins", StringComparison.OrdinalIgnoreCase))
+            {
+                allModels.CheckIn = await _context.CheckIns
+                    .AsNoTracking()
+                    .Include(c => c.Location)
+                    .Include(c => c.DropOffLocation)
+                    .OrderByDescending(c => c.Date)
+                    .ToListAsync();
+
+                // Convert UTC -> Central for display consistency
+                if (allModels.CheckIn != null)
+                {
+                    foreach (var checkIn in allModels.CheckIn)
+                        checkIn.Date = TimeService.ConvertUtcToCentral(checkIn.Date);
+                }
+
+                ViewBag.ReportType = "checkins";
+            }
+            else
+            {
+                ViewBag.ReportType = "";
+            }
+
+            // IMPORTANT: return the PARTIAL view here
+            return PartialView("~/Views/Shared/DashboardPartials/ReportsTable.cshtml", allModels);
+        }
+
+
+
+        // ==========================================================
+        // FULL REPORTS PAGE (Admin Only)
+        // - Full page view with Layout + CSS
+        // - ALL TIME data
+        // ==========================================================
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> Reports(string report = "")
+        {
+            var allModels = new AllModels();
+
+            if (string.Equals(report, "requests", StringComparison.OrdinalIgnoreCase))
+            {
+                allModels.Register = await _context.RegisterModels
+                    .AsNoTracking()
+                    .OrderByDescending(r => r.InsertDateTime)
+                    .ToListAsync();
+
+                ViewBag.ReportType = "requests";
+            }
+            else if (string.Equals(report, "checkins", StringComparison.OrdinalIgnoreCase))
+            {
+                allModels.CheckIn = await _context.CheckIns
+                    .AsNoTracking()
+                    .Include(c => c.Location)
+                    .Include(c => c.DropOffLocation)
+                    .OrderByDescending(c => c.Date)
+                    .ToListAsync();
+
+                // Convert UTC -> Central for display consistency
+                if (allModels.CheckIn != null)
+                {
+                    foreach (var checkIn in allModels.CheckIn)
+                        checkIn.Date = TimeService.ConvertUtcToCentral(checkIn.Date);
+                }
+
+                ViewBag.ReportType = "checkins";
+            }
+            else
+            {
+                ViewBag.ReportType = "";
+            }
+
+            // IMPORTANT: this is the FULL page view
+            return View("~/Views/Dashboard/Reports.cshtml", allModels);
+        }
+
+
+
+        // ==========================================================
+        // EXPORT RIDER REQUESTS (CSV) - Admin Only, ALL TIME
+        // ==========================================================
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> ExportRiderRequestsCsv()
+        {
+            var rows = await _context.RegisterModels
+                .AsNoTracking()
+                .OrderByDescending(r => r.InsertDateTime)
+                .Select(r => new
+                {
+                    r.RegistrationId,
+                    r.Name,
+                    r.StudentId,
+                    r.Email,
+                    r.Phone,
+                    r.IsAdult,
+                    r.TripType,
+                    r.InsertDateTime,
+                    r.IsArchived,
+                    r.IsActive
+                })
+                .ToListAsync();
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("RegistrationId,Name,StudentId,Email,Phone,IsAdult,TripType,InsertDateTime,IsArchived,IsActive");
+
+            foreach (var r in rows)
+            {
+                sb.AppendLine(
+                    $"{r.RegistrationId}," +
+                    $"{Csv(r.Name)}," +
+                    $"{Csv(r.StudentId)}," +
+                    $"{Csv(r.Email)}," +
+                    $"{Csv(r.Phone)}," +
+                    $"{r.IsAdult}," +
+                    $"{Csv(r.TripType)}," +
+                    $"{(r.InsertDateTime.HasValue ? r.InsertDateTime.Value.ToString("o") : "")}," +
+                    $"{r.IsArchived}," +
+                    $"{r.IsActive}"
+                );
+            }
+
+            return File(
+                System.Text.Encoding.UTF8.GetBytes(sb.ToString()),
+                "text/csv",
+                $"rider-requests-ALLTIME-{DateTime.Now:yyyyMMdd-HHmm}.csv"
+            );
+        }
+
+
+
+        // ==========================================================
+        // EXPORT CHECK-INS (CSV) - Admin Only, ALL TIME
+        // ==========================================================
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> ExportCheckInsCsv()
+        {
+            var rows = await _context.CheckIns
+                .AsNoTracking()
+                .OrderByDescending(c => c.Date)
+                .Select(c => new
+                {
+                    c.CheckInId,
+                    c.Name,
+                    c.StudentId,
+                    c.Date,
+                    c.FirstTime,
+                    c.LocationId,
+                    c.DropOffLocationId,
+                    c.Comments,
+                    c.IsActive
+                })
+                .ToListAsync();
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("CheckInId,Name,StudentId,DateCentral,FirstTime,PickUpLocationId,DropOffLocationId,Comments,IsActive");
+
+            foreach (var c in rows)
+            {
+                var centralTime = TimeService.ConvertUtcToCentral(c.Date);
+
+                sb.AppendLine(
+                    $"{c.CheckInId}," +
+                    $"{Csv(c.Name)}," +
+                    $"{Csv(c.StudentId)}," +
+                    $"{centralTime:O}," +
+                    $"{c.FirstTime}," +
+                    $"{c.LocationId}," +
+                    $"{c.DropOffLocationId}," +
+                    $"{Csv(c.Comments)}," +
+                    $"{c.IsActive}"
+                );
+            }
+
+            return File(
+                System.Text.Encoding.UTF8.GetBytes(sb.ToString()),
+                "text/csv",
+                $"checkins-ALLTIME-{DateTime.Now:yyyyMMdd-HHmm}.csv"
+            );
+        }
+
+
+
+        // ==========================================================
+        // CSV HELPER
+        // ==========================================================
+        private static string Csv(string? value)
+        {
+            value ??= "";
+
+            var mustQuote =
+                value.Contains(',') ||
+                value.Contains('"') ||
+                value.Contains('\n') ||
+                value.Contains('\r');
+
+            value = value.Replace("\"", "\"\"");
+
+            return mustQuote ? $"\"{value}\"" : value;
+        }
+
     }
 }
