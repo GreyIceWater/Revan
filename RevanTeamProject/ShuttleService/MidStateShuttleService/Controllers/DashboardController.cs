@@ -368,7 +368,9 @@ namespace MidStateShuttleService.Controllers
                     r.Email,
                     r.Phone,
                     r.IsAdult,
-                    r.TripType,
+                    r.isCustom,
+                    r.IsFieldTrip,
+                    r.IsInternalInquiry,
                     r.InsertDateTime,
                     r.IsArchived,
                     r.IsActive
@@ -378,7 +380,7 @@ namespace MidStateShuttleService.Controllers
             // DEV NOTE:
             // Build CSV content manually with a StringBuilder.
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine("RegistrationId,Name,StudentId,Email,Phone,IsAdult,TripType,InsertDateTime,IsArchived,IsActive");
+            sb.AppendLine("RegistrationId,Name,StudentId,Email,Phone,IsAdult,RequestType,IsFieldTrip,IsInternalInquiry,InsertDateTime,IsArchived");
 
             foreach (var r in rows)
             {
@@ -387,16 +389,19 @@ namespace MidStateShuttleService.Controllers
                 sb.AppendLine(
                     $"{r.RegistrationId}," +
                     $"{Csv(r.Name)}," +
-                    $"{Csv(r.StudentId)}," +
+                    $"{CsvExcelText(r.StudentId)}," +
                     $"{Csv(r.Email)}," +
-                    $"{Csv(r.Phone)}," +
+                    $"{CsvExcelText(r.Phone)}," +
                     $"{r.IsAdult}," +
-                    $"{Csv(r.TripType)}," +
+                    $"{Csv(r.isCustom ? "Special" : "Regular")}," +
+                    $"{r.IsFieldTrip}," +
+                    $"{r.IsInternalInquiry}," +
                     $"{(r.InsertDateTime.HasValue ? r.InsertDateTime.Value.ToString("o") : "")}," +
-                    $"{r.IsArchived}," +
-                    $"{r.IsActive}"
+                    $"{r.IsArchived}"
                 );
             }
+
+
 
             // DEV NOTE:
             // Return the CSV as a downloadable file.
@@ -405,6 +410,17 @@ namespace MidStateShuttleService.Controllers
                 "text/csv",
                 $"rider-requests-ALLTIME-{DateTime.Now:yyyyMMdd-HHmm}.csv"
             );
+
+
+        }
+        // DEV NOTE:
+        // Excel likes to auto-format long numeric-looking values like phone numbers
+        // and student IDs into scientific notation. This forces Excel to keep them as text.
+        private static string CsvExcelText(string? value)
+        {
+            value ??= "";
+            value = value.Replace("\"", "\"\"");
+            return $"=\"{value}\"";
         }
 
 
@@ -421,6 +437,8 @@ namespace MidStateShuttleService.Controllers
             var rows = await _context.CheckIns
                 .AsNoTracking()
                 .OrderByDescending(c => c.Date)
+                .Include(c => c.Location)
+                .Include(c => c.DropOffLocation)
                 .Select(c => new
                 {
                     c.CheckInId,
@@ -428,15 +446,14 @@ namespace MidStateShuttleService.Controllers
                     c.StudentId,
                     c.Date,
                     c.FirstTime,
-                    c.LocationId,
-                    c.DropOffLocationId,
-                    c.Comments,
-                    c.IsActive
+                    PickUpLocation = c.Location != null ? c.Location.Name : "",
+                    DropOffLocation = c.DropOffLocation != null ? c.DropOffLocation.Name : "",
+                    c.Comments
                 })
                 .ToListAsync();
 
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine("CheckInId,Name,StudentId,DateCentral,FirstTime,PickUpLocationId,DropOffLocationId,Comments,IsActive");
+            sb.AppendLine("CheckInId,Name,StudentId,DateCentral,FirstTime,PickUpLocation,DropOffLocation,Comments");
 
             foreach (var c in rows)
             {
@@ -450,10 +467,9 @@ namespace MidStateShuttleService.Controllers
                     $"{Csv(c.StudentId)}," +
                     $"{centralTime:O}," +
                     $"{c.FirstTime}," +
-                    $"{c.LocationId}," +
-                    $"{c.DropOffLocationId}," +
-                    $"{Csv(c.Comments)}," +
-                    $"{c.IsActive}"
+                    $"{Csv(c.PickUpLocation)}," +
+                    $"{Csv(c.DropOffLocation)}," +
+                    $"{Csv(c.Comments)}"
                 );
             }
 
