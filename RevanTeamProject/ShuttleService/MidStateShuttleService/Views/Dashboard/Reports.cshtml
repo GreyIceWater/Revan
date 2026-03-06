@@ -142,6 +142,7 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Over 18</th>
+                            <th>Request Type</th>
                             <th>Field Trip</th>
                             <th>Internal Inquiry</th>
                             <th>Created</th>
@@ -153,7 +154,7 @@
                         @if (!requestRows.Any())
                         {
                             <tr>
-                                <td colspan="10" class="emptyCell">No rider request records found.</td>
+                                <td colspan="11" class="emptyCell">No rider request records found.</td>
                             </tr>
                         }
                         else
@@ -174,14 +175,20 @@
                                     </td>
 
                                     <td>
-                                        <span class="pill @(IsFieldTrip(r.TripType) ? "pill-yes" : "pill-no")">
-                                            @(IsFieldTrip(r.TripType) ? "Yes" : "No")
+                                        <span class="pill @(r.isCustom ? "pill-yes" : "pill-no")">
+                                            @(r.isCustom ? "Special" : "Regular")
                                         </span>
                                     </td>
 
                                     <td>
-                                        <span class="pill @(IsInternalInquiry(r.TripType) ? "pill-yes" : "pill-no")">
-                                            @(IsInternalInquiry(r.TripType) ? "Yes" : "No")
+                                        <span class="pill @(r.IsFieldTrip ? "pill-yes" : "pill-no")">
+                                            @(r.IsFieldTrip ? "Yes" : "No")
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="pill @(r.IsInternalInquiry ? "pill-yes" : "pill-no")">
+                                            @(r.IsInternalInquiry ? "Yes" : "No")
                                         </span>
                                     </td>
 
@@ -277,18 +284,3 @@
     }
 
 </div>
-
-@functions {
-    private bool IsFieldTrip(string? tripType)
-    {
-        if (string.IsNullOrWhiteSpace(tripType)) return false;
-        return tripType.Contains("field", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private bool IsInternalInquiry(string? tripType)
-    {
-        if (string.IsNullOrWhiteSpace(tripType)) return false;
-        return tripType.Contains("internal", StringComparison.OrdinalIgnoreCase)
-            || tripType.Contains("inquiry", StringComparison.OrdinalIgnoreCase);
-    }
-}

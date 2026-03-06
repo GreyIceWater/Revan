@@ -130,6 +130,16 @@ namespace MidStateShuttleService.Models
 
         public bool IsAdult { get; set; }
 
+        /// <summary>
+        /// True if this request is a field trip.
+        /// </summary>
+        public bool IsFieldTrip { get; set; }
+
+        /// <summary>
+        /// True if this request is an internal inquiry.
+        /// </summary>
+        public bool IsInternalInquiry { get; set; }
+
         [Required(ErrorMessage = "Term is required.")]
         public SchoolTerm? Term { get; set; }
 

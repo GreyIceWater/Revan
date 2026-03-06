@@ -106,19 +106,31 @@
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
 
-            <!-- AGE -->
-            <div class="form-group mt-3">
-                <input asp-for="IsAdult" type="checkbox" />
-                <label asp-for="IsAdult"></label>
-            </div>
+        <!-- AGE -->
+        <div class="form-group mt-3">
+            <input asp-for="IsAdult" type="checkbox" />
+            <label asp-for="IsAdult"></label>
+        </div>
 
-            <!-- TERMS AGREEMENT -->
-            <div class="form-group">
-                <input asp-for="AgreeTerms" type="checkbox" />
-                <label asp-for="AgreeTerms">
-                    User agreed to special request terms
-                </label>
-            </div>
+        <!-- FIELD TRIP -->
+        <div class="form-group">
+            <input asp-for="IsFieldTrip" type="checkbox" />
+            <label asp-for="IsFieldTrip">Is this a field trip?</label>
+        </div>
+
+        <!-- INTERNAL INQUIRY -->
+        <div class="form-group">
+            <input asp-for="IsInternalInquiry" type="checkbox" />
+            <label asp-for="IsInternalInquiry">Is this an internal inquiry?</label>
+        </div>
+
+        <!-- TERMS AGREEMENT -->
+        <div class="form-group">
+            <input asp-for="AgreeTerms" type="checkbox" />
+            <label asp-for="AgreeTerms">
+                User agreed to special request terms
+            </label>
+        </div>
 
             <!-- SAVE BUTTON -->
             <div class="form-group submit-group">
