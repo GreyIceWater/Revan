@@ -295,19 +295,29 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public async Task<IActionResult> Reports(string report = "")
         {
+            // DEV NOTE:
+            // Main reports page action.
+            // Uses the "report" query string to decide which dataset to load.
             var allModels = new AllModels();
 
             if (string.Equals(report, "requests", StringComparison.OrdinalIgnoreCase))
             {
+                // DEV NOTE:
+                // Load rider request records newest first for the Requests report.
                 allModels.Register = await _context.RegisterModels
                     .AsNoTracking()
                     .OrderByDescending(r => r.InsertDateTime)
                     .ToListAsync();
 
+                // DEV NOTE:
+                // Passed to the view so it knows which report table to render.
                 ViewBag.ReportType = "requests";
             }
             else if (string.Equals(report, "checkins", StringComparison.OrdinalIgnoreCase))
             {
+                // DEV NOTE:
+                // Load check-in records newest first.
+                // Include related pickup/dropoff locations so names can be shown in the view.
                 allModels.CheckIn = await _context.CheckIns
                     .AsNoTracking()
                     .Include(c => c.Location)
@@ -315,7 +325,8 @@ namespace MidStateShuttleService.Controllers
                     .OrderByDescending(c => c.Date)
                     .ToListAsync();
 
-                // Convert UTC -> Central for display consistency
+                // DEV NOTE:
+                // Stored dates are UTC, so convert them to Central before displaying.
                 if (allModels.CheckIn != null)
                 {
                     foreach (var checkIn in allModels.CheckIn)
@@ -326,6 +337,8 @@ namespace MidStateShuttleService.Controllers
             }
             else
             {
+                // DEV NOTE:
+                // No report selected yet, so the page loads with just the picker.
                 ViewBag.ReportType = "";
             }
 
@@ -342,6 +355,8 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public async Task<IActionResult> ExportRiderRequestsCsv()
         {
+            // DEV NOTE:
+            // Pull only the fields needed for CSV export.
             var rows = await _context.RegisterModels
                 .AsNoTracking()
                 .OrderByDescending(r => r.InsertDateTime)
@@ -360,11 +375,15 @@ namespace MidStateShuttleService.Controllers
                 })
                 .ToListAsync();
 
+            // DEV NOTE:
+            // Build CSV content manually with a StringBuilder.
             var sb = new System.Text.StringBuilder();
             sb.AppendLine("RegistrationId,Name,StudentId,Email,Phone,IsAdult,TripType,InsertDateTime,IsArchived,IsActive");
 
             foreach (var r in rows)
             {
+                // DEV NOTE:
+                // Csv(...) safely escapes text values that may contain commas, quotes, or line breaks.
                 sb.AppendLine(
                     $"{r.RegistrationId}," +
                     $"{Csv(r.Name)}," +
@@ -379,6 +398,8 @@ namespace MidStateShuttleService.Controllers
                 );
             }
 
+            // DEV NOTE:
+            // Return the CSV as a downloadable file.
             return File(
                 System.Text.Encoding.UTF8.GetBytes(sb.ToString()),
                 "text/csv",
@@ -395,6 +416,8 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public async Task<IActionResult> ExportCheckInsCsv()
         {
+            // DEV NOTE:
+            // Pull only the fields needed for check-in CSV export.
             var rows = await _context.CheckIns
                 .AsNoTracking()
                 .OrderByDescending(c => c.Date)
@@ -417,6 +440,8 @@ namespace MidStateShuttleService.Controllers
 
             foreach (var c in rows)
             {
+                // DEV NOTE:
+                // Convert stored UTC time to Central before writing it to the CSV.
                 var centralTime = TimeService.ConvertUtcToCentral(c.Date);
 
                 sb.AppendLine(
@@ -446,14 +471,20 @@ namespace MidStateShuttleService.Controllers
         // ==========================================================
         private static string Csv(string? value)
         {
+            // DEV NOTE:
+            // Prevent null issues by converting null to empty string.
             value ??= "";
 
+            // DEV NOTE:
+            // CSV values must be quoted if they contain commas, quotes, or line breaks.
             var mustQuote =
                 value.Contains(',') ||
                 value.Contains('"') ||
                 value.Contains('\n') ||
                 value.Contains('\r');
 
+            // DEV NOTE:
+            // Escape quotes by doubling them.
             value = value.Replace("\"", "\"\"");
 
             return mustQuote ? $"\"{value}\"" : value;

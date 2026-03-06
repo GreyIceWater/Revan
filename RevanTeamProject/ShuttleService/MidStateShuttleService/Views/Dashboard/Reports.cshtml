@@ -7,18 +7,21 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 
     // DEV NOTE:
-    // Controller sets ViewBag.ReportType so we know which report to display
+    // Controller sets ViewBag.ReportType ("requests" or "checkins")
+    // This determines which report section renders below.
     var reportType = (ViewBag.ReportType as string) ?? "";
 
     var isRequests = reportType.Equals("requests", StringComparison.OrdinalIgnoreCase);
     var isCheckins = reportType.Equals("checkins", StringComparison.OrdinalIgnoreCase);
 
     // DEV NOTE:
-    // Declare these ONCE so they exist everywhere in the page
+    // Convert model collections to lists so we can safely use Count(), Any(), and foreach.
+    // Also prevents null reference errors if the controller didn't populate them.
     var requestRows = (Model.Register ?? Enumerable.Empty<RegisterModel>()).ToList();
     var checkinRows = (Model.CheckIn ?? Enumerable.Empty<CheckIn>()).ToList();
 }
 
+<!-- DEV NOTE: Page styling -->
 <link rel="stylesheet" href="~/css/Dashboard.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Reports..css" asp-append-version="true" />
 
@@ -31,6 +34,7 @@
             <div class="reportsHint">Run admin reports and export CSV files.</div>
         </div>
 
+        <!-- DEV NOTE: Returns user to the dashboard reports widget -->
         <a class="rptBtn rptBtnGhost"
            href="@Url.Action("Index", "Dashboard", new { section = "reports" })">
             ← Back to Dashboard
@@ -38,6 +42,7 @@
     </div>
 
     <!-- DEV NOTE: REPORT PICKER -->
+    <!-- User selects which report to run -->
     <div class="reportCard">
         <div class="reportCardHeader">
             <div class="reportCardHeaderText">
@@ -49,6 +54,7 @@
         <div class="reportCardBody">
             <div class="reportPickerGrid">
 
+                <!-- DEV NOTE: Rider Requests report option -->
                 <div class="reportOption @(isRequests ? "reportOptionActive" : "")">
                     <div class="reportOptionTop">
                         <div class="reportOptionText">
@@ -62,11 +68,14 @@
                     </div>
 
                     <div class="reportOptionActions">
+
+                        <!-- DEV NOTE: Loads the Rider Requests report -->
                         <a class="rptBtn"
                            href="@Url.Action("Reports", "Dashboard", new { report = "requests" })">
                             Run
                         </a>
 
+                        <!-- DEV NOTE: CSV export of rider request data -->
                         <a class="rptBtn rptBtnOutline"
                            href="@Url.Action("ExportRiderRequestsCsv", "Dashboard")">
                             Export CSV
@@ -74,6 +83,7 @@
                     </div>
                 </div>
 
+                <!-- DEV NOTE: Check-ins report option -->
                 <div class="reportOption @(isCheckins ? "reportOptionActive" : "")">
                     <div class="reportOptionTop">
                         <div class="reportOptionText">
@@ -87,11 +97,14 @@
                     </div>
 
                     <div class="reportOptionActions">
+
+                        <!-- DEV NOTE: Loads the Check-ins report -->
                         <a class="rptBtn"
                            href="@Url.Action("Reports", "Dashboard", new { report = "checkins" })">
                             Run
                         </a>
 
+                        <!-- DEV NOTE: CSV export for check-in data -->
                         <a class="rptBtn rptBtnOutline"
                            href="@Url.Action("ExportCheckInsCsv", "Dashboard")">
                             Export CSV
@@ -104,12 +117,12 @@
     </div>
 
     @* DEV NOTE:
-       IMPORTANT Razor rule:
-       - NO HTML / markup / comments between @if and else if
-       - Keep them directly attached or Razor will render "else if" as text *@
+       Razor rule reminder:
+       No markup between @if and else if blocks *@
 
     @if (isRequests)
     {
+        <!-- DEV NOTE: Rider Requests report table -->
         <div class="reportCard reportResultsBlock">
             <div class="reportStickyBar">
                 <div class="reportStickyLeft">
@@ -118,13 +131,17 @@
                 </div>
 
                 <div class="reportStickyRight">
+
+                    <!-- Back to report picker -->
                     <a class="rptBtn rptBtnGhost"
                        href="@Url.Action("Index", "Dashboard", new { section = "reports" })">
                         ← Back
                     </a>
 
+                    <!-- Row count indicator -->
                     <span class="pill pill-neutral">Rows: @requestRows.Count</span>
 
+                    <!-- Export same data shown in table -->
                     <a class="rptBtn rptBtnOutline"
                        href="@Url.Action("ExportRiderRequestsCsv", "Dashboard")">
                         Export CSV
@@ -132,6 +149,7 @@
                 </div>
             </div>
 
+            <!-- DEV NOTE: Scrollable results table -->
             <div class="reportScrollArea">
                 <table class="reportsTable">
                     <thead>
@@ -151,6 +169,8 @@
                     </thead>
 
                     <tbody>
+
+                        <!-- DEV NOTE: Empty state -->
                         @if (!requestRows.Any())
                         {
                             <tr>
@@ -159,6 +179,7 @@
                         }
                         else
                         {
+                            // DEV NOTE: Loop through each registration record
                             foreach (var r in requestRows)
                             {
                                 <tr>
@@ -209,6 +230,7 @@
     }
     else if (isCheckins)
     {
+        <!-- DEV NOTE: Check-ins report table -->
         <div class="reportCard reportResultsBlock">
             <div class="reportStickyBar">
                 <div class="reportStickyLeft">
@@ -247,6 +269,8 @@
                     </thead>
 
                     <tbody>
+
+                        <!-- DEV NOTE: Empty state -->
                         @if (!checkinRows.Any())
                         {
                             <tr>
@@ -255,6 +279,7 @@
                         }
                         else
                         {
+                            // DEV NOTE: Loop through check-in records
                             foreach (var c in checkinRows)
                             {
                                 <tr>
@@ -269,7 +294,7 @@
                                         </span>
                                     </td>
 
-                                    @* DEV NOTE: Requires Include() in controller to avoid null nav properties *@
+                                    @* DEV NOTE: These depend on navigation properties being loaded in controller *@
                                     <td>@(c.Location?.Name ?? $"#{c.LocationId}")</td>
                                     <td>@(c.DropOffLocation?.Name ?? $"#{c.DropOffLocationId}")</td>
 
