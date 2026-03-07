@@ -197,7 +197,7 @@
     <template id="rideTemplate">
         <div class="ride-row row mb-2 align-items-center" data-ride-index="__rideIndex__">
 
-            <div class="col-3">
+            <div class="col-12 col-md-3 mb-2">
                 <select class="dropdown-midstate"
                         name="DaySchedules[__dayIndex__].Rides[__rideIndex__].PickUpLocationID"
                         required>
@@ -209,7 +209,7 @@
                 </select>
             </div>
 
-            <div class="col-3">
+            <div class="col-12 col-md-3 mb-2">
                 <select class="dropdown-midstate"
                         name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffLocationID"
                         required>
@@ -221,23 +221,22 @@
                 </select>
             </div>
 
-            <div class="col-3">
+            <div class="col-12 col-md-3 mb-2">
                 <select class="dropdown-midstate"
                         name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffTime"
                         required>
                     <option value="">Time</option>
-                    @if(Model.TimeOptions != null)
+                    @if (Model.TimeOptions != null)
                     {
-                       @foreach (var time in Model.TimeOptions)
+                        @foreach (var time in Model.TimeOptions)
                         {
                             <option value="@time.Value">@time.Text</option>
-                        } 
+                        }
                     }
-                    
                 </select>
             </div>
 
-            <div class="col-3">
+            <div class="col-12 col-md-3 mb-2">
                 <button type="button"
                         class="btn-midstate btn-danger removeRideBtn w-100">
                     Remove
@@ -246,6 +245,19 @@
 
         </div>
     </template>
+
+    <style>
+        @@media (max-width: 768px) {
+            .ride-row
+
+        {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+        }
+
+        }
+    </style>
 
 <script src="/js/Registeration/RegisterValidation.js"></script>
 <script src="/js/Registeration/RouteUpdater.js"></script>
