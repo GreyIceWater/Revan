@@ -17,51 +17,75 @@
 <div class="container1">
     <div class="navigation">
         <ul>
-            <li>
-                <a href="#">
-                    <span class="icon"></span>
-                    <span class="title"></span>
-                </a>
-            </li>
-            <li>
-                <a href="#" id="order">
-                    <span class="icon"><i class="bi bi-house"></i></span>
-                    <span class="title">Dashboard</span>
-                </a>
-            </li>
-            
-            <li>
-                <a href="#" id="special">
-                    <span class="icon"><i class="bi bi-send-arrow-down-fill"></i></span>
-                    <span class="title">Requests</span>
-                </a>
-            </li>
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a href="#" id="order">
+                        <span class="icon"><i class="bi bi-house"></i></span>
+                        <span class="title">Dashboard</span>
+                    </a>
+                </li>
+            }
 
-            <li>
-                <a href="#" id="routes">
-                    <span class="icon"><i class="bi bi-map"></i></span>
-                    <span class="title">Routes</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" id="check">
-                    <span class="icon"><i class="bi bi-clipboard2-check"></i></span>
-                    <span class="title">Check-ins</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" id="location">
-                    <span class="icon"><i class="bi bi-geo-alt"></i></span>
-                    <span class="title">Locations</span>
-                </a>
-            </li>
-            <li>
-                <a href="#" id="shuttle">
-                    <span class="icon"><i class="bi bi-bus-front"></i></span>
-                    <span class="title">Shuttles</span>
-                </a>
-            </li>
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a href="#" id="special">
+                        <span class="icon"><i class="bi bi-send-arrow-down-fill"></i></span>
+                        <span class="title">Requests</span>
+                    </a>
+                </li>
+            }
 
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a href="#" id="routes">
+                        <span class="icon"><i class="bi bi-map"></i></span>
+                        <span class="title">Routes</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a href="#" id="check">
+                        <span class="icon"><i class="bi bi-clipboard2-check"></i></span>
+                        <span class="title">Check-ins</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a href="#" id="location">
+                        <span class="icon"><i class="bi bi-geo-alt"></i></span>
+                        <span class="title">Locations</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a href="#" id="shuttle">
+                        <span class="icon"><i class="bi bi-bus-front"></i></span>
+                        <span class="title">Shuttles</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a href="#" id="driver">
+                        <span class="icon"><i class="bi bi-file-earmark-person-fill"></i></span>
+                        <span class="title">Drivers</span>
+                    </a>
+                </li>
+            }
             <li>
                 <a href="#" id="driver">
                     <span class="icon"><i class="bi bi-file-earmark-person-fill"></i></span>
@@ -75,40 +99,25 @@
                 </a>
             </li>
 
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a href="@Url.Action("Index", "Dashboard", new { section = "feedback" })" id="feedback">
+                        <span class="icon"><i class="bi bi-hand-thumbs-up"></i></span>
+                        <span class="title">Testimonials</span>
+                    </a>
+                </li>
+            }
 
-            <li>
-                @* <a href="#" id="feedback"> *@
-                @* <a href="@Url.Action("Index", "Dashboard", new { section = "feedback" })" id="feedback">
-                    <span class="icon"><i class="bi bi-hand-thumbs-up"></i></span>
-                    <span class="title">Feedbacks</span>
-                </a> *@
-                <a href="@Url.Action("Index", "Dashboard", new { section = "feedback" })" id="feedback">
-                    <span class="icon"><i class="bi bi-hand-thumbs-up"></i></span>
-                    <span class="title">Testimonials</span>
-                </a>
-            </li>
-
-
-            <li>
-                <a href="@Url.Action("Index", "Communicate")">
-                    <span class="icon"><i class="bi bi-send-arrow-down-fill"></i></span>
-                    <span class="title">Send Messages</span>
-                </a>
-            </li>
-
-            <li>
-                <a href="@Url.Action("Index", "Home")">
-                    <span class="icon"><i class="bi bi-arrow-return-left"></i></span>
-                    <span class="title">Return Home</span>
-                </a>
-            </li>
-
-            <li>
-                <a asp-area="MicrosoftIdentity" asp-controller="Auth" asp-action="Logout">
-                    <span class="icon"><i class="bi bi-box-arrow-left"></i></span>
-                    <span class="title">Sign out</span>
-                </a>
-            </li>
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a href="@Url.Action("Index", "Communicate")">
+                        <span class="icon"><i class="bi bi-send-arrow-down-fill"></i></span>
+                        <span class="title">Send Messages</span>
+                    </a>
+                </li>
+            }
         </ul>
     </div>
 </div>
@@ -190,31 +199,95 @@
 
     </div>
     <div class="details">
-        <!--Tables to hide-->
+
         <div class="recentFeedback messages">
-            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/MessagesTable.cshtml")
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/MessagesTable.cshtml")
+            }
+            else
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
+            }
         </div>
+
         <div class="recentFeedback route">
-            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/RouteTable.cshtml")
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/RouteTable.cshtml")
+            }
+            else
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
+            }
         </div>
+
         <div class="recentFeedback check">
-            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/CheckInTable.cshtml")
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/CheckInTable.cshtml")
+            }
+            else
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
+            }
         </div>
+
         <div class="recentFeedback location">
-            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/LocationTable.cshtml")
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/LocationTable.cshtml")
+            }
+            else
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
+            }
         </div>
+
         <div class="recentFeedback driver">
-            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/DriverTable.cshtml")
+            @if (User.IsInRole("Admin"))
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/DriverTable.cshtml")
+            }
+            else
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
+            }
         </div>
+
         <div class="recentFeedback shuttle">
-            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/ShuttleTable.cshtml")
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/ShuttleTable.cshtml")
+            }
+            else
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
+            }
         </div>
+
         <div class="recentFeedback feedback">
-            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/FeedbackTable.cshtml")
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/FeedbackTable.cshtml")
+            }
+            else
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
+            }
         </div>
+
         <div class="recentFeedback request">
-            @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_ViewRegistrations.cshtml")
+            @if (User.IsInRole("Admin"))
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_ViewRegistrations.cshtml")
+            }
+            else
+            {
+                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
+            }
         </div>
+
         <div class="recentFeedback reports">
             @await Html.PartialAsync("~/Views/Shared/DashboardPartials/ReportsTable.cshtml")
         </div>

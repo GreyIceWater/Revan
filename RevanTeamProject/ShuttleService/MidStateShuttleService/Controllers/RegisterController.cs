@@ -221,7 +221,7 @@ namespace MidStateShuttleService.Controllers
         /// This is the only Controller action to use view models
         /// </summary>
         /// <returns></returns>
-        [Authorize(Roles = "Admin,Driver")]
+        [Authorize(Roles = "Admin")]
         public IActionResult ViewRegistrations()
         {
             var registrations = new RegisterServices(_context).GetViewModels();
@@ -230,7 +230,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // Displays the full breakdown of a single registration
-        [Authorize(Roles = "Admin,Driver")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Details(int registrationId)
         {
             var registration = _context.RegisterModels
@@ -257,7 +257,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         //displays the details for special request/registrations
-        [Authorize(Roles = "Admin,Driver")]
+        [Authorize(Roles = "Admin")]
         public IActionResult SpecialDetails(int registrationId)
         {
             var model = _context.RegisterModels

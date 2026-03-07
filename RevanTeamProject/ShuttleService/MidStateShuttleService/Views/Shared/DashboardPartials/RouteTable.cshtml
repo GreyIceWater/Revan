@@ -16,8 +16,11 @@
         </label>
     </div>
     -->
-    
-    <a asp-controller="Routes" asp-action="Create" class="btn">Add Route</a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-controller="Routes" asp-action="Create" class="btn">Add Route</a>        
+    }
+
 </div>
 <table>
     <thead>
@@ -60,9 +63,15 @@
                             <span>Inactive</span>
                         }
                     </td>
-                    <td><a asp-controller="Routes" asp-action="Edit" asp-route-id="@r.RouteID">Update</a></td>
-                    <td><a asp-controller="Routes" asp-action="Delete" asp-route-id="@r.RouteID">Remove</a></td>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <td><a asp-controller="Routes" asp-action="Edit" asp-route-id="@r.RouteID">Update</a></td>
+                        <td><a asp-controller="Routes" asp-action="Delete" asp-route-id="@r.RouteID">Remove</a></td>                        
+                    }
+
                 </tr>
+
             }
         }
         

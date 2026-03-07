@@ -13,8 +13,11 @@
         </label>
     </div>
     -->
-    
-    <a asp-controller="Shuttles" asp-action="Create" class="btn">Add Shuttle</a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-controller="Shuttles" asp-action="Create" class="btn">Add Shuttle</a>       
+    }
+
 </div>
 <table>
     <thead>
@@ -38,8 +41,11 @@
                     <td>@b.BusNo</td>
                     <td>@b.PassengerCapacity</td>
                     <td>@b.IsActive.ToString()</td>
-                    <td><a asp-controller="Shuttles" asp-action="Edit" asp-route-id="@b.BusId">Update</a></td>
-                    <td><a asp-controller="Shuttles" asp-action="Delete" asp-route-id="@b.BusId">Remove</a></td>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <td><a asp-controller="Shuttles" asp-action="Edit" asp-route-id="@b.BusId">Update</a></td>
+                        <td><a asp-controller="Shuttles" asp-action="Delete" asp-route-id="@b.BusId">Remove</a></td>
+                    }
                 </tr>
             }
         }

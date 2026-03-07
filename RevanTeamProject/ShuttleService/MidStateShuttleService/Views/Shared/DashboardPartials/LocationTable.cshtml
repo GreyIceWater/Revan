@@ -15,7 +15,11 @@
             <i class="bi bi-search"></i>
         </label>
     </div>-->
-    <a asp-controller="Location" asp-action="Create" class="btn">Add Location</a>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-controller="Location" asp-action="Create" class="btn">Add Location</a>        
+    }
+
 </div>
 <table>
     <thead>
@@ -27,7 +31,7 @@
             <td>Zip Code</td>
             <td>Abbreviation</td>
             <td>Status</td>
-            <td>Action</td>
+            <td>Actions</td>
         </tr>
     </thead>
     <tbody id="locationsTableBody">
@@ -56,8 +60,12 @@
                             <span>Inactive</span>
                         }
                     </td>
-                    <td><a asp-controller="Location" asp-action="Edit" asp-route-id="@location.LocationId">Update</a></td>
-                    <td><a asp-controller="Location" asp-action="DeleteLocation" asp-route-id="@location.LocationId">Remove</a></td>
+                    @if (User.IsInRole("Admin"))
+                    {
+                       <td><a asp-controller="Location" asp-action="Edit" asp-route-id="@location.LocationId">Update</a></td>
+                        <td><a asp-controller="Location" asp-action="DeleteLocation" asp-route-id="@location.LocationId">Remove</a></td> 
+                    }
+                    
                 </tr>
             }
         }

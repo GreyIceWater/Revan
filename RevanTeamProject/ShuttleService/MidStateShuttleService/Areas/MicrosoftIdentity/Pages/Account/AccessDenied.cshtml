@@ -1,0 +1,41 @@
+﻿@page
+
+@{
+    ViewBag.Title = "Access Denied";
+}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/Form.css" />
+<link rel="stylesheet" href="/css/Input.css" />
+<link rel="stylesheet" href="/css/HelpIcon.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<div class="form-container tiled-background-1">
+    <div class="form-paper">
+
+        <section class="form-section main-form text-center">
+
+            <div style="font-size:60px; margin-bottom:15px; color:#c0392b;">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+
+            <h2>Access Denied</h2>
+
+            <p style="margin-top:10px;">
+                You do not have permission to access this section of the shuttle system.
+            </p>
+
+            <p style="color:#6c757d;">
+                If you believe this is a mistake, please contact the shuttle program administrator.
+            </p>
+
+            <div class="form-group submit-group" style="margin-top:25px;">
+                <a class="btn-midstate btn-primary" href="/Home/Index">
+                    <i class="bi bi-house-door"></i> Return Home
+                </a>
+            </div>
+
+        </section>
+
+    </div>
+</div>
