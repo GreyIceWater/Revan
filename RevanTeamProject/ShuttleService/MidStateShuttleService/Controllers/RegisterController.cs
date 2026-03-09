@@ -234,9 +234,10 @@ namespace MidStateShuttleService.Controllers
         public IActionResult Details(int registrationId)
         {
             var registration = _context.RegisterModels
-                .Include(r => r.DaySchedules)
-                    .ThenInclude(d => d.Rides)
-                .FirstOrDefault(r => r.RegistrationId == registrationId);
+            .Include(r => r.DaySchedules)
+                .ThenInclude(d => d.Rides)
+                    .ThenInclude(r => r.Route)
+            .FirstOrDefault(r => r.RegistrationId == registrationId);
 
             if (registration == null)
                 return NotFound();
@@ -253,7 +254,33 @@ namespace MidStateShuttleService.Controllers
                 })
                 .ToList();
 
+            var routesByPickDrop = new Dictionary<(int pickup, int dropoff), List<SelectListItem>>();
+
+            foreach (var pickup in registration.LocationNames.Select(l => int.Parse(l.Value)))
+            {
+                foreach (var drop in registration.LocationNames.Select(l => int.Parse(l.Value)))
+                {
+                    routesByPickDrop[(pickup, drop)] = _context.Routes
+                        .Where(r => r.PickUpLocationID == pickup && r.DropOffLocationID == drop)
+                        .Select(r => new SelectListItem
+                        {
+                            Value = r.RouteID.ToString(),
+                            Text = FormatTime(r.PickUpTime) + " > " + FormatTime(r.DropOffTime)
+                        })
+                        .ToList();
+                }
+            }
+            ViewBag.RoutesByPickDrop = routesByPickDrop;
+
             return View(registration);
+        }
+
+        private static string FormatTime(TimeSpan? time)
+        {
+            if (time == null)
+                return "";
+
+            return time.Value.ToString(@"h\:mm");
         }
 
         //displays the details for special request/registrations
@@ -321,6 +348,8 @@ namespace MidStateShuttleService.Controllers
                     existingRide.PickUpLocationID = modelRide.PickUpLocationID;
                     existingRide.DropOffLocationID = modelRide.DropOffLocationID;
                     existingRide.DropOffTime = modelRide.DropOffTime;
+
+                    existingRide.RouteId = modelRide.RouteId;
                 }
             }
 

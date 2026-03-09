@@ -29,6 +29,9 @@ public class Ride
 
 
     // Time they must arrive
-    [Required]
-    public TimeOnly DropOffTime { get; set; }
+    public TimeOnly? DropOffTime { get; set; }
+
+    public int? RouteId { get; set; }
+
+    public Routes? Route { get; set; }
 }

@@ -4,6 +4,7 @@ using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MidStateShuttleService.Models;
 
@@ -12,9 +13,11 @@ using MidStateShuttleService.Models;
 namespace MidStateShuttleService.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260307182901_RouteOnRide")]
+    partial class RouteOnRide
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -610,7 +613,7 @@ namespace MidStateShuttleService.Migrations
                     b.Property<int>("DropOffLocationID")
                         .HasColumnType("int");
 
-                    b.Property<TimeOnly?>("DropOffTime")
+                    b.Property<TimeOnly>("DropOffTime")
                         .HasColumnType("time");
 
                     b.Property<int>("PickUpLocationID")
@@ -629,8 +632,6 @@ namespace MidStateShuttleService.Migrations
                     b.HasIndex("PickUpLocationID");
 
                     b.HasIndex("RequestDayId");
-
-                    b.HasIndex("RouteId");
 
                     b.ToTable("Ride");
                 });
@@ -771,17 +772,11 @@ namespace MidStateShuttleService.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MidStateShuttleService.Models.Routes", "Route")
-                        .WithMany()
-                        .HasForeignKey("RouteId");
-
                     b.Navigation("DropOffLocation");
 
                     b.Navigation("PickUpLocation");
 
                     b.Navigation("RequestDay");
-
-                    b.Navigation("Route");
                 });
 
             modelBuilder.Entity("MidStateShuttleService.Models.RegisterModel", b =>

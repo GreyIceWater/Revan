@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
@@ -181,6 +182,32 @@ namespace MidStateShuttleService.Controllers
             {
                 return View();
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRoutes(int pickupId, int dropoffId)
+        {
+            var routes = await _context.Routes
+                .Where(r => r.PickUpLocationID == pickupId &&
+                            r.DropOffLocationID == dropoffId)
+                .ToListAsync();
+
+            var result = routes.Select(r => new
+            {
+                id = r.RouteID,
+                pickupTime = FormatTime(r.PickUpTime),
+                dropoffTime = FormatTime(r.DropOffTime)
+            });
+
+            return Json(result);
+        }
+
+        private static string FormatTime(TimeSpan? time)
+        {
+            if (time == null)
+                return "";
+
+            return time.Value.ToString(@"h\:mm");
         }
     }
 }

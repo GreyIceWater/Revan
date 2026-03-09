@@ -8,180 +8,333 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 <link rel="stylesheet" href="/css/Form.css" />
 <link rel="stylesheet" href="/css/Input.css" />
+<link rel="stylesheet" href="/css/HelpIcon.css" />
 
-<div class="form-container">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<div class="form-container tiled-background-1">
     <div class="form-paper">
 
         <h2>Edit Registration</h2>
 
-        @using (Html.BeginForm("EditSave", "Register", FormMethod.Post, new { id = "editForm" }))
+        @using (Html.BeginForm("EditSave", "Register", FormMethod.Post, new { id = "registrationForm" }))
         {
             @Html.AntiForgeryToken()
-
             @Html.HiddenFor(m => m.RegistrationId)
 
             <!-- TERM -->
             <div class="form-group">
-                @Html.DropDownListFor(x => x.Term,
-                    (IEnumerable<SelectListItem>)ViewBag.Terms,
-                    "Select Term",
-                    new { @class = "dropdown-midstate", required = "required" })
-            </div>
+                @Html.DropDownListFor(
+                x => x.Term,
+                        (IEnumerable<SelectListItem>)ViewBag.Terms,
+                        "Select Term",
+                        new { @class = "dropdown-midstate", required = "required" }
+                        )
+        </div>
 
-            <!-- LENGTH -->
-            <div class="form-group">
-                <select asp-for="LengthOfRequest"
-                        class="dropdown-midstate"
-                        asp-items="Html.GetEnumSelectList<LengthOfRequest>()"
-                        required>
-                    <option value="">-- Select Length --</option>
-                </select>
-            </div>
+        <!-- LENGTH -->
+        <div class="form-group">
+            <label asp-for="LengthOfRequest"></label>
 
-            <!-- DAY SCHEDULES -->
-            <h4 class="mt-4">Day Schedules</h4>
+            <select asp-for="LengthOfRequest"
+                    class="form-control dropdown-midstate"
+                    asp-items="Html.GetEnumSelectList<LengthOfRequest>()">
 
-            <div id="dayCardsContainer">
+                <option value="">-- Select Length --</option>
 
-                @for (int i = 0; i < Model.DaySchedules.Count; i++)
+            </select>
+        </div>
+
+        <!-- ADD DAY -->
+        <div class="form-group">
+            <button type="button"
+                    class="btn-midstate btn-primary"
+                    id="addDayBtn">
+                Add Day +
+            </button>
+
+            <span class="help-icon"
+                  data-help="Add a day and schedule rides for it.">
+                ?
+            </span>
+        </div>
+
+        <!-- DAY CARDS -->
+        <div id="dayCardsContainer">
+
+            @if (Model.DaySchedules != null && Model.DaySchedules.Any())
                 {
-                    <div class="day-card form-paper mb-4 p-4">
+                    for (int d = 0; d < Model.DaySchedules.Count; d++)
+                    {
+                        var day = Model.DaySchedules[d];
 
-                        @Html.HiddenFor(m => m.DaySchedules[i].RequestDayId)
+                        <div class="day-card form-paper mb-4 p-4" data-day-index="@d">
 
-                        <!-- WEEKDAY -->
-                        <div class="form-group">
-                            <select class="dropdown-midstate"
-                                    asp-for="DaySchedules[i].WeekDay"
-                                    required>
-                                <option value="">Select Day</option>
-                                <option>Monday</option>
-                                <option>Tuesday</option>
-                                <option>Wednesday</option>
-                                <option>Thursday</option>
-                            </select>
-                        </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="mb-0">Day Request</h4>
 
-                        <!-- RIDES -->
-                        <h5>Rides</h5>
+                                <button type="button"
+                                        class="btn-midstate btn-danger removeDayBtn">
+                                    Remove
+                                </button>
+                            </div>
 
-                        @for (int j = 0; j < Model.DaySchedules[i].Rides.Count; j++)
-                        {
-                            <div class="ride-row row mb-2">
+                            <!-- DAY SELECT -->
+                            <div class="form-group mb-3">
 
-                                @Html.HiddenFor(m => m.DaySchedules[i].Rides[j].RideId)
+                                <select class="dropdown-midstate day-select"
+                                        name="DaySchedules[@d].WeekDay"
+                                        required>
 
-                                <div class="col-3">
-                                    <select class="dropdown-midstate"
-                                            asp-for="DaySchedules[i].Rides[j].PickUpLocationID"
-                                            asp-items="Model.LocationNames"
-                                            required>
-                                        <option value="">Pick-Up</option>
-                                    </select>
-                                </div>
+                                    <option value="">Select Day</option>
 
-                                <div class="col-3">
-                                    <select class="dropdown-midstate"
-                                            asp-for="DaySchedules[i].Rides[j].DropOffLocationID"
-                                            asp-items="Model.LocationNames"
-                                            required>
-                                        <option value="">Drop-Off</option>
-                                    </select>
-                                </div>
+                                    @foreach (WeekDay w in Enum.GetValues(typeof(WeekDay)))
+                                    {
+                                        <option value="@w" selected="@(day.WeekDay == w)">
+                                            @w
+                                        </option>
+                                    }
 
-                                <div class="col-3">
-                                    <select class="dropdown-midstate"
-                                            asp-for="DaySchedules[i].Rides[j].DropOffTime"
-                                            asp-items="Model.TimeOptions"
-                                            required>
-                                        <option value="">Time</option>
-                                    </select>
-                                </div>
+                                </select>
 
                             </div>
-                        }
 
-                    </div>
+                            <!-- ADD RIDE -->
+                            <div class="form-group mb-3">
+                                <button type="button"
+                                        class="btn-midstate btn-secondary addRideBtn">
+                                    Add Ride +
+                                </button>
+                            </div>
+
+                            <div class="ridesContainer mt-2">
+
+                                @if (day.Rides != null)
+                                {
+                                    for (int r = 0; r < day.Rides.Count; r++)
+                                    {
+                                        var ride = day.Rides[r];
+
+                                        <div class="ride-row row mb-2 align-items-center" data-ride-index="@r">
+
+                                            <input type="hidden"
+                                                   name="DaySchedules[@d].Rides[@r].RideId"
+                                                   value="@ride.RideId" />
+
+                                            <!-- PICKUP -->
+                                            <div class="col-md-3 mb-2">
+
+                                                <select class="dropdown-midstate"
+                                                        name="DaySchedules[@d].Rides[@r].PickUpLocationID"
+                                                        required>
+
+                                                    <option value="">Pick-Up</option>
+
+                                                    @foreach (var loc in Model.LocationNames)
+                                                    {
+                                                        <option value="@loc.Value"
+                                                                selected="@(loc.Value == ride.PickUpLocationID.ToString())">
+                                                            @loc.Text
+                                                        </option>
+                                                    }
+
+                                                </select>
+
+                                            </div>
+
+                                            <!-- DROPOFF -->
+                                            <div class="col-md-3 mb-2">
+
+                                                <select class="dropdown-midstate"
+                                                        name="DaySchedules[@d].Rides[@r].DropOffLocationID"
+                                                        required>
+
+                                                    <option value="">Drop-Off</option>
+
+                                                    @foreach (var loc in Model.LocationNames)
+                                                    {
+                                                        <option value="@loc.Value"
+                                                                selected="@(loc.Value == ride.DropOffLocationID.ToString())">
+                                                            @loc.Text
+                                                        </option>
+                                                    }
+
+                                                </select>
+
+                                            </div>
+
+                                            <!-- ROUTE -->
+                                            <div class="col-md-3 mb-2">
+
+                                                <select class="dropdown-midstate route-select"
+                                                        name="DaySchedules[@d].Rides[@r].RouteId">
+
+                                                    <option value="">Select Route (Optional)</option>
+
+                                                    @{
+                                                        var routesDict = (Dictionary<(int pickup, int dropoff), List<SelectListItem>>)ViewBag.RoutesByPickDrop;
+                                                        var key = (ride.PickUpLocationID, ride.DropOffLocationID);
+
+                                                        @if (routesDict != null && routesDict.ContainsKey(key))
+                                                        {
+                                                            foreach (var route in routesDict[key])
+                                                            {
+                                                                var isSelected = ride.RouteId != null && ride.RouteId.ToString() == route.Value;
+
+                                                                <option value="@route.Value" selected="@(isSelected ? "selected" : null)">
+                                                                    @route.Text
+                                                                </option>
+                                                            }
+                                                        }
+                                                    }
+
+                                                </select>
+
+                                            </div>
+
+                                            <!-- TIME -->
+                                            <div class="col-md-3 mb-2">
+
+                                                <select class="dropdown-midstate time-select"
+                                                        name="DaySchedules[@d].Rides[@r].DropOffTime">
+
+                                                    <option value="">Select Time (Optional)</option>
+
+                                                    @foreach (var time in Model.TimeOptions)
+                                                    {
+                                                        <option value="@time.Value"
+                                                                selected="@(time.Value == ride.DropOffTime.ToString())">
+                                                            @time.Text
+                                                        </option>
+                                                    }
+
+                                                </select>
+
+                                            </div>
+
+                                            <!-- REMOVE -->
+                                            <div class="col-md-3 mb-2">
+
+                                                <button type="button"
+                                                        class="btn-midstate btn-danger removeRideBtn w-100">
+                                                    Remove
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+                                    }
+                                }
+
+                            </div>
+
+                        </div>
+                    }
                 }
 
             </div>
 
-            <!-- FULL NAME -->
+            <!-- NAME -->
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
+
+                <label asp-for="Name"></label>
+
                 <input asp-for="Name"
                        class="form-control midstate-textinput"
                        placeholder="Enter Students Name"
                        required />
-                <span asp-validation-for="Name" class="text-danger"></span>
+
             </div>
 
             <!-- STUDENT ID -->
             <div class="form-group">
-                <label class="control-label">Student ID (Mid-State Students Only)</label>
+
+                <label>Student ID (Mid-State Students Only)</label>
+
                 <input asp-for="StudentId"
                        class="form-control midstate-textinput"
                        placeholder="8-Digit Student ID" />
-                <span asp-validation-for="StudentId" class="text-danger"></span>
+
             </div>
 
             <!-- EMAIL -->
             <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
+
+                <label asp-for="Email"></label>
+
                 <input asp-for="Email"
-                        class="form-control midstate-textinput"
-                        type="email"
-                        placeholder="Enter your email"
-                        required />
-                <span asp-validation-for="Email" class="text-danger"></span>
+                       class="form-control midstate-textinput"
+                       type="email"
+                       required />
+
             </div>
 
             <!-- PHONE -->
             <div class="form-group">
-                <label asp-for="Phone" class="control-label"></label>
+
+                <label asp-for="Phone"></label>
+
                 <input asp-for="Phone"
-                        class="form-control midstate-textinput"
-                        type="tel"
-                        placeholder="Enter your phone number"
-                        required />
-                <span asp-validation-for="Phone" class="text-danger"></span>
+                       class="form-control midstate-textinput"
+                       type="tel"
+                       required />
+
             </div>
 
             <!-- AGE -->
-            <div class="form-group mt-3">
+            <div class="form-group">
+
                 <input asp-for="IsAdult" type="checkbox" />
                 <label asp-for="IsAdult"></label>
+
             </div>
 
-            <!-- AGREEMENT -->
-            <div class="form-group mt-3">
+            <!-- TERMS -->
+            <div class="form-group">
+
                 <input asp-for="AgreeTerms" type="checkbox" />
                 <label asp-for="AgreeTerms"></label>
+
             </div>
 
-            <!-- SAVE BUTTON -->
+            <!-- SAVE -->
             <div class="form-group submit-group">
-                <button class="btn-midstate btn-primary" type="submit"
+
+                <button class="btn-midstate btn-primary"
+                        type="submit"
                         @(User.IsInRole("Driver") || User.IsInRole("Rider") ? "disabled" : "")>
                     Save Changes
                 </button>
-                <a asp-controller="Dashboard" 
+
+                <a asp-controller="Dashboard"
                    asp-action="Index"
                    class="btn-midstate btn-secondary">
                     Back
                 </a>
+
             </div>
 
-            
         }
 
-        <!-- ARCHIVE BUTTON -->
-            <form asp-action="ArchiveRegistration" method="post">
-                <input type="hidden" name="id" value="@Model.RegistrationId" />
-                <button type="submit" class="btn-midstate btn-warning"
-                        @(User.IsInRole("Driver") || User.IsInRole("Rider") ? "disabled" : "")>
-                    Archive
-                </button>
-            </form>
+        <!-- ARCHIVE -->
+        <form asp-action="ArchiveRegistration" method="post">
+
+            <input type="hidden"
+                   name="id"
+                   value="@Model.RegistrationId" />
+
+            <button type="submit"
+                    class="btn-midstate btn-warning"
+                    @(User.IsInRole("Driver") || User.IsInRole("Rider") ? "disabled" : "")>
+                Archive
+            </button>
+
+        </form>
+
     </div>
 </div>
+
+<script src="/js/RouteSelector.js"></script>
+<script src="/js/helpicon.js"></script>
+<script src="/js/DayCards.js"></script>

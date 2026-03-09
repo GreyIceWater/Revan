@@ -54,7 +54,7 @@ namespace MidStateShuttleService.Service
                             {
                                 PickUpLocation = ride.PickUpLocationID.ToString(),
                                 DropOffLocation = ride.DropOffLocationID.ToString(),
-                                DropOffTime = ride.DropOffTime.ToString("hh\\:mm")
+                                DropOffTime = ride.DropOffTime.ToString()
                             }).ToList()
 
                         }).ToList(),

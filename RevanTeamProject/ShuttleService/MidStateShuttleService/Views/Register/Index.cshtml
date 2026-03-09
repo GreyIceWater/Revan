@@ -222,13 +222,20 @@
             </div>
 
             <div class="col-12 col-md-3 mb-2">
-                <select class="dropdown-midstate"
-                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffTime"
-                        required>
-                    <option value="">Time</option>
+                <select class="dropdown-midstate route-select"
+                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].RouteId">
+                    <option value="">Select Route (Optional)</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3 mb-2">
+                <select class="dropdown-midstate time-select"
+                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffTime">
+                    <option value="">Select Time (Optional)</option>
+
                     @if (Model.TimeOptions != null)
                     {
-                        @foreach (var time in Model.TimeOptions)
+                        foreach (var time in Model.TimeOptions)
                         {
                             <option value="@time.Value">@time.Text</option>
                         }
@@ -259,10 +266,9 @@
         }
     </style>
 
-<script src="/js/Registeration/RegisterValidation.js"></script>
-<script src="/js/Registeration/RouteUpdater.js"></script>
-<script src="/js/Registeration/ReturnRouteUpdater.js"></script>
-<script src="/js/Registeration/routeVisibility.js"></script>
+
+
+<script src="/js/RouteSelector.js"></script>
 <script src="/js/helpicon.js"></script>
 <script src="/js/DayCards.js"></script>
 
