@@ -10,8 +10,7 @@ env:
   DOTNET_VERSION: "10.0.x"
 
 jobs:
-
-    semgrep:
+  semgrep:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -24,8 +23,9 @@ jobs:
         uses: semgrep/semgrep-action@v1
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-          
+
   build-and-deploy:
+    needs: semgrep
     runs-on: ubuntu-latest
 
     steps:
