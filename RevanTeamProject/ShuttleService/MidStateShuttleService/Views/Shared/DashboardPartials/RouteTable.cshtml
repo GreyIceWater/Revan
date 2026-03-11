@@ -28,6 +28,7 @@
             <td>Reservation List</td>
             <td>Pick Up Location</td>
             <td>Drop Off Location</td>
+            <td>Day of Week</td>
             <td>Pick Up Time</td>
             <td>Drop Off Time</td>
             <td>Driver</td>
@@ -49,6 +50,7 @@
                     <td><a asp-controller="Dashboard" asp-action="PassengerList" asp-route-id="@r.RouteID">View Reservations</a></td>
                     <td>@r.PickUpLocation.ToStringPickup()</td>
                     <td>@r.DropOffLocation.ToStringDropoff()</td>
+                    <td>@r.DayOfWeek.ToString()</td>
                     <td>@r.ToStringPickUpTime()</td>
                     <td>@r.ToStringDropOffTime()</td>
                     <td>@r.Driver.ToStringDriver()</td>

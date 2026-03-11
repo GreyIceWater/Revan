@@ -1,54 +1,183 @@
-﻿
+﻿// Wait until the page is fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+
+    // Listen for changes anywhere in the document
+    // This automatically supports dynamically added rides
+    document.addEventListener("change", handleChange);
+
+    // Initialize routes for rides that already exist on the page
+    setTimeout(initializeExistingRides, 50);
+});
 
 
-document.addEventListener("change", async function (e) {
+/*
+ Handles all change events and determines what action to take.
+*/
+async function handleChange(e) {
+    const target = e.target;
 
+    if (target.classList.contains("route-select")) {
+        toggleField(target, ".time-select");
+        return;
+    }
+
+    if (target.classList.contains("time-select")) {
+        toggleField(target, ".route-select");
+        return;
+    }
+
+    // If pickup, dropoff, or day select changed → refresh routes
     if (
-        !e.target.name.includes("PickUpLocationID") &&
-        !e.target.name.includes("DropOffLocationID")
-    ) return
+        target.name?.includes("PickUpLocationID") ||
+        target.name?.includes("DropOffLocationID") ||
+        target.classList.contains("day-select")
+    ) {
+        // If it's a day select, refresh all rides under this day
+        if (target.classList.contains("day-select")) {
+            const dayCard = target.closest(".day-card");
+            const rows = dayCard.querySelectorAll(".ride-row");
+            rows.forEach(row => updateRoutes(row));
+        } else {
+            const row = target.closest(".ride-row");
+            if (row) updateRoutes(row);
+        }
+    }
+}
 
-    const row = e.target.closest(".ride-row")
 
-    const pickup = row.querySelector("[name*='PickUpLocationID']").value
-    const dropoff = row.querySelector("[name*='DropOffLocationID']").value
+/*
+ Enables/disables the opposite dropdown so users
+ cannot choose both a route and a manual time.
+*/
+function toggleField(source, selector) {
 
-    if (!pickup || !dropoff) return
+    const row = source.closest(".ride-row");
+    if (!row) return;
 
-    const routeDropdown = row.querySelector(".route-select")
+    const other = row.querySelector(selector);
+    if (!other) return;
 
-    const response = await fetch(`/Routes/GetRoutes?pickupId=${pickup}&dropoffId=${dropoff}`)
-    const routes = await response.json()
+    other.disabled = source.value !== "";
+}
 
-    routeDropdown.innerHTML = `<option value="">Select Route (Optional)</option>`
 
-    routes.forEach(r => {
-        routeDropdown.innerHTML += `<option value="${r.id}">${r.pickupTime} → ${r.dropoffTime}</option>`
-    })
-})
+/*
+ Fetch routes based on pickup, dropoff, and weekday.
+*/
+async function updateRoutes(source) {
 
-document.addEventListener("change", function (e) {
+    // Get the ride row
+    const row = source.closest?.(".ride-row") || source;
+    if (!row) return;
 
-    if (!e.target.classList.contains("route-select")) return
+    // Get parent day card
+    const dayCard = row.closest(".day-card");
+    if (!dayCard) return;
 
-    const row = e.target.closest(".ride-row")
-    const timeSelect = row.querySelector(".time-select")
+    // Get weekday
+    const weekday = dayCard.querySelector(".day-select")?.value;
+    if (!weekday) return;
 
-    if (e.target.value !== "")
-        timeSelect.disabled = true
-    else
-        timeSelect.disabled = false
-})
+    // Get pickup/dropoff
+    const pickup = row.querySelector("[name*='PickUpLocationID']")?.value;
+    const dropoff = row.querySelector("[name*='DropOffLocationID']")?.value;
 
-document.addEventListener("change", function (e) {
+    if (!pickup || !dropoff) return;
 
-    if (!e.target.classList.contains("time-select")) return
+    const routeDropdown = row.querySelector(".route-select");
+    if (!routeDropdown) return;
 
-    const row = e.target.closest(".ride-row")
-    const routeSelect = row.querySelector(".route-select")
+    // Save currently selected route
+    const selectedRoute = routeDropdown.value;
 
-    if (e.target.value !== "")
-        routeSelect.disabled = true
-    else
-        routeSelect.disabled = false
-})
+    // Show loading state
+    routeDropdown.innerHTML = `<option value="">Loading routes...</option>`;
+
+    // Build API query
+    const params = new URLSearchParams({
+        pickupId: pickup,
+        dropoffId: dropoff,
+        dayOfWeek: weekday
+    });
+
+    const url = `${window.location.origin}/Routes/GetRoutes?${params}`;
+
+    try {
+
+        const response = await fetch(url);
+
+        if (!response.ok)
+            throw new Error(response.statusText);
+
+        const routes = await response.json();
+
+        populateRoutes(routeDropdown, routes, selectedRoute);
+
+    } catch (err) {
+
+        console.error("Route fetch failed:", err);
+
+        routeDropdown.innerHTML =
+            `<option value="">Unable to load routes</option>`;
+
+    }
+
+}
+
+
+/*
+ Populate the route dropdown with API results.
+*/
+function populateRoutes(select, routes, selectedRoute) {
+
+    select.innerHTML = "";
+
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "Select Route (Optional)";
+    select.appendChild(defaultOption);
+
+    const fragment = document.createDocumentFragment();
+
+    routes.forEach(route => {
+
+        const option = document.createElement("option");
+
+        option.value = route.id;
+        option.textContent =
+            `${route.pickupTime} → ${route.dropoffTime}`;
+
+        if (route.id.toString() === selectedRoute)
+            option.selected = true;
+
+        fragment.appendChild(option);
+
+    });
+
+    select.appendChild(fragment);
+}
+
+
+/*
+ When editing an existing registration, rides already have
+ pickup and dropoff values but routes were rendered by Razor.
+
+ This function refreshes them so the dropdown always reflects
+ the API results.
+*/
+function initializeExistingRides() {
+
+    const rows = document.querySelectorAll(".ride-row");
+
+    rows.forEach(row => {
+
+        const pickup = row.querySelector("[name*='PickUpLocationID']");
+        const dropoff = row.querySelector("[name*='DropOffLocationID']");
+
+        if (pickup && dropoff && pickup.value && dropoff.value) {
+            updateRoutes(row);
+        }
+
+    });
+
+}

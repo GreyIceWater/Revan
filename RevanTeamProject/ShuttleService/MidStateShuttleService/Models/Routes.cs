@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MidStateShuttleService.Enums;
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -56,6 +57,8 @@ namespace MidStateShuttleService.Models
 
         [NotMapped]
         public string? RouteInfo;
+
+        public WeekDay DayOfWeek { get; set; }
 
         public string ToStringPickUp()
         {

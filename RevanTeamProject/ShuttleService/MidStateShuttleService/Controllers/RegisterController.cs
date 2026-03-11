@@ -155,39 +155,82 @@ namespace MidStateShuttleService.Controllers
             LocationServices ls = new LocationServices(_context);
             RegisterServices rs = new RegisterServices(_context);
 
+            model.TimeOptions = GetTimeSelectList();
 
-            // Repopulate LocationNames for the model in case of return to View due to invalid model state or any error.
+            model.InsertDateTime = DateTime.Now;
+
+            // Repopulate LocationNames in case we return to the view
             model.LocationNames = ls.GetLocationNames();
 
             if (ModelState.IsValid)
             {
-                var oidClaim = User.FindFirst("oid")
-                ?? User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier");
+                // -------- VALIDATION SECTION --------
 
-                string userId = oidClaim?.Value;
-
-                var dbUser = _context.Users
-                .FirstOrDefault(u => u.AzureAdObjectId == userId);
-
-                model.IsActive = true; // Set IsActive to true
-                model.DeviceIpAddress = model.DeviceIpAddress ?? "Unknown";
-                model.InsertDateTime = DateTime.Now;
-
-                if (dbUser != null)
+                // Ensure days are not repeated
+                if (model.DaySchedules != null)
                 {
-                    model.UserId = dbUser.Id;
+                    var duplicateDays = model.DaySchedules
+                        .GroupBy(d => d.WeekDay)
+                        .Where(g => g.Count() > 1)
+                        .Select(g => g.Key)
+                        .ToList();
+
+                    if (duplicateDays.Any())
+                    {
+                        TempData["Error"] = "Each request day (Monday–Thursday) can only be selected once.";
+                        ViewBag.Terms = GetSchoolTermSelectList();
+                        return View("Index", model);
+                    }
                 }
+
+                // Ensure at least one ride exists
+                bool hasRide = model.DaySchedules != null &&
+                               model.DaySchedules.Any(d => d.Rides != null && d.Rides.Any());
+
+                if (!hasRide)
+                {
+                    TempData["Error"] = "At least one ride must be added to submit a registration.";
+                    ViewBag.Terms = GetSchoolTermSelectList();
+                    return View("Index", model);
+                }
+
+                // Ensure no request day has zero rides
+                bool emptyDayExists = model.DaySchedules != null &&
+                                      model.DaySchedules.Any(d => d.Rides == null || !d.Rides.Any());
+
+                if (emptyDayExists)
+                {
+                    TempData["Error"] = "Every request day must contain at least one ride.";
+                    ViewBag.Terms = GetSchoolTermSelectList();
+                    return View("Index", model);
+                }
+
+                // Ensure each ride has either Route OR Time
+                bool invalidRide = model.DaySchedules != null &&
+                                   model.DaySchedules.Any(d =>
+                                        d.Rides != null &&
+                                        d.Rides.Any(r =>
+                                            r.RouteId == null &&
+                                            string.IsNullOrWhiteSpace(r.DropOffTime.ToString())));
+
+                if (invalidRide)
+                {
+                    TempData["Error"] = "Each ride must have either a route selected or a drop-off time.";
+                    ViewBag.Terms = GetSchoolTermSelectList();
+                    return View("Index", model);
+                }
+
+                // -------- SAVE REGISTRATION --------
 
                 if (rs.AddEntity(model))
                 {
-                    // Increment the registration count in the session
                     int registrationCount = HttpContext.Session.GetInt32("RegistrationCount") ?? 0;
                     registrationCount++;
 
                     HttpContext.Session.SetInt32("RegistrationCount", registrationCount);
 
-                    string emailBody = ""; 
-                    
+                    string emailBody = "";
+
                     if (model.isCustom)
                     {
                         emailBody = BuildEmailForSpecialRegisterSubmit(model.RegistrationId);
@@ -213,7 +256,6 @@ namespace MidStateShuttleService.Controllers
             }
 
             ViewBag.Terms = GetSchoolTermSelectList();
-
             return View("Index", model);
         }
 
@@ -280,7 +322,7 @@ namespace MidStateShuttleService.Controllers
             if (time == null)
                 return "";
 
-            return time.Value.ToString(@"h\:mm");
+            return DateTime.Today.Add(time.Value).ToString("h:mm tt");
         }
 
         //displays the details for special request/registrations
@@ -332,25 +374,31 @@ namespace MidStateShuttleService.Controllers
             existing.StudentId = model.StudentId;
             existing.Name = model.Name;
 
-            // Update DaySchedules and Rides
-            for (int i = 0; i < existing.DaySchedules.Count; i++)
+            // Clear existing structure
+            existing.DaySchedules.Clear();
+
+            foreach (var modelDay in model.DaySchedules)
             {
-                var existingDay = existing.DaySchedules[i];
-                var modelDay = model.DaySchedules[i];
-
-                existingDay.WeekDay = modelDay.WeekDay;
-
-                for (int j = 0; j < existingDay.Rides.Count; j++)
+                var newDay = new RequestDay
                 {
-                    var existingRide = existingDay.Rides[j];
-                    var modelRide = modelDay.Rides[j];
+                    WeekDay = modelDay.WeekDay,
+                    Rides = new List<Ride>()
+                };
 
-                    existingRide.PickUpLocationID = modelRide.PickUpLocationID;
-                    existingRide.DropOffLocationID = modelRide.DropOffLocationID;
-                    existingRide.DropOffTime = modelRide.DropOffTime;
+                foreach (var modelRide in modelDay.Rides)
+                {
+                    var newRide = new Ride
+                    {
+                        PickUpLocationID = modelRide.PickUpLocationID,
+                        DropOffLocationID = modelRide.DropOffLocationID,
+                        DropOffTime = modelRide.DropOffTime,
+                        RouteId = modelRide.RouteId
+                    };
 
-                    existingRide.RouteId = modelRide.RouteId;
+                    newDay.Rides.Add(newRide);
                 }
+
+                existing.DaySchedules.Add(newDay);
             }
 
             _context.SaveChanges();

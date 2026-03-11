@@ -159,8 +159,10 @@
     <!-- Day Card Template -->
     <template id="dayCardTemplate">
         <div class="day-card form-paper mb-4 p-4" data-day-index="__dayIndex__">
+
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="mb-0">Day Request</h4>
+
                 <button type="button"
                         class="btn-midstate btn-danger removeDayBtn">
                     Remove
@@ -172,11 +174,13 @@
                 <select class="dropdown-midstate day-select"
                         name="DaySchedules[__dayIndex__].WeekDay"
                         required>
+
                     <option value="">Select Day</option>
-                    <option>Monday</option>
-                    <option>Tuesday</option>
-                    <option>Wednesday</option>
-                    <option>Thursday</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+
                 </select>
             </div>
 
@@ -190,47 +194,69 @@
 
             <!-- RIDES CONTAINER -->
             <div class="ridesContainer mt-2"></div>
+
         </div>
     </template>
 
-    <!-- Location Pair Template -->
+    <!-- Ride Template -->
     <template id="rideTemplate">
-        <div class="ride-row row mb-2 align-items-center" data-ride-index="__rideIndex__">
 
-            <div class="col-12 col-md-3 mb-2">
-                <select class="dropdown-midstate"
-                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].PickUpLocationID"
-                        required>
-                    <option value="">Pick-Up</option>
-                    @foreach (var loc in Model.LocationNames)
-                    {
-                        <option value="@loc.Value">@loc.Text</option>
-                    }
-                </select>
+        <div class="ride-row mb-3 p-3 border rounded"
+             data-ride-index="__rideIndex__">
+
+            <!-- PICKUP + DROPOFF -->
+            <div class="row mb-2">
+
+                <div class="col-12 col-md-6 mb-2">
+                    <select class="dropdown-midstate"
+                            name="DaySchedules[__dayIndex__].Rides[__rideIndex__].PickUpLocationID"
+                            required>
+
+                        <option value="">Pick-Up</option>
+
+                        @foreach (var loc in Model.LocationNames)
+                        {
+                            <option value="@loc.Value">@loc.Text</option>
+                        }
+
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-6 mb-2">
+                    <select class="dropdown-midstate"
+                            name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffLocationID"
+                            required>
+
+                        <option value="">Drop-Off</option>
+
+                        @foreach (var loc in Model.LocationNames)
+                        {
+                            <option value="@loc.Value">@loc.Text</option>
+                        }
+
+                    </select>
+                </div>
+
             </div>
 
-            <div class="col-12 col-md-3 mb-2">
-                <select class="dropdown-midstate"
-                        name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffLocationID"
-                        required>
-                    <option value="">Drop-Off</option>
-                    @foreach (var loc in Model.LocationNames)
-                    {
-                        <option value="@loc.Value">@loc.Text</option>
-                    }
-                </select>
-            </div>
+            <!-- ROUTE -->
+            <div class="mb-2">
 
-            <div class="col-12 col-md-3 mb-2">
                 <select class="dropdown-midstate route-select"
                         name="DaySchedules[__dayIndex__].Rides[__rideIndex__].RouteId">
+
                     <option value="">Select Route (Optional)</option>
+
                 </select>
+
             </div>
 
-            <div class="col-12 col-md-3 mb-2">
+            <!-- TIME -->
+            <div class="mb-2">
+
                 <select class="dropdown-midstate time-select"
                         name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffTime">
+
                     <option value="">Select Time (Optional)</option>
 
                     @if (Model.TimeOptions != null)
@@ -240,17 +266,23 @@
                             <option value="@time.Value">@time.Text</option>
                         }
                     }
+
                 </select>
+
             </div>
 
-            <div class="col-12 col-md-3 mb-2">
+            <!-- REMOVE BUTTON -->
+            <div>
                 <button type="button"
                         class="btn-midstate btn-danger removeRideBtn w-100">
-                    Remove
+
+                    Remove Ride
+
                 </button>
             </div>
 
         </div>
+
     </template>
 
     <style>

@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using MidStateShuttleService.Enums;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
 using System.Data;
@@ -185,11 +186,16 @@ namespace MidStateShuttleService.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRoutes(int pickupId, int dropoffId)
+        public async Task<IActionResult> GetRoutes(int pickupId, int dropoffId, int dayOfWeek)
         {
+            WeekDay weekDay = (WeekDay)dayOfWeek;
+
             var routes = await _context.Routes
-                .Where(r => r.PickUpLocationID == pickupId &&
-                            r.DropOffLocationID == dropoffId)
+                .Where(r =>
+                    r.PickUpLocationID == pickupId &&
+                    r.DropOffLocationID == dropoffId &&
+                    r.DayOfWeek == weekDay &&
+                    r.IsActive == true)
                 .ToListAsync();
 
             var result = routes.Select(r => new
@@ -207,7 +213,7 @@ namespace MidStateShuttleService.Controllers
             if (time == null)
                 return "";
 
-            return time.Value.ToString(@"h\:mm");
+            return DateTime.Today.Add(time.Value).ToString("h:mm tt");
         }
     }
 }

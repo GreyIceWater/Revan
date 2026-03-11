@@ -91,9 +91,14 @@
 
                                     @foreach (WeekDay w in Enum.GetValues(typeof(WeekDay)))
                                     {
-                                        <option value="@w" selected="@(day.WeekDay == w)">
-                                            @w
-                                        </option>
+                                        if (day.WeekDay == w)
+                                        {
+                                            <option value="@( (int)w )" selected>@w</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@( (int)w )">@w</option>
+                                        }
                                     }
 
                                 </select>
@@ -116,15 +121,14 @@
                                     {
                                         var ride = day.Rides[r];
 
-                                        <div class="ride-row row mb-2 align-items-center" data-ride-index="@r">
+                                        <div class="ride-row mb-3 p-3 border rounded" data-ride-index="@r">
 
                                             <input type="hidden"
                                                    name="DaySchedules[@d].Rides[@r].RideId"
                                                    value="@ride.RideId" />
 
                                             <!-- PICKUP -->
-                                            <div class="col-md-3 mb-2">
-
+                                            <div class="mb-2">
                                                 <select class="dropdown-midstate"
                                                         name="DaySchedules[@d].Rides[@r].PickUpLocationID"
                                                         required>
@@ -140,12 +144,10 @@
                                                     }
 
                                                 </select>
-
                                             </div>
 
                                             <!-- DROPOFF -->
-                                            <div class="col-md-3 mb-2">
-
+                                            <div class="mb-2">
                                                 <select class="dropdown-midstate"
                                                         name="DaySchedules[@d].Rides[@r].DropOffLocationID"
                                                         required>
@@ -161,12 +163,10 @@
                                                     }
 
                                                 </select>
-
                                             </div>
 
                                             <!-- ROUTE -->
-                                            <div class="col-md-3 mb-2">
-
+                                            <div class="mb-2">
                                                 <select class="dropdown-midstate route-select"
                                                         name="DaySchedules[@d].Rides[@r].RouteId">
 
@@ -176,7 +176,7 @@
                                                         var routesDict = (Dictionary<(int pickup, int dropoff), List<SelectListItem>>)ViewBag.RoutesByPickDrop;
                                                         var key = (ride.PickUpLocationID, ride.DropOffLocationID);
 
-                                                        @if (routesDict != null && routesDict.ContainsKey(key))
+                                                        if (routesDict != null && routesDict.ContainsKey(key))
                                                         {
                                                             foreach (var route in routesDict[key])
                                                             {
@@ -190,12 +190,10 @@
                                                     }
 
                                                 </select>
-
                                             </div>
 
                                             <!-- TIME -->
-                                            <div class="col-md-3 mb-2">
-
+                                            <div class="mb-2">
                                                 <select class="dropdown-midstate time-select"
                                                         name="DaySchedules[@d].Rides[@r].DropOffTime">
 
@@ -210,17 +208,14 @@
                                                     }
 
                                                 </select>
-
                                             </div>
 
                                             <!-- REMOVE -->
-                                            <div class="col-md-3 mb-2">
-
+                                            <div>
                                                 <button type="button"
                                                         class="btn-midstate btn-danger removeRideBtn w-100">
-                                                    Remove
+                                                    Remove Ride
                                                 </button>
-
                                             </div>
 
                                         </div>
@@ -334,6 +329,187 @@
 
     </div>
 </div>
+
+<!-- Day Card Template -->
+<template id="dayCardTemplate">
+    <div class="day-card form-paper mb-4 p-4" data-day-index="__dayIndex__">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Day Request</h4>
+
+            <button type="button"
+                    class="btn-midstate btn-danger removeDayBtn">
+                Remove
+            </button>
+        </div>
+
+        <div class="form-group mb-3">
+            <select class="dropdown-midstate day-select"
+                    name="DaySchedules[__dayIndex__].WeekDay"
+                    required>
+
+                <option value="">Select Day</option>
+                <option value="1">Monday</option>
+                <option value="2">Tuesday</option>
+                <option value="3">Wednesday</option>
+                <option value="4">Thursday</option>
+
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <button type="button"
+                    class="btn-midstate btn-secondary addRideBtn">
+                Add Ride +
+            </button>
+        </div>
+
+        <div class="ridesContainer mt-2"></div>
+
+    </div>
+</template>
+
+<!-- Ride Template -->
+<template id="rideTemplate">
+
+    <div class="ride-row mb-3 p-3 border rounded"
+         data-ride-index="__rideIndex__">
+
+        <div class="mb-2">
+            <select class="dropdown-midstate"
+                    name="DaySchedules[__dayIndex__].Rides[__rideIndex__].PickUpLocationID"
+                    required>
+
+                <option value="">Pick-Up</option>
+
+                @foreach (var loc in Model.LocationNames)
+                {
+                    <option value="@loc.Value">@loc.Text</option>
+                }
+
+            </select>
+        </div>
+
+        <div class="mb-2">
+            <select class="dropdown-midstate"
+                    name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffLocationID"
+                    required>
+
+                <option value="">Drop-Off</option>
+
+                @foreach (var loc in Model.LocationNames)
+                {
+                    <option value="@loc.Value">@loc.Text</option>
+                }
+
+            </select>
+        </div>
+
+        <div class="mb-2">
+            <select class="dropdown-midstate route-select"
+                    name="DaySchedules[__dayIndex__].Rides[__rideIndex__].RouteId">
+
+                <option value="">Select Route (Optional)</option>
+
+            </select>
+        </div>
+
+        <div class="mb-2">
+            <select class="dropdown-midstate time-select"
+                    name="DaySchedules[__dayIndex__].Rides[__rideIndex__].DropOffTime">
+
+                <option value="">Select Time (Optional)</option>
+
+                @if (Model.TimeOptions != null)
+                {
+                    foreach (var time in Model.TimeOptions)
+                    {
+                        <option value="@time.Value">@time.Text</option>
+                    }
+                }
+
+            </select>
+        </div>
+
+        <div>
+            <button type="button"
+                    class="btn-midstate btn-danger removeRideBtn w-100">
+                Remove Ride
+            </button>
+        </div>
+
+    </div>
+
+</template>
+
+<script>
+
+    // When the form is submitted, run reindexForm()
+    // This ensures all dynamically added days and rides have
+    // correctly ordered names so ASP.NET can bind them to the model
+    document
+        .getElementById("registrationForm")
+        .addEventListener("submit", reindexForm);
+
+
+    function reindexForm() {
+
+        // Get every day card currently in the form
+        // Each represents one DaySchedule in the model
+        const days = document.querySelectorAll(".day-card");
+
+        // Loop through each day and assign a sequential index
+        days.forEach((day, dIndex) => {
+
+            // Update the weekday dropdown name
+            // ASP.NET expects: DaySchedules[0].WeekDay, DaySchedules[1].WeekDay, etc.
+            const daySelect = day.querySelector(".day-select");
+            if (daySelect)
+                daySelect.name = `DaySchedules[${dIndex}].WeekDay`;
+
+            // Get all rides that belong to this day
+            const rides = day.querySelectorAll(".ride-row");
+
+            // Loop through rides and assign sequential ride indexes
+            rides.forEach((ride, rIndex) => {
+
+                // Grab each input element in the ride row
+                const pickup = ride.querySelector("[name*='PickUpLocationID']");
+                const dropoff = ride.querySelector("[name*='DropOffLocationID']");
+                const route = ride.querySelector(".route-select");
+                const time = ride.querySelector(".time-select");
+                const rideId = ride.querySelector("[name*='RideId']");
+
+                // Update the pickup location field name
+                // Example result:
+                // DaySchedules[0].Rides[0].PickUpLocationID
+                if (pickup)
+                    pickup.name = `DaySchedules[${dIndex}].Rides[${rIndex}].PickUpLocationID`;
+
+                // Update the dropoff location field name
+                if (dropoff)
+                    dropoff.name = `DaySchedules[${dIndex}].Rides[${rIndex}].DropOffLocationID`;
+
+                // Update route selection field name
+                if (route)
+                    route.name = `DaySchedules[${dIndex}].Rides[${rIndex}].RouteId`;
+
+                // Update time selection field name
+                if (time)
+                    time.name = `DaySchedules[${dIndex}].Rides[${rIndex}].DropOffTime`;
+
+                // If this ride already exists in the database,
+                // preserve its RideId so EF can update the correct record
+                if (rideId)
+                    rideId.name = `DaySchedules[${dIndex}].Rides[${rIndex}].RideId`;
+
+            });
+
+        });
+
+    }
+
+</script>
 
 <script src="/js/RouteSelector.js"></script>
 <script src="/js/helpicon.js"></script>
