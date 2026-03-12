@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
-using System.Data;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -13,11 +11,12 @@ namespace MidStateShuttleService.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<LocationController> _logger;
 
-        // Inject ApplicationDbContext and ILogger into the controller constructor
+        // DEV NOTE:
+        // Keep constructor injection simple and consistent with the rest of the project.
         public LocationController(ApplicationDbContext context, ILogger<LocationController> logger)
         {
-            _context = context; // Assign the injected ApplicationDbContext to the _context field
-            _logger = logger; // Assign the injected ILogger to the _logger field
+            _context = context;
+            _logger = logger;
         }
 
         // GET: LocationController
@@ -28,6 +27,7 @@ namespace MidStateShuttleService.Controllers
 
         // GET: LocationController/Create
         [Authorize(Roles = "Admin")]
+        [HttpGet]
         public ActionResult Create()
         {
             return View();
@@ -36,46 +36,63 @@ namespace MidStateShuttleService.Controllers
         // POST: LocationController/Create
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
         public ActionResult Create(Location location)
         {
             if (!ModelState.IsValid)
             {
-
                 return View(location);
             }
 
             try
             {
-                LocationServices ls = new LocationServices(_context);
+                LocationServices locationServices = new LocationServices(_context);
+
+                // DEV NOTE:
+                // New locations should always start active.
                 location.IsActive = true;
-                ls.AddEntity(location);
+
+                locationServices.AddEntity(location);
 
                 TempData["SuccessMessage"] = "The location has been successfully created!";
                 HttpContext.Session.SetString("LocationSuccess", "true");
                 TempData["LocationSuccess"] = true;
-                return RedirectToAction("Create");
+
+                return RedirectToAction(nameof(Create));
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context); // Log SQL exception
-                _logger.LogError(ex, "An error occurred while creating location.");
-                ModelState.AddModelError("", "An unexpected error occurred, please try again.");
+                _logger.LogError(exception, "An error occurred while creating location.");
+
+                // DEV NOTE:
+                // Show the real underlying error while debugging.
+                var actualError = exception.InnerException?.Message ?? exception.Message;
+                ModelState.AddModelError("", actualError);
+
                 return View(location);
             }
         }
 
-
         // GET: LocationController/Edit/5
         [Authorize(Roles = "Admin")]
+        [HttpGet]
         public ActionResult Edit(int id)
         {
-            LocationServices ls = new LocationServices(_context);
-            Location model = ls.GetEntityById(id);
+            try
+            {
+                LocationServices locationServices = new LocationServices(_context);
+                Location location = locationServices.GetEntityById(id);
 
-            if (model == null)
-                return FailedLocation("Location Not Found");
+                if (location == null)
+                    return FailedLocation("Location Not Found");
 
-            return View(model);
+                return View(location);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "An error occurred while loading location {LocationId} for edit.", id);
+                return FailedLocation("Location could not be loaded");
+            }
         }
 
         // POST: LocationController/Edit/5
@@ -84,54 +101,76 @@ namespace MidStateShuttleService.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(Location model)
         {
-            LocationServices ls = new LocationServices(_context);
             if (model == null)
                 return FailedLocation("Updates to location could not be applied");
 
+            if (!ModelState.IsValid)
+                return View(model);
+
             try
             {
-                model.IsActive = true;
-                ls.UpdateEntity(model);
+                LocationServices locationServices = new LocationServices(_context);
+                Location existingLocation = locationServices.GetEntityById(model.LocationId);
+
+                if (existingLocation == null)
+                    return FailedLocation("Location Not Found");
+
+                // DEV NOTE:
+                // Update only editable fields.
+                // Preserve IsActive so edit does not accidentally reactivate a removed location.
+                existingLocation.Name = model.Name;
+                existingLocation.Address = model.Address;
+                existingLocation.City = model.City;
+                existingLocation.State = model.State;
+                existingLocation.ZipCode = model.ZipCode;
+                existingLocation.Abbreviation = model.Abbreviation;
+
+                locationServices.UpdateEntity(existingLocation);
+
                 HttpContext.Session.SetString("LocationSuccess", "true");
                 TempData["LocationSuccess"] = true;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
 
+                return RedirectToAction(nameof(Edit), new { id = existingLocation.LocationId });
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "An error occurred while updating location {LocationId}.", model.LocationId);
                 return FailedLocation("Updates to location could not be applied");
             }
-
-            return RedirectToAction("Edit");
         }
 
-        // GET: LocationController/Delete/5
+        // POST: LocationController/DeleteLocation/5
         [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult DeleteLocation(int id)
         {
             try
             {
-                LocationServices ls = new LocationServices(_context);
-                Location model = ls.GetEntityById(id);
+                LocationServices locationServices = new LocationServices(_context);
+                Location location = locationServices.GetEntityById(id);
 
-                if (model == null)
+                if (location == null)
                     return FailedLocation("Location Not Found");
 
-                model.IsActive = !model.IsActive; // Toggle IsActive from true to false or false to true
-                ls.UpdateEntity(model); // Update the entity in the database
+                // DEV NOTE:
+                // Soft delete only. Toggle active state instead of removing the row.
+                location.IsActive = !location.IsActive;
+                locationServices.UpdateEntity(location);
 
-                return RedirectToAction("Index", "Dashboard"); // Redirect after toggling IsActive
+                return RedirectToAction("Index", "Dashboard");
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                _logger.LogError(e.Message);
-
+                _logger.LogError(exception, "An error occurred while toggling location {LocationId}.", id);
                 return FailedLocation("Updates to location could not be applied");
             }
         }
 
-        // POST: LocationController/Delete/5
+        // DEV NOTE:
+        // Keeping this action in place in case any old routes/views still reference it.
         [Authorize(Roles = "Admin")]
+        [HttpGet]
         public ActionResult Delete(int id)
         {
             return View();
