@@ -1,184 +1,155 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
-using System.Data;
+using MidStateShuttleService.Services;
 
 namespace MidStateShuttleService.Controllers
 {
     public class DriverController : Controller
     {
+        private readonly DriverServices _driverService;
         private readonly ILogger<DriverController> _logger;
-        private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        // Inject ApplicationDbContext into the controller constructor
-        public DriverController(ApplicationDbContext context, ILogger<DriverController> logger)
+        public DriverController(
+            DriverServices driverService,
+            ILogger<DriverController> logger,
+            IWebHostEnvironment environment)
         {
-            _context = context; // Assign the injected ApplicationDbContext to the _context field
-            _logger = logger; // Assign the injected ILogger to the _logger field
+            _driverService = driverService;
+            _logger = logger;
+            _environment = environment;
         }
 
-        // GET: DriverController
-        public ActionResult Index()
-        {
-            return View();
-        }
-
-        // GET: DriverController/Details/5
-        public ActionResult Details(int id)
+        [Authorize(Roles = "Admin")] // DEV NOTE: Admin-only list page for driver management.
+        [HttpGet]
+        public IActionResult Index()
         {
             return View();
         }
 
-        // GET: DriverController/Create
-        [Authorize(Roles = "Admin")]
-        public ActionResult Create()
+        [Authorize(Roles = "Admin")] // DEV NOTE: Admin-only details page.
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            Driver existingDriver = _driverService.GetEntityById(id);
+
+            if (existingDriver == null)
+                return NotFound();
+
+            return View(existingDriver);
+        }
+
+        [Authorize(Roles = "Admin")] // DEV NOTE: Admin-only page for creating drivers.
+        [HttpGet]
+        public IActionResult Create()
         {
             return View();
         }
 
-        // POST: DriverController/Create
+        [Authorize(Roles = "Admin")] // DEV NOTE: Admin-only form submission for creating drivers.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public ActionResult Create(Driver driver)
+        public IActionResult Create(Driver submittedDriver)
         {
             if (!ModelState.IsValid)
-            {
-                return View(driver);
-            }
+                return View(submittedDriver);
 
             try
             {
-                DriverServices ds = new DriverServices(_context);
-                driver.IsActive = true;
-                ds.AddEntity(driver);
+                submittedDriver.IsActive = true;
+                _driverService.AddEntity(submittedDriver);
 
                 TempData["SuccessMessage"] = "The driver has been successfully created!";
                 HttpContext.Session.SetString("DriverSuccess", "true");
                 TempData["DriverSuccess"] = true;
 
-                return RedirectToAction("Create");
+                return RedirectToAction(nameof(Create));
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context); // Log SQL exception
-                _logger.LogError(ex, "An error occurred while creating driver.");
+                LogEvents.LogSqlException(exception, _environment);
+                _logger.LogError(exception, "An error occurred while creating driver.");
+
                 ModelState.AddModelError("", "An unexpected error occurred, please try again.");
-                return View(driver);
+                return View(submittedDriver);
             }
-
-            
         }
 
-
-
-        // GET: DriverController/Edit/5
-        [Authorize(Roles = "Admin")]
-        public ActionResult Edit(int id)
+        [Authorize(Roles = "Admin")] // DEV NOTE: Admin-only page for editing drivers.
+        [HttpGet]
+        public IActionResult Edit(int id)
         {
-            // Retrieve the driver to be edited from the database
-            var driver = _context.Drivers.Find(id);
+            Driver existingDriver = _driverService.GetEntityById(id);
 
-            if (driver == null)
-            {
-                return NotFound(); // Or handle the case where the driver is not found
-            }
+            if (existingDriver == null)
+                return NotFound();
 
-            return View(driver);
+            return View(existingDriver);
         }
 
-        // POST: DriverController/Edit/5
-        // POST: DriverController/Edit/5
+        [Authorize(Roles = "Admin")] // DEV NOTE: Admin-only form submission for editing drivers.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public ActionResult Edit(int id, Driver driver)
+        public IActionResult Edit(int id, Driver submittedDriver)
         {
-            if (id != driver.DriverId)
-            {
-                return BadRequest(); // Or handle the case where IDs do not match
-            }
+            if (id != submittedDriver.DriverId)
+                return BadRequest();
 
             if (!ModelState.IsValid)
-            {
-                return View(driver); // Return the view with validation errors
-            }
+                return View(submittedDriver);
 
             try
             {
-                
-                driver.IsActive = true; // Set IsActive to true
-                // Update the driver in the database
-                _context.Update(driver);
-                _context.SaveChanges();
+                submittedDriver.IsActive = true;
+                _driverService.UpdateEntity(submittedDriver);
 
                 TempData["SuccessMessage"] = "The driver has been successfully updated!";
                 HttpContext.Session.SetString("DriverSuccess", "true");
                 TempData["DriverSuccess"] = true;
-                return RedirectToAction("Edit");
+
+                return RedirectToAction(nameof(Edit), new { id = submittedDriver.DriverId });
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context); // Log SQL exception
-                _logger.LogError(ex, "An error occurred while updating driver.");
+                LogEvents.LogSqlException(exception, _environment);
+                _logger.LogError(exception, "An error occurred while updating driver.");
+
                 ModelState.AddModelError("", "An unexpected error occurred, please try again.");
-                return View(driver); // Return the view with an error message
+                return View(submittedDriver);
             }
         }
 
-        // GET: DriverController/Delete/5
-        [Authorize(Roles = "Admin")]
-        public ActionResult Delete(int id)
-        {
-            try
-            {
-                var driver = _context.Drivers.Find(id);
-
-                if (driver != null)
-                {
-                    driver.IsActive = !driver.IsActive; // Toggle IsActive from true to false or false to true
-                    _context.SaveChanges();
-                }
-                else
-                {
-                    // Handle the case where the driver with the specified id is not found
-                    ModelState.AddModelError("", "Driver not found.");
-                    return View();
-                }
-
-                return RedirectToAction("Index", "Dashboard"); // Redirect after toggling IsActive
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
-                _logger.LogError(ex, "An error occurred while toggling IsActive of the driver.");
-
-                // Optionally add a model error for displaying an error message to the user
-                ModelState.AddModelError("", "An unexpected error occurred while toggling IsActive of the driver, please try again.");
-
-                // Return the view with an error message
-                return View();
-            }          
-        }
-
-
-        // POST: DriverController/Delete/5
-        [HttpPost]
+        [Authorize(Roles = "Admin")] // DEV NOTE: Admin-only action that toggles driver active status.
+        [HttpPost] // DEV NOTE: Data-changing actions should use POST instead of GET.
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public IActionResult Delete(int id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                Driver existingDriver = _driverService.GetEntityById(id);
+
+                if (existingDriver == null)
+                {
+                    TempData["ErrorMessage"] = "Driver not found.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+
+                existingDriver.IsActive = !existingDriver.IsActive;
+                _driverService.UpdateEntity(existingDriver);
+
+                return RedirectToAction("Index", "Dashboard");
             }
-            catch
+            catch (Exception exception)
             {
-                return View();
+                LogEvents.LogSqlException(exception, _environment);
+                _logger.LogError(exception, "An error occurred while toggling IsActive of the driver.");
+
+                TempData["ErrorMessage"] =
+                    "An unexpected error occurred while updating the driver.";
+
+                return RedirectToAction("Index", "Dashboard");
             }
         }
     }

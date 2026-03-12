@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
 }
 @model MidStateShuttleService.Models.AllModels
 
@@ -15,7 +14,7 @@
     -->
     @if (User.IsInRole("Admin"))
     {
-        <a asp-controller="Shuttles" asp-action="Create" class="btn">Add Shuttle</a>       
+        <a asp-controller="Shuttles" asp-action="Create" class="btn">Add Shuttle</a>
     }
 
 </div>
@@ -29,23 +28,26 @@
         </tr>
     </thead>
     <tbody id="shuttleTableBody">
-        @if (Model == null)
+        @if (Model == null || Model.Bus == null || !Model.Bus.Any())
         {
-            <tr><td colspan="4" class="text-center">There are Currently No Routes</td></tr>
+            <tr><td colspan="4" class="text-center">There are Currently No Shuttles</td></tr>
         }
         else
         {
-            @foreach (var b in Model.Bus.OrderBy(b => b.BusNo))
+            @foreach (var shuttle in Model.Bus.Where(shuttle => shuttle.IsActive == true).OrderBy(shuttle => shuttle.BusNo))
             {
                 <tr class="shuttleRow">
-                    <td>@b.BusNo</td>
-                    <td>@b.PassengerCapacity</td>
-                    <td>@b.IsActive.ToString()</td>
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <td><a asp-controller="Shuttles" asp-action="Edit" asp-route-id="@b.BusId">Update</a></td>
-                        <td><a asp-controller="Shuttles" asp-action="Delete" asp-route-id="@b.BusId">Remove</a></td>
-                    }
+                    <td>@shuttle.BusNo</td>
+                    <td>@shuttle.PassengerCapacity</td>
+                    <td>@(shuttle.IsActive == true ? "Active" : "Inactive")</td>
+                    <td>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Shuttles" asp-action="Edit" asp-route-id="@shuttle.BusId">Update</a>
+                            <span> | </span>
+                            <a asp-controller="Shuttles" asp-action="Delete" asp-route-id="@shuttle.BusId">Remove</a>
+                        }
+                    </td>
                 </tr>
             }
         }
@@ -56,4 +58,3 @@
 </div>
 
 <script src="~/js/tablePagination.js"></script>
-

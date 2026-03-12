@@ -28,6 +28,8 @@ namespace MidStateShuttleService
 
             builder.Services.AddScoped<EmailServices>();
 
+            builder.Services.AddScoped<DriverServices>();
+
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;

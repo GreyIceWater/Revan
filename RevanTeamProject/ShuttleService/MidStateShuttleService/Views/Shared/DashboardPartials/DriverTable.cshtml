@@ -52,7 +52,16 @@
                         }
                     </td>
                     <td><a asp-controller="Driver" asp-action="Edit" asp-route-id="@d.DriverId">Update</a></td>
-                    <td><a asp-controller="Driver" asp-action="Delete" asp-route-id="@d.DriverId">Remove</a></td>
+                    <td>
+                        <form asp-controller="Driver"
+                              asp-action="Delete"
+                              asp-route-id="@d.DriverId"
+                              method="post"
+                              style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-link p-0 align-baseline">Remove</button>
+                        </form>
+                    </td>
                 </tr>
             }
         }
