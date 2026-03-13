@@ -2,28 +2,26 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
-using System.Data;
 
 namespace MidStateShuttleService.Controllers
 {
     public class RoutesController : Controller
     {
-        private readonly ILogger<LocationController> _logger;
-
+        private readonly ILogger<RoutesController> _logger;
         private readonly ApplicationDbContext _context;
-        
+        private readonly IWebHostEnvironment _environment;
 
         // Inject ApplicationDbContext into the controller constructor
-        public RoutesController(ApplicationDbContext context, ILogger<LocationController> logger)
+        public RoutesController(
+            ApplicationDbContext context,
+            ILogger<RoutesController> logger,
+            IWebHostEnvironment environment)
         {
-            _context = context; // Assign the injected ApplicationDbContext to the _context field
-            
+            _context = context;
             _logger = logger;
+            _environment = environment;
         }
 
         // GET: RoutesController
@@ -42,30 +40,41 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Create()
         {
-            LocationServices ls = new LocationServices(_context);
-            ViewBag.Locations = ls.GetAllEntities().Select(x => new SelectListItem { Text = x.Name, Value = x.LocationId.ToString() });
-
-            // Assuming GetAllEntities() returns a list of drivers
-            DriverServices ds = new DriverServices(_context);
-            ViewBag.Drivers = ds.GetAllEntities().Select(x => new SelectListItem { Text = x.Name, Value = x.DriverId.ToString() });
-
+            LoadRouteDropdowns();
             return View();
         }
 
-
-        // POST: RoutesController/Edit/
+        // POST: RoutesController/Create
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public ActionResult Create(Routes route)
         {
-            RouteServices rs = new RouteServices(_context);
-            route.IsActive = true;
-            rs.AddEntity(route);
+            if (!ModelState.IsValid)
+            {
+                LoadRouteDropdowns();
+                return View(route);
+            }
 
-            HttpContext.Session.SetString("RouteSuccess", "true");
-            TempData["RouteSuccess"] = true;
+            try
+            {
+                RouteServices rs = new RouteServices(_context);
+                route.IsActive = true;
+                rs.AddEntity(route);
 
-            return RedirectToAction("Create");
+                HttpContext.Session.SetString("RouteSuccess", "true");
+                TempData["RouteSuccess"] = true;
+
+                return RedirectToAction(nameof(Create));
+            }
+            catch (Exception ex)
+            {
+                LogEvents.LogSqlException(ex, _environment);
+                _logger.LogError(ex, "An error occurred while creating the route.");
+                LoadRouteDropdowns();
+                ModelState.AddModelError("", "An unexpected error occurred while creating the route.");
+                return View(route);
+            }
         }
 
         // GET: RoutesController/Edit/5
@@ -79,18 +88,7 @@ namespace MidStateShuttleService.Controllers
                 return NotFound();
             }
 
-            route.PickUpTime = null;
-            route.DropOffTime = null;
-
-            LocationServices ls = new LocationServices(_context);
-            ViewBag.Locations = ls.GetAllEntities().Select(x => new SelectListItem { Text = x.Name, Value = x.LocationId.ToString() });
-
-            BusServices bs = new BusServices(_context);
-            ViewBag.Buses = bs.GetAllEntities().Select(x => new SelectListItem { Text = "Shuttle: " + x.BusNo, Value = x.BusId.ToString() });
-
-            DriverServices ds = new DriverServices(_context);
-            ViewBag.Drivers = ds.GetAllEntities().Select(x => new SelectListItem { Text = x.Name, Value = x.DriverId.ToString() });
-
+            LoadRouteDropdowns();
             return View(route);
         }
 
@@ -100,12 +98,16 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id, Routes updatedRoute)
         {
-            if(id != updatedRoute.RouteID)
+            if (id != updatedRoute.RouteID)
             {
                 return BadRequest();
             }
 
-            
+            if (!ModelState.IsValid)
+            {
+                LoadRouteDropdowns();
+                return View(updatedRoute);
+            }
 
             try
             {
@@ -115,55 +117,23 @@ namespace MidStateShuttleService.Controllers
 
                 HttpContext.Session.SetString("RouteSuccess", "true");
                 TempData["RouteSuccess"] = true;
-
                 TempData["SuccessMessage"] = "The route has been successfully updated!";
-                return RedirectToAction("Edit");
+
+                return RedirectToAction(nameof(Edit), new { id = updatedRoute.RouteID });
             }
             catch (Exception ex)
             {
-                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
+                LogEvents.LogSqlException(ex, _environment);
                 _logger.LogError(ex, "An error occurred while updating the route.");
                 return RedirectToAction("Index", "Dashboard");
             }
         }
 
-
-
         // GET: RoutesController/Delete/5
         [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
         {
-            try
-            {
-                var route = _context.Routes.Find(id);
-
-                if (route != null)
-                {
-                    route.IsActive = !route.IsActive; // Toggle IsActive from true to false or false to true
-                    _context.SaveChanges();
-                }
-                else
-                {
-                    // Handle the case where the route with the specified id is not found
-                    ModelState.AddModelError("", "Route not found.");
-                    return View();
-                }
-
-                return RedirectToAction("Index", "Dashboard"); // Redirect after toggling IsActive
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
-                _logger.LogError(ex, "An error occurred while toggling IsActive of the route.");
-
-                // Optionally add a model error for displaying an error message to the user
-                ModelState.AddModelError("", "An unexpected error occurred while toggling IsActive of the route, please try again.");
-
-                // Return the view with an error message
-                return View();
-            }
-
+            return RedirectToAction("Index", "Dashboard");
         }
 
         // POST: RoutesController/Delete/5
@@ -174,13 +144,58 @@ namespace MidStateShuttleService.Controllers
         {
             try
             {
+                var route = _context.Routes.Find(id);
 
-                return RedirectToAction(nameof(Index));
+                if (route == null)
+                {
+                    TempData["ErrorMessage"] = "Route not found.";
+                    return RedirectToAction("Index", "Dashboard");
+                }
+
+                route.IsActive = !route.IsActive;
+                _context.SaveChanges();
+
+                return RedirectToAction("Index", "Dashboard");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                LogEvents.LogSqlException(ex, _environment);
+                _logger.LogError(ex, "An error occurred while toggling IsActive of the route.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while updating the route.";
+                return RedirectToAction("Index", "Dashboard");
             }
+        }
+
+        // Helper method used by Create/Edit views to populate dropdown lists
+        private void LoadRouteDropdowns()
+        {
+            // Load all ACTIVE locations for the pickup/drop-off dropdowns
+            LocationServices ls = new LocationServices(_context);
+            ViewBag.Locations = ls.GetAllEntities()
+                .Where(location => location.IsActive)
+                .Select(location => new SelectListItem
+                {
+                    Text = location.Name,                    // Location name shown to user
+                    Value = location.LocationId.ToString()   // Location ID submitted with form
+                });
+
+            // Load drivers so a route can be assigned to one
+            DriverServices ds = new DriverServices(_context);
+            ViewBag.Drivers = ds.GetAllEntities()
+                .Select(driver => new SelectListItem
+                {
+                    Text = driver.Name,                 // Driver name shown in dropdown
+                    Value = driver.DriverId.ToString()  // Driver ID submitted
+                });
+
+            // Load buses/shuttles for route assignment
+            BusServices bs = new BusServices(_context);
+            ViewBag.Buses = bs.GetAllEntities()
+                .Select(bus => new SelectListItem
+                {
+                    Text = "Shuttle: " + bus.BusNo,     // Label shown in dropdown
+                    Value = bus.BusId.ToString()        // Bus ID submitted
+                });
         }
     }
 }
