@@ -69,7 +69,10 @@
                             <div class="p-t-20">
                                 <div class="p-t-20">
                                     <button class="btn btn--radius btn--submit" type="submit">Save</button>
-                                    <button class="btn btn--radius btn--cancel" type="button" onclick="location.href='../../Dashboard'">Cancel</button>
+                                    <button type="button" class="btn btn-primary"
+                                            onclick="location.href='@Url.Action("ViewAll", "Location")'">
+                                        Cancel
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -93,7 +96,10 @@
                     Location edited successfully!
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="location.href='../../Dashboard'">Return</button>
+                    <button type="button" class="btn btn-primary"
+                            onclick="location.href='@Url.Action("ViewAll", "Location")'">
+                        Return
+                    </button>
                 </div>
             </div>
         </div>

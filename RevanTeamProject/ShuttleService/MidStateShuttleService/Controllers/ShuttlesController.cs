@@ -131,6 +131,15 @@ namespace MidStateShuttleService.Controllers
             }
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin,Driver")]
+        public ActionResult ViewAll()
+        {
+            var shuttles = new BusServices(_context).GetAllEntities();
+
+            return View("ShuttleTable", shuttles);
+        }
+
         // GET: ShuttlesController/Delete/5
         [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
@@ -148,7 +157,7 @@ namespace MidStateShuttleService.Controllers
 
                 _context.SaveChanges();
 
-                return RedirectToAction("Index", "Dashboard"); // Redirect to Index after successful toggle
+                return RedirectToAction("ViewAll");
             }
             catch (Exception ex)
             {

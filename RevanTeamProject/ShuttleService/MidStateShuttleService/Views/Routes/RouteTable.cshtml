@@ -1,0 +1,132 @@
+﻿@model IEnumerable<MidStateShuttleService.Models.Routes>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@{
+    var routes = Model?
+        .OrderBy(r => r.PickUpLocationID)
+        .ThenBy(r => r.PickUpTime)
+        .ToList();
+}
+
+
+@await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
+
+<div class="form-container tiled-background-2">
+    <div class="form-paper">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2>Routes</h2>
+                <p class="mb-0">Manage shuttle routes.</p>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="Routes" asp-action="Create" class="btn btn-midstate">
+                    Add Route
+                </a>
+            }
+        </div>
+
+        <div id="routesTableBody">
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="form-paper p-3">
+                    <p>No routes currently exist.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var r in routes)
+                {
+                    <div class="form-paper mb-4 p-4 position-relative route-card"
+                         data-pickup="@r.PickUpLocationID"
+                         data-dropoff="@r.DropOffLocationID"
+                         data-day="@r.DayOfWeek"
+                         data-active="@(r.IsActive ? "true" : "false")">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+                                <h4 class="mb-1">
+                                    @r.PickUpLocation.ToStringPickup() → @r.DropOffLocation.ToStringDropoff()
+                                </h4>
+
+                                <div>
+                                    <span><strong>Day:</strong> @r.DayOfWeek</span>
+                                    <span> | </span>
+                                    <span><strong>Pickup:</strong> @r.ToStringPickUpTime()</span>
+                                    <span> | </span>
+                                    <span><strong>Dropoff:</strong> @r.ToStringDropOffTime()</span>
+                                    <span> | </span>
+                                    <span><strong>Driver:</strong> @r.Driver.ToStringDriver()</span>
+                                    <span> | </span>
+                                    <span>
+                                        <strong>Status:</strong>
+                                        @if (r.IsActive)
+                                        {
+                                            <span class="text-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">Inactive</span>
+                                        }
+                                    </span>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(r.AdditionalDetails))
+                                {
+                                    <div class="mt-2 text-muted">
+                                        <strong>Notes:</strong> @r.AdditionalDetails
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="text-end">
+                                <a asp-controller="Dashboard"
+                                   asp-action="PassengerList"
+                                   asp-route-id="@r.RouteID"
+                                   class="btn btn-midstate btn-sm mb-2">
+                                    <i class="bi bi-people-fill me-1"></i> Reservations
+                                </a>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <div>
+                                        <a asp-controller="Routes"
+                                           asp-action="Edit"
+                                           asp-route-id="@r.RouteID"
+                                           class="btn btn-midstate btn-sm me-2">
+                                            <i class="bi bi-pencil-fill me-1"></i> Update
+                                        </a>
+
+                                        <a asp-controller="Routes"
+                                           asp-action="Delete"
+                                           asp-route-id="@r.RouteID"
+                                           class="btn btn-midstate btn-sm btn-danger">
+                                            <i class="bi bi-trash-fill me-1"></i> Remove
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+            }
+
+        </div>
+
+        <div id="pagination-controls-routes" class="pagination"></div>
+
+    </div>
+</div>
+
+<script src="~/js/tablePagination.js"></script>
+<script src="/js/Dashboard/Table.js"></script>

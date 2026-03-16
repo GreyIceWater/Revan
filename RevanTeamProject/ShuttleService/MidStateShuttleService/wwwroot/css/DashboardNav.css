@@ -1,0 +1,184 @@
+﻿/* =========================
+   Dashboard Navigation Only
+   ========================= */
+
+.container1 {
+    position: relative;
+    width: 100%;
+}
+
+/* MOBILE NAV TOGGLE BUTTON */
+.mobile-nav-toggle {
+    position: relative;
+    z-index: 1100;
+}
+
+/* =========================
+   SIDEBAR NAVIGATION
+   ========================= */
+
+.navigation {
+    position: fixed;
+    width: 300px;
+    height: 100%;
+    background: #800000;
+    border-left: 10px solid #800000;
+    transition: 0.5s;
+    overflow: hidden;
+    transition: left 0.3s ease;
+}
+
+    .navigation.active {
+        width: 100px;
+    }
+
+    .navigation ul {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+        .navigation ul li {
+            position: relative;
+            width: 100%;
+            list-style: none;
+            border-top-left-radius: 30px;
+            border-bottom-left-radius: 30px;
+        }
+
+            .navigation ul li:hover,
+            .navigation ul li.hovered {
+                background: #EEEEEE;
+            }
+
+            .navigation ul li a {
+                position: relative;
+                display: flex;
+                width: 100%;
+                text-decoration: none;
+                color: #fdb71a;
+                font-weight: 500;
+            }
+
+            .navigation ul li:hover a,
+            .navigation ul li.hovered a {
+                color: #840029;
+            }
+
+            /* ICON */
+
+            .navigation ul li a .icon {
+                position: relative;
+                display: block;
+                min-width: 60px;
+                height: 60px;
+                line-height: 70px;
+                text-align: center;
+            }
+
+                .navigation ul li a .icon i {
+                    font-size: 1.75em;
+                }
+
+            /* TITLE */
+
+            .navigation ul li a .title {
+                position: relative;
+                display: block;
+                padding: 0 10px;
+                height: 60px;
+                line-height: 60px;
+                text-align: start;
+                white-space: nowrap;
+            }
+
+            /* CURVED HOVER EFFECT */
+
+            .navigation ul li:hover a::before,
+            .navigation ul li.hovered a::before {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: -50px;
+                width: 50px;
+                height: 50px;
+                background: transparent;
+                border-radius: 50%;
+                box-shadow: 35px 35px 0 10px #EEEEEE;
+                pointer-events: none;
+            }
+
+            .navigation ul li:hover a::after,
+            .navigation ul li.hovered a::after {
+                content: '';
+                position: absolute;
+                right: -50px;
+                bottom: -50px;
+                width: 50px;
+                height: 50px;
+                background: transparent;
+                border-radius: 50%;
+                box-shadow: 35px -35px 0 10px #EEEEEE;
+                pointer-events: none;
+            }
+
+    .navigation.collapse.show {
+        left: 0;
+    }
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 991px) {
+
+    .navigation {
+        left: -300px;
+    }
+
+        .navigation.active {
+            width: 300px;
+            left: 0;
+        }
+
+        .navigation.collapse.show {
+            left: 0;
+        }
+
+        /* REMOVE HOVER EFFECTS ON MOBILE */
+
+        .navigation ul li:hover,
+        .navigation ul li.hovered {
+            background: transparent;
+        }
+
+            .navigation ul li:hover a,
+            .navigation ul li.hovered a {
+                color: #fdb71a;
+            }
+
+                .navigation ul li:hover a::before,
+                .navigation ul li.hovered a::before,
+                .navigation ul li:hover a::after,
+                .navigation ul li.hovered a::after {
+                    display: none;
+                }
+}
+
+@media (max-width: 480px) {
+
+    .navigation {
+        width: 100%;
+        left: -100%;
+        z-index: 1000;
+    }
+
+        .navigation.active {
+            width: 100%;
+            left: 0;
+        }
+}

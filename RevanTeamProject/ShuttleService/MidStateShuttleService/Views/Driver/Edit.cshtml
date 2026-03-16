@@ -40,7 +40,10 @@
 
                             <div class="p-t-20">
                                 <button class="btn btn--radius btn--submit" type="submit">Submit</button>
-                                <button class="btn btn--radius btn--cancel" type="button" onclick="location.href='../../Dashboard'">Cancel</button>
+                                <button type="button" class="btn btn-primary"
+                                        onclick="location.href='@Url.Action("ViewAll", "Driver")'">
+                                    Cancel
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -63,7 +66,10 @@
                     Driver edited successfully!
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="location.href='../../Dashboard'">Return</button>
+                    <button type="button" class="btn btn-primary"
+                            onclick="location.href='@Url.Action("ViewAll", "Driver")'">
+                        Return
+                    </button>
                 </div>
             </div>
         </div>

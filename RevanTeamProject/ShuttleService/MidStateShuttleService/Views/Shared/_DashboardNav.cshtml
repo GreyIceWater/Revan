@@ -1,0 +1,143 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+<link rel="stylesheet" href="~/css/DashboardNav.css" asp-append-version="true" />
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<link rel="stylesheet" href="~/css/Form.css" />
+<link rel="stylesheet" href="~/css/Input.css" />
+
+<!-- MOBILE TOGGLE -->
+
+<div class="mobile-nav-toggle d-md-none p-2">
+    <button class="btn btn-dark"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#sidebarNav">
+        <i class="bi bi-list"></i>
+    </button>
+</div>
+
+<div class="container1">
+
+    <!-- SIDEBAR -->
+    <div class="navigation collapse d-md-block" id="sidebarNav">
+        <ul>
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a asp-controller="Dashboard" asp-action="Index">
+                        <span class="icon"><i class="bi bi-house"></i></span>
+                        <span class="title">Dashboard</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a asp-controller="Register" asp-action="ViewAll">
+                        <span class="icon"><i class="bi bi-send-arrow-down-fill"></i></span>
+                        <span class="title">Requests</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a asp-controller="Routes" asp-action="ViewAll">
+                        <span class="icon"><i class="bi bi-map"></i></span>
+                        <span class="title">Routes</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a asp-controller="CheckIn" asp-action="ViewAll">
+                        <span class="icon"><i class="bi bi-clipboard2-check"></i></span>
+                        <span class="title">Check-ins</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a asp-controller="Location" asp-action="ViewAll">
+                        <span class="icon"><i class="bi bi-geo-alt"></i></span>
+                        <span class="title">Locations</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a asp-controller="Shuttles" asp-action="ViewAll">
+                        <span class="icon"><i class="bi bi-bus-front"></i></span>
+                        <span class="title">Shuttles</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a asp-controller="Driver" asp-action="ViewAll">
+                        <span class="icon"><i class="bi bi-file-earmark-person-fill"></i></span>
+                        <span class="title">Drivers</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a asp-controller="Dashboard" asp-action="Reports">
+                        <span class="icon"><i class="bi bi-bar-chart-line"></i></span>
+                        <span class="title">Reports</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a asp-controller="Feedback" asp-action="ViewAll">
+                        <span class="icon"><i class="bi bi-hand-thumbs-up"></i></span>
+                        <span class="title">Testimonials</span>
+                    </a>
+                </li>
+            }
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            {
+                <li>
+                    <a asp-controller="Communicate" asp-action="Index">
+                        <span class="icon"><i class="bi bi-chat-left-text"></i></span>
+                        <span class="title">Send Messages</span>
+                    </a>
+                </li>
+            }
+
+            <li>
+                <a asp-controller="Home" asp-action="Index">
+                    <span class="icon"><i class="bi bi-house"></i></span>
+                    <span class="title">Home</span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+
+</div>
+
+<!-- BOOTSTRAP JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

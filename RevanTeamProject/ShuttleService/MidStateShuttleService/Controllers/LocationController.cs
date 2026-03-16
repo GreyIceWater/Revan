@@ -105,6 +105,15 @@ namespace MidStateShuttleService.Controllers
             return RedirectToAction("Edit");
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin,Driver")]
+        public ActionResult ViewAll()
+        {
+            var locations = new LocationServices(_context).GetAllEntities();
+
+            return View("LocationTable", locations);
+        }
+
         // GET: LocationController/Delete/5
         [Authorize(Roles = "Admin")]
         public ActionResult DeleteLocation(int id)
@@ -120,7 +129,7 @@ namespace MidStateShuttleService.Controllers
                 model.IsActive = !model.IsActive; // Toggle IsActive from true to false or false to true
                 ls.UpdateEntity(model); // Update the entity in the database
 
-                return RedirectToAction("Index", "Dashboard"); // Redirect after toggling IsActive
+                return RedirectToAction("ViewAll");
             }
             catch (Exception e)
             {

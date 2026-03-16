@@ -117,6 +117,15 @@ namespace MidStateShuttleService.Controllers
             return RedirectToAction("Index", "Dashboard");
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin,Driver")]
+        public ActionResult ViewAll()
+        {
+            var checkins = new CheckInServices(_context).GetAllEntities();
+
+            return View("CheckInTable", checkins);
+        }
+
         [Authorize(Roles = "Admin")]
         public ActionResult DeleteCheckIn(int id)
         {
@@ -131,7 +140,7 @@ namespace MidStateShuttleService.Controllers
                 model.IsActive = !model.IsActive; // Toggle IsActive value
                 cs.UpdateEntity(model); // Update the entity in the database
 
-                return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("ViewAll");
             }
             catch (Exception ex)
             {

@@ -28,6 +28,7 @@ namespace MidStateShuttleService.Controllers
             _emailServices = emailServices;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Index()
         {
@@ -37,6 +38,7 @@ namespace MidStateShuttleService.Controllers
         }
 
         // When the form submits, this method will play out.
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult Index(CommuncateModel c)
         {
@@ -53,11 +55,11 @@ namespace MidStateShuttleService.Controllers
 
                     RegisterServices rs = new RegisterServices(_context);
 
-                    var registeredStudents = rs.GetEmailsByRoute(c.SelectedRouteDetail.ToString());
+                    var registeredStudents = rs.GetEmailsByRoute(c.SelectedRouteDetail);
 
                     foreach (var student in registeredStudents)
                     {
-                        //_emailServices.SendEmail(student.Email, "Mid State Shuttle Service Update", c.message);
+                        _emailServices.SendEmail(student.Email, "Mid State Shuttle Service Update", c.message);
 
                     }
 
@@ -141,6 +143,15 @@ namespace MidStateShuttleService.Controllers
             return locations;
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public ActionResult ViewAll()
+        {
+            var messages = new MessageServices(_context).GetAllEntities();
+
+            return View("MessagesTable", messages);
+        }
+
         // GET: DriverController/Delete/5
         [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
@@ -161,7 +172,7 @@ namespace MidStateShuttleService.Controllers
                     return View();
                 }
 
-                return RedirectToAction("Index", "Dashboard"); // Redirect after toggling IsActive
+                return RedirectToAction("ViewAll");
             }
             catch (Exception ex)
             {

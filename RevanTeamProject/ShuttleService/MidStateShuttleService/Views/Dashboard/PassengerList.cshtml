@@ -41,7 +41,7 @@
                 else
                 {
                     
-                    @foreach (var registration in Model.OrderBy(r => r.FirstDayExpectingToRide))
+                    @foreach (var registration in Model.OrderBy(r => r.InsertDateTime))
                     {
                         /*
                         <tr class="passengerRow" data-days="@string.Join(",", registration.SelectedDaysOfWeek)">

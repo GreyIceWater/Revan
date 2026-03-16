@@ -43,66 +43,16 @@ namespace MidStateShuttleService.Models
         [Key]
         public int RegistrationId { get; set; }
 
-        [StringLength(10)]
-        public string? TripType { get; set; }// This could be a dropdown in the UI linked to Types available
-
         //[Required(ErrorMessage = "Pick Up Location is required")]
         public int? PickUpLocationID { get; set; }
 
         //[Required(ErrorMessage = "Drop Off Location is required")]
         public int? DropOffLocationID { get; set; }
 
-        //[StringLength(300, ErrorMessage = "Need transportation cannot exceed 300 characters")]
-        public string? NeedTransportation { get; set; }
-
-        //[Required(ErrorMessage = "Special request is required")]
-        public bool? SpecialRequest { get; set; } = false; // Assuming this is mandatory for registration
-
-        //[StringLength(300, ErrorMessage = "Which Friday cannot exceed 300 characters")]
-        public string? WhichFriday { get; set; }
-
-        //[Required(ErrorMessage = "Friday Trip Type is required")]
-        public string? FridayTripType { get; set; }
-
-        public string? ContactPreference { get; set; }
-
         [Required]
         public bool AgreeTerms { get; set; } = false;//  true/false for agreement
 
-        [Required]
-        public bool? FridayAgreeTerms { get; set; } = false;//  true/false for agreement
-
         public IEnumerable<SelectListItem>? LocationNames { get; set; }
-
-        // Add new properties for route details
-        public string? SelectedRouteDetail { get; set; }
-        public string? ReturnSelectedRouteDetail { get; set; }
-
-        // New property for selecting days of the week
-        public List<string>? SelectedDaysOfWeek { get; set; } = new List<string>();
-
-        public DateOnly? FirstDayExpectingToRide { get; set; }
-
-        public TimeOnly? MustArriveTime { get; set; }
-
-        public TimeOnly? CanLeaveTime { get; set; }
-
-
-        public TimeOnly? FridayMustArriveTime { get; set; }
-
-        public TimeOnly? FridayCanLeaveTime { get; set; }
-
-        public string? SpecialPickUpLocation { get; set; }
-
-        public string? SpecialDropOffLocation { get; set; }
-
-        //[Required(ErrorMessage = "Pick Up Location is required")]
-        public int? FridayPickUpLocationID { get; set; }
-
-        //[Required(ErrorMessage = "Drop Off Location is required")]
-        public int? FridayDropOffLocationID { get; set; }
-
-        public bool IsActive { get; set; }
 
         /// <summary>
         /// The student ID of the student associated with the registration.
@@ -111,12 +61,6 @@ namespace MidStateShuttleService.Models
         [RegularExpression(@"^$|^\d{8}$",
         ErrorMessage = "Student ID must be exactly 8 digits if provided.")]
         public string? StudentId {get; set; }
-
-        /// <summary>
-        /// The IP address of the device that created the record.
-        /// </summary>
-        [StringLength(50)]
-        public string? DeviceIpAddress { get; set; }
 
         /// <summary>
         /// The date and time the record was created.

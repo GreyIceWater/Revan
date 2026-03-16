@@ -15,63 +15,6 @@
     @RenderSection("Scripts", required: false)
 </head>
 <body>
-    <header>
-        <div class="container-fluid">
-            <nav class="navbar navbar-expand-lg ">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                    <img src="~/img/MSTCBanner.png" alt="Mid-State Technical College" style="height:40px;" />
-                </a>
-
-                <button class="navbar-toggler navbar-light bg-light" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                    <div class="navbar-nav">
-                        <a class="nav-item nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <a class="nav-item nav-link" asp-area="" asp-controller="Register" asp-action="Index">Request Service</a>
-                        }
-                        else
-                        {
-                            <a class="nav-item nav-link" asp-controller="Auth" asp-action="Login">
-                                Request Service
-                            </a>
-                        }
-
-                        <a class="nav-item nav-link" asp-area="" asp-controller="CheckIn" asp-action="CheckIn">Check-in</a>
-                        <a class="nav-item nav-link" asp-area="" asp-controller="Communicate" asp-action="StudentCommunicate">Message</a>
-
-
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-
-                            <a class="nav-item nav-link" asp-area="" asp-controller="User" asp-action="Account">Account</a>
-
-                            if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-                            {
-                                <a class="nav-item nav-link" asp-controller="Dashboard" asp-action="Index">
-                                    Dashboard
-                                </a>
-                            }
-
-                            <a class="nav-item nav-link" asp-controller="Auth" asp-action="Logout">
-                                Sign Out
-                            </a>
-                        }
-                        else
-                        {
-                            <a class="nav-item nav-link" asp-controller="Auth" asp-action="Login">
-                                Sign In
-                            </a>
-                        }
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </header>
 
     <div class="">
         <main role="main" class="">

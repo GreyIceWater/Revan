@@ -1,0 +1,139 @@
+﻿@model IEnumerable<MidStateShuttleService.Models.RegisterModel>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/RegistrationManagement.css" />
+
+@await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
+
+<div class="form-container tiled-background-2">
+    <div class="form-paper">
+
+        <section class="form-section">
+            <h2>All Shuttle Requests</h2>
+            <p>Below is a list of all submitted ride requests.</p>
+        </section>
+
+        <!-- Search / Filter / Sort -->
+        <div class="form-paper mb-3 p-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="mb-1"><strong>Search</strong></label>
+                    <input id="regSearch"
+                           type="text"
+                           class="form-control"
+                           placeholder="Search by name, student ID, or term..." />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="mb-1"><strong>Filter</strong></label>
+                    <select id="regFilter" class="form-control">
+                        <option value="all">All Requests</option>
+                        <option value="custom">Special Requests Only</option>
+                        <option value="standard">Standard Requests Only</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="mb-1"><strong>Sort</strong></label>
+                    <select id="regSort" class="form-control">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="ridesDesc">Most Rides</option>
+                        <option value="ridesAsc">Least Rides</option>
+                    </select>
+                </div>
+            </div>
+
+            <small class="text-muted d-block mt-2" id="regCount"></small>
+        </div>
+
+        <div id="registrationTableBody">
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="form-paper p-3">
+                    <p>No registrations found.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var registration in Model)
+                {
+                    var dayCount = registration.DaySchedules?.Count ?? 0;
+
+                    var rideCount = registration.DaySchedules?
+                    .Where(d => d.Rides != null)
+                    .SelectMany(d => d.Rides)
+                    .Count() ?? 0;
+
+                    <div class="form-paper mb-4 p-4 position-relative reg-card registration-card @(registration.isCustom == true ? "custom-card" : "")"
+                         data-name="@registration.Name"
+                         data-studentid="@registration.StudentId"
+                         data-term="@registration.Term"
+                         data-iscustom="@(registration.isCustom == true ? "true" : "false")"
+                         data-created="@registration.InsertDateTime.ToString()"
+                         data-rides="@rideCount">
+
+                        @if (registration.isCustom == true)
+                        {
+                            <div class="custom-star">★</div>
+                        }
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="mb-1">@registration.Name</h4>
+
+                                <small>
+                                    <strong>Student ID:</strong> @registration.StudentId
+                                    <span> | </span>
+
+                                    <strong>Term:</strong> @registration.Term
+                                    <span> | </span>
+
+                                    @if (registration.isCustom == true)
+                                    {
+                                        <strong>Custom Schedule</strong>
+                                        <span> | </span>
+                                    }
+                                    else
+                                    {
+                                        <strong>Days:</strong>
+                                        @dayCount
+                                        <span> | </span>
+
+                                        <strong>Total Rides:</strong>
+                                        @rideCount
+                                        <span> | </span>
+                                    }
+
+                                    <strong>Created:</strong> @registration.InsertDateTime.ToString()
+                                </small>
+                            </div>
+
+                            <div>
+                                <a asp-controller="Register"
+                                   asp-action="@(registration.isCustom == true ? "SpecialDetails" : "Details")"
+                                   asp-route-registrationId="@registration.RegistrationId"
+                                   class="btn-midstate btn btn-secondary">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+            }
+        </div>
+
+        <div id="pagination-controls-registration" class="pagination"></div>
+
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/RegistrationManagement.js"></script>

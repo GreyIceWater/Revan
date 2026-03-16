@@ -1,0 +1,94 @@
+﻿@model IEnumerable<MidStateShuttleService.Models.Driver>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+@await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
+
+<div class="form-container tiled-background-2">
+    <div class="form-paper">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2>Drivers</h2>
+                <p class="mb-0">Manage shuttle drivers.</p>
+            </div>
+
+            <a asp-controller="Driver" asp-action="Create" class="btn btn-midstate">
+                <i class="bi bi-plus-circle-fill me-1"></i> Add Driver
+            </a>
+        </div>
+
+        <div id="driverTableBody">
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="form-paper p-3">
+                    <p>There are currently no drivers.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var d in Model.OrderBy(d => d.Name))
+                {
+                    <div class="form-paper mb-4 p-4 position-relative driver-card">
+
+                        <div class="d-flex justify-content-between align-items-start">
+
+                            <div>
+                                <h4 class="mb-1">@d.Name</h4>
+
+                                <div class="mb-1">
+                                    <strong>Phone:</strong> @d.PhoneNumber
+                                </div>
+                                <div class="mb-1">
+                                    <strong>Email:</strong> @d.Email
+                                </div>
+                                <div>
+                                    <strong>Status:</strong>
+                                    @if (d.IsActive)
+                                    {
+                                        <span class="text-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger">Inactive</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <a asp-controller="Driver"
+                                   asp-action="Edit"
+                                   asp-route-id="@d.DriverId"
+                                   class="btn btn-midstate btn-sm me-1">
+                                    <i class="bi bi-pencil-fill me-1"></i> Update
+                                </a>
+
+                                <a asp-controller="Driver"
+                                   asp-action="Delete"
+                                   asp-route-id="@d.DriverId"
+                                   class="btn btn-midstate btn-danger btn-sm">
+                                    <i class="bi bi-trash-fill me-1"></i> Remove
+                                </a>
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+            }
+
+        </div>
+
+        <div id="pagination-controls-driver" class="pagination"></div>
+
+    </div>
+</div>
+
+<script src="~/js/tablePagination.js"></script>
+<script src="/js/Dashboard/Table.js"></script>
+<script src="/js/SearchFunc/RouteSearch.js"></script>

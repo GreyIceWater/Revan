@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
 using MidStateShuttleService.Services;
+using MidStateShuttleService.ViewModels;
 using System.Data;
 using System.Diagnostics;
 
@@ -31,39 +32,15 @@ namespace MidStateShuttleService.Controllers
         // GET: DashboardController
         public ActionResult Index(string section = "")
         {
-            AllModels allModels = new AllModels();
-
-            LocationServices ls = new LocationServices(_context);
-            allModels.Location = ls.GetAllEntities();
-
-            RouteServices rs = new RouteServices(_context);
-            allModels.Route = rs.GetAllEntities();
-
-            DriverServices ds = new DriverServices(_context);
-            allModels.Driver = ds.GetAllEntities();
-
-            BusServices bs = new BusServices(_context);
-            allModels.Bus = bs.GetAllEntities();
+            DashboardViewModel dashboardViewModel = new DashboardViewModel();
 
             CheckInServices cis = new CheckInServices(_context);
-            allModels.CheckIn = cis.GetAllEntities();
-
-            if (allModels.CheckIn != null)
-            {
-                foreach (var checkIn in allModels.CheckIn)
-                {
-                    checkIn.Date = TimeService.ConvertUtcToCentral(checkIn.Date);
-                }
-            }
-
-            MessageServices ms = new MessageServices(_context);
-            allModels.Message = ms.GetAllEntities();
-
-            FeedbackServices fs = new FeedbackServices(_context);
-            allModels.Feedback = fs.GetAllEntities();
 
             RegisterServices reg = new RegisterServices(_context);
-            allModels.RegistrationViewModel = reg.GetViewModels();
+
+            dashboardViewModel.TotalMonthlyCheckins = cis.GetAllEntities().Where(c => c.Date >= DateTime.Today.AddDays(-30)).Count();
+            dashboardViewModel.PastWeekRegistrations = reg.GetRegistrationCount("week");
+            dashboardViewModel.TotalRequests = reg.GetAllEntities().Where(r => !r.IsArchived).Count();
 
             // Retrieve the registration success flag and count from the session
             var registrationSuccess = HttpContext.Session.GetString("RegistrationSuccess") == "true";
@@ -73,7 +50,6 @@ namespace MidStateShuttleService.Controllers
             // For instance, passing them to the view via ViewData or ViewBag, if your view logic depends on these values
             ViewData["RegistrationSuccess"] = registrationSuccess;
             ViewData["RegistrationCount"] = newRegistrations;
-            ViewData["PastWeekRegistrations"] = reg.GetRegistrationCount("week");
 
             // Retrieve the check-in count from the session
             int checkInCountFromSession = HttpContext.Session.GetInt32("CheckInCount") ?? 0;
@@ -113,8 +89,13 @@ namespace MidStateShuttleService.Controllers
                 HttpContext.Session.SetInt32("MessageCount", 0); // Reset message count
             }
 
-            return View(allModels);
+            return View(dashboardViewModel);
 
+        }
+
+        public ActionResult ViewReports()
+        {
+            return View("Reports");
         }
 
         public ActionResult GetMessageDetails(int messageId)
@@ -124,70 +105,6 @@ namespace MidStateShuttleService.Controllers
 
             // Return a partial view with the message details
             return PartialView("_MessageDetails", message);
-        }
-
-        // Passenger lists are now being called reservation lists in the UI
-        public ActionResult PassengerList(int id)
-        {
-            var route = _context.Routes
-                .Include(r => r.PickUpLocation)
-                .Include(r => r.DropOffLocation)
-                .FirstOrDefault(r => r.RouteID == id);
-
-            if (route == null)
-            {
-                return NotFound(); // Handle the case where the route is not found
-            }
-
-            // Initialize a HashSet to store unique register IDs
-            var uniqueRegisterIds = new HashSet<int>();
-
-            // Initialize a list to store unique passengers
-            var uniquePassengers = new List<RegisterModel>();
-
-            // Fetch passengers related to this route's selected route details
-            var selectedRoutePassengers = _context.RegisterModels
-                                    .Where(p => p.SelectedRouteDetail == route.RouteID.ToString())
-                                    .ToList();
-
-            // Fetch passengers related to this route's return route details
-            var returnRoutePassengers = _context.RegisterModels
-                                    .Where(p => p.ReturnSelectedRouteDetail == route.RouteID.ToString())
-                                    .ToList();
-
-            // Add passengers from selected route details
-            foreach (var passenger in selectedRoutePassengers)
-            {
-                if (!uniqueRegisterIds.Contains(passenger.RegistrationId))
-                {
-                    uniquePassengers.Add(passenger);
-                    uniqueRegisterIds.Add(passenger.RegistrationId);
-                }
-            }
-
-            // Add passengers from return route details
-            foreach (var passenger in returnRoutePassengers)
-            {
-                if (!uniqueRegisterIds.Contains(passenger.RegistrationId))
-                {
-                    uniquePassengers.Add(passenger);
-                    uniqueRegisterIds.Add(passenger.RegistrationId);
-                }
-            }
-            ViewBag.PassengerList = _context.RegisterModels.ToList();
-            var pickupLocation = route.ToStringPickUp();
-            var dropOffLocation = route.ToStringDropOff();
-
-            var pickupLocationTime = route.ToStringPickUpTime();
-            var dropOffLocationTime = route.ToStringDropOffTime();
-
-            // Construct the title string
-            // using Reservation list in the UI instead of passenger list
-            ViewBag.Title = $"Reservation List for {pickupLocation} ({pickupLocationTime}) to {dropOffLocation} ({dropOffLocationTime})";
-
-            // Pass the route and the list of unique passengers to the view
-            ViewBag.Route = route;
-            return View(uniquePassengers);
         }
         
         // Accept and reject feedback methods
@@ -280,8 +197,7 @@ namespace MidStateShuttleService.Controllers
                 ViewBag.ReportType = "";
             }
 
-            // IMPORTANT: return the PARTIAL view here
-            return PartialView("~/Views/Shared/DashboardPartials/ReportsTable.cshtml", allModels);
+            return View("ReportsTable.cshtml", allModels);
         }
 
 
@@ -372,8 +288,7 @@ namespace MidStateShuttleService.Controllers
                     r.IsFieldTrip,
                     r.IsInternalInquiry,
                     r.InsertDateTime,
-                    r.IsArchived,
-                    r.IsActive
+                    r.IsArchived
                 })
                 .ToListAsync();
 

@@ -129,6 +129,15 @@ namespace MidStateShuttleService.Controllers
             }
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public ActionResult ViewAll()
+        {
+            var drivers = new DriverServices(_context).GetAllEntities();
+
+            return View("DriverTable", drivers);
+        }
+
         // GET: DriverController/Delete/5
         [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
@@ -149,7 +158,7 @@ namespace MidStateShuttleService.Controllers
                     return View();
                 }
 
-                return RedirectToAction("Index", "Dashboard"); // Redirect after toggling IsActive
+                return RedirectToAction("ViewAll");
             }
             catch (Exception ex)
             {

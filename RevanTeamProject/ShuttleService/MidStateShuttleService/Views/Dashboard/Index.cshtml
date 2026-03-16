@@ -1,333 +1,221 @@
-﻿@model MidStateShuttleService.Models.AllModels
+﻿@model MidStateShuttleService.ViewModels.DashboardViewModel
+
 @{
-    ViewData["Title"] = "Dashboard";
-    <link rel="stylesheet" href="~/css/Dashboard.css" asp-append-version="true" />
+    ViewData["Title"] = "Admin Dashboard";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
-@{
-    // Calculate total check-ins for the last 30 days
-    var totalCheckInsLast30Days = Model.CheckIn.Where(c => c.Date >= DateTime.Today.AddDays(-30)).Count();
 
-    // Calculate total check-insF
-    var totalCheckIns = Model.CheckIn.Count();
+@await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
 
-    var totalRiders = Model.RegistrationViewModel.Count();
-}
+<body>
+    <div class="dashboard-landing tiled-background-2">
+        <!-- Key Metrics -->
+        <section class="dashboard-stats-container mb-5">
 
-<div class="container1">
-    <div class="navigation">
-        <ul>
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                <li>
-                    <a href="#" id="order">
-                        <span class="icon"><i class="bi bi-house"></i></span>
-                        <span class="title">Dashboard</span>
-                    </a>
-                </li>
-            }
-
-            @if (User.IsInRole("Admin"))
-            {
-                <li>
-                    <a href="#" id="special">
-                        <span class="icon"><i class="bi bi-send-arrow-down-fill"></i></span>
-                        <span class="title">Requests</span>
-                    </a>
-                </li>
-            }
-
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                <li>
-                    <a href="#" id="routes">
-                        <span class="icon"><i class="bi bi-map"></i></span>
-                        <span class="title">Routes</span>
-                    </a>
-                </li>
-            }
-
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                <li>
-                    <a href="#" id="check">
-                        <span class="icon"><i class="bi bi-clipboard2-check"></i></span>
-                        <span class="title">Check-ins</span>
-                    </a>
-                </li>
-            }
-
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                <li>
-                    <a href="#" id="location">
-                        <span class="icon"><i class="bi bi-geo-alt"></i></span>
-                        <span class="title">Locations</span>
-                    </a>
-                </li>
-            }
-
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                <li>
-                    <a href="#" id="shuttle">
-                        <span class="icon"><i class="bi bi-bus-front"></i></span>
-                        <span class="title">Shuttles</span>
-                    </a>
-                </li>
-            }
-
-            @if (User.IsInRole("Admin"))
-            {
-                <li>
-                    <a href="#" id="driver">
-                        <span class="icon"><i class="bi bi-file-earmark-person-fill"></i></span>
-                        <span class="title">Drivers</span>
-                    </a>
-                </li>
-            }
-
-            @if (User.IsInRole("Admin"))
-            {
-                <li>
-                    <a href="#" id="reports">
-                    <span class="icon"><i class="bi bi-bar-chart-line"></i></span>
-                    <span class="title">Reports</span>
-                </a>
-            </li>
-            }
-
-            @if (User.IsInRole("Admin"))
-            {
-                <li>
-                    <a href="@Url.Action("Index", "Dashboard", new { section = "feedback" })" id="feedback">
-                        <span class="icon"><i class="bi bi-hand-thumbs-up"></i></span>
-                        <span class="title">Testimonials</span>
-                    </a>
-                </li>
-            }
-
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                <li>
-                    <a href="@Url.Action("Index", "Communicate")">
-                        <span class="icon"><i class="bi bi-send-arrow-down-fill"></i></span>
-                        <span class="title">Send Messages</span>
-                    </a>
-                </li>
-            }
-        </ul>
-    </div>
-</div>
-<div class="main">
-    <div class="topbar">
-        <div class="toggle">
-            <i class="bi bi-list"></i>
-        </div>
-        
-
-        <div class="icons-container">
-            <div class="notification-container">
-
-                <div class="notification-bell" onclick="toggleNotifications('notificationBellDropdown')"
-                     data-registration-count="@ViewData["RegistrationCount"].ToString()"
-                     data-check-in-count="@ViewData["CheckInCount"]">
-                    <span class="badge"></span>
-                    <i class="bi bi-bell"></i>
+            <a asp-controller="Register" asp-action="ViewAll" class="text-decoration-none">
+                <div class="dashboard-stat-card bg-primary text-white shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-week fs-1 mb-2"></i>
+                        <h3 class="display-5">@Model.PastWeekRegistrations</h3>
+                        <p class="mb-0">Weekly Requests</p>
+                    </div>
                 </div>
-                <div class="dropdown-menu notifications dropdown-menu-arrow" id="notificationBellDropdown" style="display: none;">
-                     <!-- Notifications go here -->
+            </a>
+
+            <a asp-controller="CheckIn" asp-action="ViewAll" class="text-decoration-none">
+                <div class="dashboard-stat-card bg-success text-white shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-clipboard2-check fs-1 mb-2"></i>
+                        <h3 class="display-5">@Model.TotalMonthlyCheckins</h3>
+                        <p class="mb-0">Monthly Check-ins</p>
+                    </div>
+                </div>
+            </a>
+
+            <div class="dashboard-stat-card bg-warning text-white shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-envelope fs-1 mb-2"></i>
+                    <h3 class="display-5">0</h3>
+                    <p class="mb-0">Mail Check Ins</p>
                 </div>
             </div>
-            <div class="notification-container">
-                <div class="notification-message" onclick="toggleNotifications('notificationMessageDropdown')"
-                     data-message-count="@ViewData["MessageCount"]"
-                     data-feedback-count="@ViewData["FeedbackCount"]"
-                     data-last-message="@ViewData["LastMessage"]">
-                    <span class="badge"></span>
-                    <i class="bi bi-chat-left-text"></i>
+
+            <a asp-controller="Register" asp-action="ViewAll" class="text-decoration-none">
+                <div class="dashboard-stat-card bg-danger text-white shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-clipboard-data fs-1 mb-2"></i>
+                        <h3 class="display-5">@Model.TotalRequests</h3>
+                        <p class="mb-0">Total Requests</p>
+                    </div>
+                </div>
+            </a>
+
+        </section>
+
+        <!-- NOTIFICATIOSN -->
+        <section class="dashboard-notifications mb-5">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-left-text me-2"></i>
+                        Recent Notifications
+                    </h5>
+
+                    <span class="badge bg-danger"
+                          data-message-count="@ViewData["MessageCount"]"
+                          data-feedback-count="@ViewData["FeedbackCount"]">
+                    </span>
                 </div>
 
-                <div class="dropdown-menu notifications dropdown-menu-arrow" id="notificationMessageDropdown" style="display: none;">
-                    <!-- Notifications go here -->
-                </div>
+                <ul class="list-group list-group-flush"
+                    id="notificationMessageDropdown"
+                    data-message-count="@ViewData["MessageCount"]"
+                    data-feedback-count="@ViewData["FeedbackCount"]"
+                    data-last-message="@ViewData["LastMessage"]"
+                    data-last-feedback="@ViewData["LastFeedback"]">
+                </ul>
 
             </div>
-        </div>
+
+        </section>
     </div>
-    <!--Cards-->
-    <div class="cardBox">
-        <div class="card">
-            <div>
-                <div class="numbers">@ViewData["PastWeekRegistrations"].ToString()</div>
-                <div class="cardName">Weekly Requests</div>
-            </div>
-            <div class="icon">
-                <i class="bi bi-clipboard2-check"></i>
-            </div>
-        </div>
-        <div class="card">
-            <div>
-                <div class="numbers"> @totalCheckInsLast30Days</div>
-                <div class="cardName">Monthly Checkins</div>
-            </div>
-            <div class="icon">
-                <i class="bi bi-clipboard2-check"></i>
-            </div>
-        </div>
-        <div class="card">
-            <div>
-                <div class="numbers">@totalCheckIns</div>
-                <div class="cardName">Total Checkins</div>
-            </div>
-            <div class="icon">
-                <i class="bi bi-clipboard2-check"></i>
-            </div>
-        </div>
-        <div class="card">
-            <div>
-                <div class="numbers">@totalRiders</div>
-                <div class="cardName">Total Riders</div>
-            </div>
-            <div class="icon">
-                <i class="bi bi-bus-front"></i>
-            </div>
-        </div>
-        <!--Sections-->
-
-    </div>
-    <div class="details">
-
-        <div class="recentFeedback messages">
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/MessagesTable.cshtml")
-            }
-            else
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
-            }
-        </div>
-
-        <div class="recentFeedback route">
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/RouteTable.cshtml")
-            }
-            else
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
-            }
-        </div>
-
-        <div class="recentFeedback check">
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/CheckInTable.cshtml")
-            }
-            else
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
-            }
-        </div>
-
-        <div class="recentFeedback location">
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/LocationTable.cshtml")
-            }
-            else
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
-            }
-        </div>
-
-        <div class="recentFeedback driver">
-            @if (User.IsInRole("Admin"))
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/DriverTable.cshtml")
-            }
-            else
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
-            }
-        </div>
-
-        <div class="recentFeedback shuttle">
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/ShuttleTable.cshtml")
-            }
-            else
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
-            }
-        </div>
-
-        <div class="recentFeedback feedback">
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/FeedbackTable.cshtml")
-            }
-            else
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
-            }
-        </div>
-
-        <div class="recentFeedback request">
-            @if (User.IsInRole("Admin"))
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_ViewRegistrations.cshtml")
-            }
-            else
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
-            }
-        </div>
-
-        <div class="recentFeedback reports">
-            @if (User.IsInRole("Admin"))
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/ReportsTable.cshtml")
-            }
-            else
-            {
-                @await Html.PartialAsync("~/Views/Shared/DashboardPartials/_AccessDenied.cshtml")
-            }
-        </div>
-        
-    </div>
-
-</div>
-
-<script type="text/javascript">
-    var feedbackUrl = '@Url.Action("Index", "Dashboard", new { section = "feedback" })';
-    var messageUrl = '@Url.Action("Index", "Dashboard", new { section = "message" })'; // Ensure this line is correct
-    console.log('Testimonial URL:', feedbackUrl);
-    console.log('Message URL:', messageUrl);
-</script>
-
-<script type="text/javascript">
-    // Define a global variable in .cshtml file
-    var globalOpenSection = '@ViewBag.OpenSection';
-    console.log(globalOpenSection);
-</script>
+</body>
 
 
+<style>
+    .dashboard-stat-card {
+        border-radius: 12px;
+        padding: 15px;
+        transition: transform 0.2s;
+    }
 
-<script src="https://code.jquery.com/jquery-3.7.1.js"
-        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-        crossorigin="anonymous"></script>
+        /* Make all stat cards maroon */
+        .dashboard-stat-card.bg-primary,
+        .dashboard-stat-card.bg-success,
+        .dashboard-stat-card.bg-warning,
+        .dashboard-stat-card.bg-danger {
+            background-color: #800000 !important; /* maroon */
+            color: white !important;
+        }
+
+        /* Icons white */
+        .dashboard-stat-card i {
+            color: white;
+        }
+
+        /* Hover effect */
+        .dashboard-stat-card:hover {
+            transform: translateY(-5px);
+            background-color: #a00000 !important; /* lighter maroon */
+        }
+
+    .dashboard-landing {
+        margin-left: 300px;
+        padding: 40px 20px;
+        min-height: 100vh;
+    }
+
+    .dashboard-header h1 {
+        font-weight: 700;
+        color: #800000; /* Maroon heading */
+    }
+
+    .dashboard-stats-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+    }
+
+    .dashboard-stat-card {
+        width: 220px;
+        border-radius: 12px;
+        padding: 15px;
+        transition: transform 0.2s;
+        color: white;
+        background-color: #800000; /* Maroon background */
+    }
+
+        .dashboard-stat-card:hover {
+            transform: translateY(-5px);
+            background-color: #a00000; /* Slightly lighter maroon on hover */
+        }
+
+    .dashboard-quick-access {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .quick-access-card {
+        width: 220px;
+    }
+
+        .quick-access-card .card {
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background-color: #800000; /* Maroon card */
+            color: white;
+        }
+
+            .quick-access-card .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(128, 0, 0, 0.4); /* Maroonish shadow */
+                background-color: #a00000; /* Slightly lighter maroon hover */
+            }
+
+        .quick-access-card i {
+            color: #ffc107; /* Use gold/yellow for icons to contrast maroon */
+        }
+
+    .dashboard-header-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .dashboard-header-card {
+        background-color: #800000; /* Maroon background */
+        border-radius: 20px; /* Rounded corners */
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+        max-width: 800px;
+        width: 100%;
+        padding: 40px 30px;
+        color: white;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .dashboard-header-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .dashboard-header-card h1 {
+            font-weight: 700;
+        }
+
+        .dashboard-header-card p {
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+
+    @@media (max-width: 768px) {
+        .dashboard-landing {
+            margin-left: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .dashboard-stats-container,
+        .dashboard-quick-access {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+</style>
 
 <script src="/js/Dashboard/DisplayNotification.js"></script>
-<script src="/js/Dashboard/dashboard-sections.js" defer></script>
-
-<script src="/js/Dashboard/Nav.js"></script>
-<script src="/js/Dashboard/Table.js"></script>
-
-@* <script src="/js/dashboard/Nav.js"></script> *@
 <script src="/js/Dashboard/notification.js"></script>
-<script src="/js/dashboard/Table.js"></script>
-<script src="/js/SearchFunc/RouteSearch.js"></script>
-

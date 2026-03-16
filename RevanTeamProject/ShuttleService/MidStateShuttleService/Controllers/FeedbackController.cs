@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MidStateShuttleService.Models;
+using MidStateShuttleService.Service;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -70,6 +71,50 @@ namespace MidStateShuttleService.Controllers
             return View("Index", feedback);
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public ActionResult ViewAll()
+        {
+            var feedbacks = new FeedbackServices(_context).GetAllEntities().Where(f => !f.IsActive);
 
+            return View("FeedbackTable", feedbacks);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ArchiveFeedback(int id)
+        {
+            try
+            {
+                var feedback = _context.Feedbacks.Find(id);
+
+                if (feedback != null)
+                {
+                    feedback.IsActive = !feedback.IsActive; // Toggle IsActive from true to false or false to true
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    // Handle the case where the driver with the specified id is not found
+                    ModelState.AddModelError("", "Feedback not found.");
+                    return View();
+                }
+
+                return RedirectToAction("ViewAll");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
+                _logger.LogError(ex, "An error occurred while toggling IsActive of the driver.");
+
+                // Optionally add a model error for displaying an error message to the user
+                ModelState.AddModelError("", "An unexpected error occurred while toggling IsActive of the feedback, please try again.");
+
+                // Return the view with an error message
+                return View();
+            }
+        }
     }
 }

@@ -90,7 +90,10 @@
 
                     <div class="p-t-20">
                         <button type="submit" class="btn btn--radius btn--submit">Edit Route</button>
-                        <button class="btn btn--radius btn--cancel" type="button" onclick="location.href='../../Dashboard'">Cancel</button>
+                        <button type="button" class="btn btn-primary"
+                                onclick="location.href='@Url.Action("ViewAll", "Routes")'">
+                            Return
+                        </button>
                     </div>
 
                 </form>
@@ -112,7 +115,10 @@
                     Route updated successfully!
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="location.href='../../Dashboard'">Return</button>
+                    <button type="button" class="btn btn-primary"
+                            onclick="location.href='@Url.Action("ViewAll", "Routes")'">
+                        Return
+                    </button>
                 </div>
             </div>
         </div>

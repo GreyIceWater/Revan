@@ -379,37 +379,12 @@ public partial class ApplicationDbContext : DbContext
                 .ValueGeneratedOnAdd()
                 .IsRequired();
 
-            entity.Property(e => e.TripType)
-                .HasMaxLength(10);
-
             entity.Property(e => e.PickUpLocationID);
 
             entity.Property(e => e.DropOffLocationID);
 
-            entity.Property(e => e.NeedTransportation)
-                .HasMaxLength(300);
-
-            entity.Property(e => e.SpecialRequest)
-                .IsRequired();
-
-            entity.Property(e => e.WhichFriday)
-                .HasMaxLength(300);
-
-            entity.Property(e => e.FridayTripType)
-                .HasMaxLength(20);
-
-            entity.Property(e => e.ContactPreference)
-                //.IsRequired()
-                .HasMaxLength(20);
-
             entity.Property(e => e.AgreeTerms)
                 .IsRequired();
-
-            entity.Property(e => e.FridayAgreeTerms)
-                .IsRequired();
-
-            entity.Property(b => b.IsActive)
-                .HasDefaultValue(false);
 
             entity.Ignore(e => e.LocationNames);
 
@@ -427,20 +402,6 @@ public partial class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_Registration_DropOffLocation");
 
-            // Configure foreign key relationship for FridayPickUpLocationID
-            entity.HasOne<Location>()
-                .WithMany()
-                .HasForeignKey(e => e.FridayPickUpLocationID)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_Registration_FridayPickUpLocation");
-
-            // Configure foreign key relationship for FridayDropOffLocationID
-            entity.HasOne<Location>()
-                .WithMany()
-                .HasForeignKey(e => e.FridayDropOffLocationID)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_Registration_FridayDropOffLocation");
-            
             entity.Property(x => x.Term)
                 .HasConversion<string>();
         });

@@ -1,0 +1,103 @@
+﻿@model IEnumerable<MidStateShuttleService.Models.Location>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+@await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
+
+<div class="form-container tiled-background-2">
+    <div class="form-paper">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2>Locations</h2>
+                <p class="mb-0">Manage shuttle locations.</p>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="Location" asp-action="Create" class="btn btn-midstate">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Add Location
+                </a>
+            }
+        </div>
+
+        <div id="locationsTableBody">
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="form-paper p-3">
+                    <p>No locations currently exist.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var loc in Model.OrderBy(l => l.Name))
+                {
+                    <div class="form-paper mb-4 p-4 position-relative location-card"
+                         data-active="@(loc.IsActive ? "true" : "false")">
+
+                        <div class="d-flex justify-content-between align-items-start">
+
+                            <div>
+                                <h4 class="mb-1">@loc.Name</h4>
+
+                                <div>
+                                    <span><strong>Address:</strong> @loc.Address</span>
+                                    <span> | </span>
+                                    <span><strong>City:</strong> @loc.City</span>
+                                    <span> | </span>
+                                    <span><strong>State:</strong> @loc.State</span>
+                                    <span> | </span>
+                                    <span><strong>Zip:</strong> @loc.ZipCode</span>
+                                    <span> | </span>
+                                    <span><strong>Abbreviation:</strong> @loc.Abbreviation</span>
+                                    <span> | </span>
+                                    <span>
+                                        <strong>Status:</strong>
+                                        @if (loc.IsActive)
+                                        {
+                                            <span class="text-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">Inactive</span>
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="text-end">
+                                    <a asp-controller="Location" asp-action="Edit" asp-route-id="@loc.LocationId"
+                                       class="btn btn-midstate btn-sm me-2">
+                                        <i class="bi bi-pencil-fill me-1"></i> Update
+                                    </a>
+
+                                    <a asp-controller="Location" asp-action="DeleteLocation" asp-route-id="@loc.LocationId"
+                                       class="btn btn-midstate btn-sm btn-danger">
+                                        <i class="bi bi-trash-fill me-1"></i> Remove
+                                    </a>
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+                }
+            }
+
+        </div>
+
+        <div id="pagination-controls-location" class="pagination"></div>
+
+    </div>
+</div>
+
+<script src="~/js/tablePagination.js"></script>
+<script src="/js/Dashboard/Table.js"></script>
+<script src="/js/SearchFunc/RouteSearch.js"></script>

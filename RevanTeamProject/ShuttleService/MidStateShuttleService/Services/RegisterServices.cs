@@ -15,56 +15,17 @@ namespace MidStateShuttleService.Service
         }
 
         // Retrieve registrations with matching pickup and drop-off locations
-        
 
-        public List<RegisterModel> GetEmailsByRoute(string routeId)
+
+        public List<RegisterModel> GetEmailsByRoute(int routeId)
         {
-            var mailingList = _dbSet.Where(x => x.SelectedRouteDetail == routeId || x.ReturnSelectedRouteDetail == routeId).ToList();
+            var mailingList = _dbSet
+                .Where(r => r.DaySchedules
+                    .Any(dr => dr.Rides
+                        .Any(ride => ride.Route != null && ride.RouteId == routeId)))
+                .ToList();
 
             return mailingList;
-        }
-
-        /// <summary>
-        /// Gets the list of view models of all the requests/registrations
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<RegistrationViewModel> GetViewModels()
-        {
-            var registrations = _context.RegisterModels
-                .Include(r => r.User)
-                .Include(r => r.DaySchedules)
-                    .ThenInclude(d => d.Rides)
-                    .Where(r => !r.IsArchived)
-                .Select(r => new RegistrationViewModel
-                {
-                    RegistrationId = r.RegistrationId,
-
-                    UserName = r.Name != null ? r.Name : "Unknown",
-                    StudentId = r.StudentId != null ? r.StudentId : "No ID",
-
-                    Term = r.Term ?? SchoolTerm.Fall,
-
-                    RequestDays = r.isCustom
-                        ? new List<RequestDayViewModel>()
-                        : r.DaySchedules.Select(d => new RequestDayViewModel
-                        {
-                            WeekDay = d.WeekDay,
-
-                            Rides = d.Rides.Select(ride => new RideViewModel
-                            {
-                                PickUpLocation = ride.PickUpLocationID.ToString(),
-                                DropOffLocation = ride.DropOffLocationID.ToString(),
-                                DropOffTime = ride.DropOffTime.ToString()
-                            }).ToList()
-
-                        }).ToList(),
-
-                    dateCreated = r.InsertDateTime ?? DateTime.MinValue,
-
-                    IsCustom = r.isCustom
-                });
-
-            return registrations;
         }
 
         public int GetRegistrationCount(string range)

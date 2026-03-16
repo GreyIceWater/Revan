@@ -129,7 +129,18 @@ namespace MidStateShuttleService.Controllers
             }
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin,Driver")]
+        public ActionResult ViewAll()
+        {
+            var routes = _context.Routes
+                .Include(r => r.PickUpLocation)
+                .Include(r => r.DropOffLocation)
+                .Include(r => r.Driver)
+                .ToList();
 
+            return View("RouteTable", routes);
+        }
 
         // GET: RoutesController/Delete/5
         [Authorize(Roles = "Admin")]
@@ -151,7 +162,7 @@ namespace MidStateShuttleService.Controllers
                     return View();
                 }
 
-                return RedirectToAction("Index", "Dashboard"); // Redirect after toggling IsActive
+                return RedirectToAction("ViewAll");
             }
             catch (Exception ex)
             {

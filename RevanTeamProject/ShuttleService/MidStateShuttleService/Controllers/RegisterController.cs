@@ -129,9 +129,6 @@ namespace MidStateShuttleService.Controllers
             model.Name = fullName;
             model.StudentId = studentId;
 
-            //set trip type up for now, its a legacy feature
-            model.TripType = "N/A";
-
             model.TimeOptions = GetTimeSelectList();
             ViewBag.Terms = GetSchoolTermSelectList();
             return View(model);
@@ -260,15 +257,18 @@ namespace MidStateShuttleService.Controllers
         }
 
         /// <summary>
-        /// This is the only Controller action to use view models
+        /// Returns all registrations as RegisterModel entities
         /// </summary>
-        /// <returns></returns>
         [Authorize(Roles = "Admin")]
-        public IActionResult ViewRegistrations()
+        public IActionResult ViewAll()
         {
-            var registrations = new RegisterServices(_context).GetViewModels();
+            var registrations = _context.RegisterModels
+                .Include(r => r.DaySchedules)
+                    .ThenInclude(d => d.Rides)
+                        .ThenInclude(r => r.Route)
+                .ToList();
 
-            return PartialView("~/Views/Register/_ViewRegistrations.cshtml", registrations);
+            return View("RegistrationTable", registrations);
         }
 
         // Displays the full breakdown of a single registration
@@ -563,88 +563,6 @@ namespace MidStateShuttleService.Controllers
             return Json(formattedRoutesList);
         }
 
-        //THIS IS UNUSED
-        public ActionResult Edit(int id)
-        {
-            LocationServices ls = new LocationServices(_context);
-            RouteServices rs = new RouteServices(_context);
-
-            // Retrieve the student to be edited from the database
-            var student = _context.RegisterModels.Find(id);
-
-            if (student == null)
-            {
-                return NotFound(); // Or handle the case where the student is not found
-            }
-
-            // Retrieve the days of the week selected for the student
-            var selectedDaysOfWeek = _context.RegisterModels
-                                              .Where(s => s.RegistrationId == id)
-                                              .Select(s => s.SelectedDaysOfWeek)
-                                              .FirstOrDefault();
-
-            // Pass the selected days of the week to the view
-            ViewBag.SelectedDaysOfWeek = selectedDaysOfWeek;
-
-            ViewBag.RouteList = rs.GetAllEntities();
-
-            ViewBag.SelectedPickupRoute = student.SelectedRouteDetail;
-            ViewBag.SelectedReturnRoute = student.ReturnSelectedRouteDetail;
-            ViewBag.Terms = GetSchoolTermSelectList();
-
-            // Return the location names for each route
-            foreach (Routes route in ViewBag.RouteList)
-            {
-                route.PickUpLocation = ls.GetEntityById(route.PickUpLocationID);
-                route.DropOffLocation = ls.GetEntityById(route.DropOffLocationID);
-            }
-
-            return View(student);
-        }
-
-        //THIS IS UNUSED
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, RegisterModel student)
-        {
-            if (id != student.RegistrationId)
-            {
-                return BadRequest(); // Or handle the case where IDs do not match
-            }
-
-            // Make sure the return route is null if the student selected one way
-            if (student.TripType == "OneWay")
-            {
-                student.ReturnSelectedRouteDetail = null;
-            }
-
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Terms = GetSchoolTermSelectList();
-                return View(student); // Return the view with validation errors
-            }
-
-            try
-            {
-                // Update the student in the database
-                student.IsActive = true; // Set IsActive to true
-                _context.Update(student);
-                _context.SaveChanges();
-
-                TempData["SuccessMessage"] = "The student has been successfully updated!";
-                return RedirectToAction("Index", "Dashboard");
-            }
-            catch (Exception ex)
-            {
-                //LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context); // Log SQL exception
-                _logger.LogError(ex, "An error occurred while updating student.");
-                ModelState.AddModelError("", "An unexpected error occurred, please try again.");
-
-                ViewBag.Terms = GetSchoolTermSelectList();
-
-                return View(student); // Return the view with an error message
-            }
-        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -660,123 +578,8 @@ namespace MidStateShuttleService.Controllers
             registration.IsArchived = true;
             _context.SaveChanges();
 
-            return RedirectToAction("Index", "Dashboard");
+            return RedirectToAction("ViewAll");
         }
-
-        /// <summary>
-        /// Email content to generate for a registration (requested ride) confirmation email
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        private string GenerateRegistrationEmailBody(RegisterModel model)
-        {
-            try
-            {
-                string initialRoute = "Unknown";
-
-                // Check if the pick-up and drop-off locations are valid
-                if (model.PickUpLocationID == null || model.DropOffLocationID == null)
-                {
-                    return "Invalid pick-up or drop-off location";
-                }
-                else
-                {
-                    ActionResult actionResult = null;
-
-                    if (model.SpecialRequest != null)
-                    {
-                        if (model.SpecialRequest.Value == true)
-                        {
-                            return SpecialRequestRoute(model);
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("", "Could not create special request. Check your request and try again.");
-                        }
-                    }
-
-                    model.SpecialRequest = false; // Default to false if SpecialRequest is null
-                    actionResult = GetRoutes(model.PickUpLocationID.Value, model.DropOffLocationID.Value);
-                    initialRoute = this.ParseInitialResult(actionResult, initialRoute);
-
-                    return "";
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                //LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
-                _logger.LogError(ex, "An error occurred while generating request email body.");
-                return "An error occurred while generating request email body.";
-            }
-        }
-
-        /// <summary>
-        /// Build the route for special requests in the email.
-        /// </summary>
-        /// <param name="model">Model of the request.</param>
-        /// <returns>The email confirmation body for a special request.</returns>
-        private string SpecialRequestRoute(RegisterModel model)
-        {
-            string initialRoute = "Unknown";
-            string pickupLocationName = "Unknown";
-            string dropoffLocationName = "Unknown";
-            string pickupTime = TimeOnly.MaxValue.ToShortTimeString();
-            string dropoffTime = TimeOnly.MaxValue.ToShortTimeString();
-            List<object> formattedRoutesList = new List<object>();
-            LocationServices ls = new LocationServices(_context);
-
-            if (model.PickUpLocationID.HasValue)
-            {
-                var x = ls.getLocationNameById(model.PickUpLocationID.Value);
-                if (x.ToLower() == "other")
-                {
-                    // Other routes
-                    pickupLocationName = model.SpecialPickUpLocation;
-                    pickupTime = ToStringRideTimes(model.MustArriveTime.Value);
-                }
-                else
-                {
-                    // Standard routes
-                    //pickupLocationName = model.PickUpLocationID.HasValue ? ls.getLocationNameById(model.PickUpLocationID.Value) : "Unknown";
-                    //pickupTime = ToStringRideTimes(model.MustArriveTime.Value);
-
-                    var routeInfo = GetRouteInfo(model.PickUpLocationID.Value, model.DropOffLocationID.Value);
-
-                    pickupLocationName = "";
-                }
-            }
-
-            if (model.DropOffLocationID.HasValue)
-            {
-                var x = ls.getLocationNameById(model.DropOffLocationID.Value);
-                if (x.ToLower() == "other")
-                {
-                    // Other routes
-                    dropoffLocationName = model.SpecialDropOffLocation;
-                    dropoffTime = ToStringRideTimes(model.CanLeaveTime.Value);
-                }
-                else
-                {
-                    // Standard routes
-                    dropoffLocationName = model.DropOffLocationID.HasValue ? ls.getLocationNameById(model.DropOffLocationID.Value) : "Unknown";
-                    dropoffTime = ToStringRideTimes(model.CanLeaveTime.Value);
-                }
-            }
-
-            formattedRoutesList.Add(new
-            {
-                RouteID = "other",
-                Detail = $"Leave {dropoffLocationName} at {pickupTime}, Arrive at {dropoffLocationName} at {dropoffTime}"
-            });
-
-            JsonResult finalList = Json(formattedRoutesList);
-
-            initialRoute = ParseInitialResult(finalList, initialRoute);
-
-            return "";
-        }
-
         private JsonResult GetRouteInfo(int pickUpLocationId, int dropOffLocationId)
         {
             RouteServices rs = new RouteServices(_context);
