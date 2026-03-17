@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
 using MidStateShuttleService.Services;
@@ -12,107 +10,111 @@ namespace MidStateShuttleService.Controllers
 {
     public class CheckInController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly CheckInServices _checkInService;
+        private readonly LocationServices _locationService;
         private readonly ILogger<CheckInController> _logger;
+        private readonly IWebHostEnvironment _environment;
 
-        // Inject ApplicationDbContext into the controller constructor
-        public CheckInController(ApplicationDbContext context, ILogger<CheckInController> logger)
+        public CheckInController(
+            CheckInServices checkInService,
+            LocationServices locationService,
+            ILogger<CheckInController> logger,
+            IWebHostEnvironment environment)
         {
-            _context = context; // Assign the injected ApplicationDbContext to the _context field
+            _checkInService = checkInService;
+            _locationService = locationService;
             _logger = logger;
+            _environment = environment;
         }
 
-        // GET: CheckInController/Create
-        [AllowAnonymous]
-        public ActionResult CheckIn()
+        [AllowAnonymous] // DEV NOTE: Public endpoint used by riders to access the check-in form.
+        [HttpGet]
+        public IActionResult CheckIn()
         {
-            LocationServices ls = new LocationServices(_context);
-            ViewBag.Locations = ls.GetAllEntities().Select(x => new SelectListItem { Text = x.Name, Value = x.LocationId.ToString() });
-
+            ViewBag.Locations = GetLocationOptions(); // DEV NOTE: Dropdown population logic centralized below.
             return View();
-
         }
 
-        [Authorize(Roles = "Admin")]
-        public ActionResult EditCheckIn(int id)
+        [HttpPost]
+        [AllowAnonymous] // DEV NOTE: Riders submit check-ins without authentication.
+        [ValidateAntiForgeryToken]
+        public IActionResult CheckIn(CheckIn submittedCheckIn)
         {
-            var cs = new CheckInServices(_context);
-            var model = cs.GetEntityById(id);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Locations = GetLocationOptions();
+                return View(submittedCheckIn);
+            }
 
-            if (model == null)
-                return FailedCheckIn("Check-in Not Found");
+            submittedCheckIn.Date = DateTime.UtcNow;
+            submittedCheckIn.IsActive = true;
 
-            var ls = new LocationServices(_context);
-            var locationOptions = ls.GetAllEntities()
-                .Select(x => new SelectListItem { Text = x.Name, Value = x.LocationId.ToString() })
-                .ToList();
+            // DEV NOTE: Database operations should remain inside service classes.
+            _checkInService.AddEntity(submittedCheckIn);
+
+            // DEV NOTE: Session tracking logic could be moved to a SessionTrackingService if reused elsewhere.
+            int currentCheckInCount = HttpContext.Session.GetInt32("CheckInCount") ?? 0;
+            HttpContext.Session.SetInt32("CheckInCount", currentCheckInCount + 1);
+
+            // DEV NOTE: Used to trigger a success modal after redirect.
+            HttpContext.Session.SetString("CheckInSuccess", "true");
+            TempData["CheckInSuccess"] = true;
+
+            return RedirectToAction(nameof(CheckIn));
+        }
+
+        [Authorize(Roles = "Admin")] // DEV NOTE: Only administrators can edit existing check-ins.
+        [HttpGet]
+        public IActionResult EditCheckIn(int checkInId)
+        {
+            CheckIn existingCheckIn = _checkInService.GetEntityById(checkInId);
+
+            if (existingCheckIn == null)
+                return FailedCheckIn("Check-in not found.");
 
             var viewModel = new CheckInViewModel
             {
-                CheckInId = model.CheckInId,
-                Name = model.Name,
-                UtcDate = model.Date,
-                Comments = model.Comments,
-                FirstTime = model.FirstTime,
-                LocationId = model.LocationId,
-                IsActive = model.IsActive,
-                StudentId = model.StudentId,
-                DropOffLocationId = model.DropOffLocationId,
-                LocationOptions = locationOptions
-                // CentralDateTime will auto-convert from UtcDate via getter in ViewModel
+                CheckInId = existingCheckIn.CheckInId,
+                Name = existingCheckIn.Name,
+                UtcDate = existingCheckIn.Date,
+                Comments = existingCheckIn.Comments,
+                FirstTime = existingCheckIn.FirstTime,
+                LocationId = existingCheckIn.LocationId,
+                IsActive = existingCheckIn.IsActive,
+                StudentId = existingCheckIn.StudentId,
+                DropOffLocationId = existingCheckIn.DropOffLocationId,
+                LocationOptions = GetLocationOptions()
             };
 
             return View(viewModel);
         }
 
-        // POST: CheckInController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [AllowAnonymous]
-        public ActionResult CheckIn(CheckIn checkIn)
-        {
-            checkIn.Date = DateTime.UtcNow;
-            CheckInServices cs = new CheckInServices(_context);
-            checkIn.IsActive = true;
-            cs.AddEntity(checkIn);
-
-            // Increment the check-in count in the session
-            int checkInCount = HttpContext.Session.GetInt32("CheckInCount") ?? 0;
-            checkInCount++;
-            HttpContext.Session.SetInt32("CheckInCount", checkInCount);
-
-            // The temp data which is used to display the modal after sending a form
-            HttpContext.Session.SetString("CheckInSuccess", "true");
-            TempData["CheckInSuccess"] = true;
-
-            return RedirectToAction("CheckIn");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public ActionResult EditCheckIn(CheckInViewModel model)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditCheckIn(CheckInViewModel submittedModel)
         {
-            if (model == null)
-                return FailedCheckIn("Updates to check-in could not be applied");
+            if (!ModelState.IsValid)
+            {
+                submittedModel.LocationOptions = GetLocationOptions();
+                return View(submittedModel);
+            }
 
-            var cs = new CheckInServices(_context);
-            var existingCheckIn = cs.GetEntityById(model.CheckInId);
+            CheckIn existingCheckIn = _checkInService.GetEntityById(submittedModel.CheckInId);
 
             if (existingCheckIn == null)
-                return FailedCheckIn("Check-in not found");
+                return FailedCheckIn("Check-in not found.");
 
-            // Update other fields
-            existingCheckIn.Name = model.Name;
-            existingCheckIn.Comments = model.Comments;
-            existingCheckIn.FirstTime = model.FirstTime;
-            existingCheckIn.LocationId = model.LocationId;
+            existingCheckIn.Name = submittedModel.Name;
+            existingCheckIn.Comments = submittedModel.Comments;
+            existingCheckIn.FirstTime = submittedModel.FirstTime;
+            existingCheckIn.LocationId = submittedModel.LocationId;
             existingCheckIn.IsActive = true;
 
-            // Use UtcDate from ViewModel (which is kept in sync when CentralDateTime is set)
-            existingCheckIn.Date = model.UtcDate;
+            // DEV NOTE: ViewModel stores UTC internally to keep DB timestamps consistent.
+            existingCheckIn.Date = submittedModel.UtcDate;
 
-            cs.UpdateEntity(existingCheckIn);
+            _checkInService.UpdateEntity(existingCheckIn);
 
             return RedirectToAction("Index", "Dashboard");
         }
@@ -126,48 +128,61 @@ namespace MidStateShuttleService.Controllers
             return View("CheckInTable", checkins);
         }
 
-        [Authorize(Roles = "Admin")]
-        public ActionResult DeleteCheckIn(int id)
+        [Authorize(Roles = "Admin")] // DEV NOTE: Admin-only operation that toggles check-in active state.
+        [HttpPost] // DEV NOTE: Data modification endpoints should use POST instead of GET.
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleCheckInActive(int checkInId)
         {
             try
             {
-                CheckInServices cs = new CheckInServices(_context);
-                CheckIn model = cs.GetEntityById(id);
+                CheckIn existingCheckIn = _checkInService.GetEntityById(checkInId);
 
-                if (model == null)
-                    return FailedCheckIn("Check-in could not be found");
+                if (existingCheckIn == null)
+                    return FailedCheckIn("Check-in could not be found.");
 
-                model.IsActive = !model.IsActive; // Toggle IsActive value
-                cs.UpdateEntity(model); // Update the entity in the database
+                existingCheckIn.IsActive = !existingCheckIn.IsActive;
+
+                _checkInService.UpdateEntity(existingCheckIn);
 
                 return RedirectToAction("ViewAll");
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                // Log the exception
-                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
-                _logger.LogError(ex, "An error occurred while toggling IsActive of the check-in.");
+                // DEV NOTE: Logging and SQL exception capture should remain centralized.
+                LogEvents.LogSqlException(exception, _environment);
 
-                // Optionally add a model error for displaying an error message to the user
-                ModelState.AddModelError("", "An unexpected error occurred while toggling IsActive of the check-in, please try again.");
+                _logger.LogError(exception,
+                    "Error toggling check-in active status for CheckInId {CheckInId}",
+                    checkInId);
 
-                // Return the view with an error message or handle the error as required
-                return View();
+                TempData["ErrorMessage"] =
+                    "An unexpected error occurred while updating the check-in.";
+
+                return RedirectToAction("Index", "Dashboard");
             }
-
         }
 
-        [Authorize(Roles = "Admin")]
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        [AllowAnonymous]
-        public ActionResult FailedCheckIn(string errorMessage)
+        [AllowAnonymous] // DEV NOTE: Shared error view for failed check-in operations.
+        [HttpGet]
+        public IActionResult FailedCheckIn(string errorMessage)
         {
             ViewBag.ErrorMessage = errorMessage;
             return View("FailedCheckIn");
+        }
+
+        // DEV NOTE:
+        // Helper method used to build location dropdown options.
+        // If multiple controllers require this logic, it should be moved
+        // into LocationServices as something like GetLocationSelectList().
+        private List<SelectListItem> GetLocationOptions()
+        {
+            var locations = _locationService.GetAllEntities();
+
+            return locations.Select(location => new SelectListItem
+            {
+                Text = location.Name,
+                Value = location.LocationId.ToString()
+            }).ToList();
         }
     }
 }

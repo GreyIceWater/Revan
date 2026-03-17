@@ -10,65 +10,63 @@
 <link rel="stylesheet" href="/css/Location.css" />
 <link rel="stylesheet" href="/css/Modal.css" />
 
-
-
 <!-- Include jQuery and Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
 
 <body>
     <div>
         <div class="wrapper wrapper--w680 mt-5">
             <div class="form form-1">
-                
+
                 <div class="form-body">
                     <h2 class="title">Create Location</h2>
                     <form asp-action="Create" method="post">
                         @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
                         <div>
-
-
                             <div class="input-fields">
                                 <input asp-for="Name" type="text" class="input--style-1" placeholder="Stop Name" required />
                                 <div class="div-line"></div>
-                                <div id="Name-validation-message" class="validation-message">Please enter a valid stop name.</div>
+                                <span asp-validation-for="Name" class="text-danger"></span>
                             </div>
 
                             <div class="input-fields">
                                 <input asp-for="Address" type="text" class="input--style-1" placeholder="Enter Address" required />
                                 <div class="div-line"></div>
-                                <div id="Address-validation-message" class="validation-message">Please enter a valid address.</div>
+                                <span asp-validation-for="Address" class="text-danger"></span>
                             </div>
 
                             <div class="input-fields">
                                 <input asp-for="City" type="text" class="input--style-1" placeholder="City" required />
                                 <div class="div-line"></div>
-                                <div id="City-validation-message" class="validation-message">Please enter a valid city.</div>
+                                <span asp-validation-for="City" class="text-danger"></span>
                             </div>
 
                             <div class="input-fields">
                                 <input asp-for="State" type="text" class="input--style-1" placeholder="State" maxlength="2" required />
                                 <div class="div-line"></div>
-                                <div id="State-validation-message" class="validation-message">Please enter a valid State.</div>
+                                <span asp-validation-for="State" class="text-danger"></span>
                             </div>
 
                             <div class="input-fields">
                                 <input asp-for="ZipCode" type="text" class="input--style-1" placeholder="Zip Code" required />
                                 <div class="div-line"></div>
-                                <div id="ZipCode-validation-message" class="validation-message">Please enter a valid zip code.</div>
+                                <span asp-validation-for="ZipCode" class="text-danger"></span>
                             </div>
 
                             <div class="input-fields">
                                 <input asp-for="Abbreviation" type="text" class="input--style-1" placeholder="Stop Abbreviation" required />
                                 <div class="div-line"></div>
-                                <div id="Abbreviation-validation-message" class="validation-message">Please enter a 3 digit easy to understand abbreviation.</div>
+                                <span asp-validation-for="Abbreviation" class="text-danger"></span>
                             </div>
 
                             <div class="p-t-20">
                                 <div class="p-t-20">
                                     <button class="btn btn--radius btn--submit" type="submit">Submit</button>
-                                    <button class="btn btn--radius btn--cancel" type="button" onclick="location.href='../Dashboard'">Cancel</button>
+                                    <a asp-controller="Dashboard" asp-action="Index" class="btn btn--radius btn--cancel">Cancel</a>
                                 </div>
                             </div>
                         </div>
@@ -110,8 +108,7 @@
             }
         });
     </script>
-        
 
-
+    <partial name="_ValidationScriptsPartial" />
     <script src="~/js/location.js"></script>
 </body>

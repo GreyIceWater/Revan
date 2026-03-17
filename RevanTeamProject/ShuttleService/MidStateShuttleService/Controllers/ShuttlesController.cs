@@ -2,11 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
-using System.Data;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -15,7 +12,6 @@ namespace MidStateShuttleService.Controllers
         private readonly ILogger<ShuttlesController> _logger;
         private readonly ApplicationDbContext _context;
 
-        // Inject ApplicationDbContext and ILogger into the controller constructor
         public ShuttlesController(ApplicationDbContext context, ILogger<ShuttlesController> logger)
         {
             _context = context;
@@ -36,11 +32,10 @@ namespace MidStateShuttleService.Controllers
 
         // GET: ShuttlesController/Create
         [Authorize(Roles = "Admin")]
+        [HttpGet]
         public ActionResult Create()
         {
-            DriverServices ds = new DriverServices(_context);
-            ViewBag.Drivers = ds.GetAllEntities().Select(x => new SelectListItem { Text = x.Name, Value = x.DriverId.ToString() });
-
+            LoadDrivers();
             return View();
         }
 
@@ -52,12 +47,14 @@ namespace MidStateShuttleService.Controllers
         {
             if (!ModelState.IsValid)
             {
+                LoadDrivers();
                 return View(bus);
             }
 
             try
             {
                 BusServices bs = new BusServices(_context);
+
                 bus.IsActive = true;
                 bs.AddEntity(bus);
 
@@ -65,34 +62,41 @@ namespace MidStateShuttleService.Controllers
                 HttpContext.Session.SetString("ShuttleSuccess", "true");
                 TempData["ShuttleSuccess"] = true;
 
-                return RedirectToAction("Create");
+                return RedirectToAction(nameof(Create));
             }
             catch (Exception ex)
             {
-                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
                 _logger.LogError(ex, "An error occurred while creating the bus.");
-                // You can return a specific view indicating failure or redirect to a generic error page
-                return RedirectToAction("Index", "Dashboard");
+
+                ModelState.AddModelError("", "An unexpected error occurred while creating the shuttle.");
+                LoadDrivers();
+
+                return View(bus);
             }
         }
 
         // GET: ShuttlesController/Edit/5
         [Authorize(Roles = "Admin")]
+        [HttpGet]
         public ActionResult Edit(int id)
         {
-            // Retrieve the bus from the database based on the id
-            var bus = _context.Buses.Find(id);
-
-            if (bus == null)
+            try
             {
-                return NotFound(); // Return 404 if bus not found
+                var bus = _context.Buses.Find(id);
+
+                if (bus == null)
+                {
+                    return NotFound();
+                }
+
+                LoadDrivers();
+                return View(bus);
             }
-
-            // Load drivers for dropdown list
-            DriverServices ds = new DriverServices(_context);
-            ViewBag.Drivers = ds.GetAllEntities().Select(x => new SelectListItem { Text = x.Name, Value = x.DriverId.ToString() });
-
-            return View(bus);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while loading shuttle {BusId} for edit.", id);
+                return RedirectToAction("Index", "Dashboard");
+            }
         }
 
         // POST: ShuttlesController/Edit/5
@@ -101,33 +105,48 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id, Bus bus)
         {
-            if (id != bus.BusId)
+            if (bus == null || id != bus.BusId)
             {
-                return BadRequest(); // Return bad request if IDs don't match
+                return BadRequest();
             }
 
             if (!ModelState.IsValid)
             {
-                return View(bus); // Return view with errors if model is invalid
+                LoadDrivers();
+                return View(bus);
             }
 
             try
             {
-                bus.IsActive = true;
-                _context.Update(bus);
+                var existingBus = _context.Buses.Find(id);
+
+                if (existingBus == null)
+                {
+                    return NotFound();
+                }
+
+                // Update only editable properties
+                existingBus.BusNo = bus.BusNo;
+                existingBus.PassengerCapacity = bus.PassengerCapacity;
+                existingBus.DriverId = bus.DriverId;
+
+                // Preserve existing IsActive value
                 _context.SaveChanges();
 
                 TempData["SuccessMessage"] = "The bus has been successfully updated!";
                 HttpContext.Session.SetString("ShuttleSuccess", "true");
                 TempData["ShuttleSuccess"] = true;
-                return RedirectToAction("Edit");
+
+                return RedirectToAction(nameof(Edit), new { id = existingBus.BusId });
             }
             catch (Exception ex)
             {
-                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
-                _logger.LogError(ex, "An error occurred while updating the bus.");
-                // Redirect to error page or handle the error appropriately
-                return RedirectToAction("Index", "Dashboard");
+                _logger.LogError(ex, "An error occurred while updating shuttle {BusId}.", id);
+
+                ModelState.AddModelError("", "An unexpected error occurred while updating the shuttle.");
+                LoadDrivers();
+
+                return View(bus);
             }
         }
 
@@ -142,6 +161,7 @@ namespace MidStateShuttleService.Controllers
 
         // GET: ShuttlesController/Delete/5
         [Authorize(Roles = "Admin")]
+        [HttpGet]
         public ActionResult Delete(int id)
         {
             try
@@ -150,28 +170,29 @@ namespace MidStateShuttleService.Controllers
 
                 if (shuttle == null)
                 {
-                    return NotFound(); // Return 404 if shuttle not found
+                    TempData["ErrorMessage"] = "Shuttle not found.";
+                    return RedirectToAction("Index", "Dashboard");
                 }
 
-                shuttle.IsActive = !shuttle.IsActive; // Toggle IsActive value
+                bool isCurrentlyActive = shuttle.IsActive ?? false;
+                shuttle.IsActive = !isCurrentlyActive;
 
+                _context.Buses.Update(shuttle);
                 _context.SaveChanges();
 
                 return RedirectToAction("ViewAll");
+                TempData["SuccessMessage"] = shuttle.IsActive == true
+                    ? "The shuttle has been restored successfully!"
+                    : "The shuttle has been removed successfully!";
+
+                return RedirectToAction("Index", "Dashboard");
             }
             catch (Exception ex)
             {
-                // Log the exception
-                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
-                _logger.LogError(ex, "An error occurred while toggling IsActive of the shuttle.");
-
-                // Optionally add a model error for displaying an error message to the user
-                ModelState.AddModelError("", "An unexpected error occurred while toggling IsActive of the shuttle, please try again.");
-
-                // Return the view with an error message or handle the error as required
-                return View();
+                _logger.LogError(ex, "An error occurred while toggling IsActive of the shuttle {BusId}.", id);
+                TempData["ErrorMessage"] = "An unexpected error occurred while updating the shuttle.";
+                return RedirectToAction("Index", "Dashboard");
             }
-
         }
 
         // POST: ShuttlesController/Delete/5
@@ -184,10 +205,23 @@ namespace MidStateShuttleService.Controllers
             {
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred while posting delete for shuttle {BusId}.", id);
                 return View();
             }
+        }
+
+        private void LoadDrivers()
+        {
+            DriverServices ds = new DriverServices(_context);
+
+            ViewBag.Drivers = ds.GetAllEntities()
+                .Select(x => new SelectListItem
+                {
+                    Text = x.Name,
+                    Value = x.DriverId.ToString()
+                });
         }
     }
 }

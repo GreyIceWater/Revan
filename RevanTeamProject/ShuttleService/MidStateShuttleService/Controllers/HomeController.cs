@@ -53,54 +53,77 @@ namespace MidStateShuttleService.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
-        public async Task<IActionResult> Create([Bind("Comment,CustomerName,Rating,DisplayTestimonial,IsActive")] Feedback feedback)
+        public async Task<IActionResult> Create([Bind("Comment,CustomerName,Rating")] Feedback feedback)
         {
+            // DEV NOTE: ModelState ensures incoming form data passes validation rules defined on the Feedback model.
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // Check if CustomerName is null or empty, and set it to "Anonymous" if it is.
-                    feedback.CustomerName = string.IsNullOrWhiteSpace(feedback.CustomerName) ? "Anonymous" : feedback.CustomerName;
+                    // DEV NOTE: If the user leaves the name blank, store the testimonial as "Anonymous".
+                    feedback.CustomerName = string.IsNullOrWhiteSpace(feedback.CustomerName)
+                        ? "Anonymous"
+                        : feedback.CustomerName;
 
-                    feedback.DateSubmitted = DateTime.Now; // Set submission date to current date and time
+                    // DEV NOTE: Public submissions should not appear on the site until approved by an admin.
+                    feedback.IsActive = false;
+
+                    // DEV NOTE: Display flag should be controlled by admin approval logic, not the public form.
+                    feedback.DisplayTestimonial = false;
+
+                    // DEV NOTE: Store timestamps in UTC so they can be converted for display later if needed.
+                    feedback.DateSubmitted = DateTime.UtcNow;
+
+                    // DEV NOTE: Add testimonial to database and persist the change.
                     _context.Add(feedback);
                     await _context.SaveChangesAsync();
-                    // changing terminology to testimonial
+
                     _logger.LogInformation("Testimonial successfully saved.");
 
-                    TempData["FeedbackSuccess"] = "True"; // Use TempData to signal that feedback was successful
+                    // DEV NOTE: TempData flag used by the view to trigger the success modal.
+                    TempData["FeedbackSuccess"] = "True";
 
-                    // Increment the message count in the session
+                    // DEV NOTE: Increment feedback notification counter for the admin dashboard.
                     int feedbackCount = HttpContext.Session.GetInt32("FeedbackCount") ?? 0;
                     feedbackCount++;
 
                     HttpContext.Session.SetInt32("FeedbackCount", feedbackCount);
-                    // Optionally, save the last message or a summary
                     HttpContext.Session.SetString("LastFeedback", "You have a new feedback!");
 
-                    return RedirectToAction(nameof(Index)); // Redirect back to the form page to show the success modal
-                    //return RedirectToAction("FeedbackTable");
+                    // DEV NOTE: Redirect to Index to prevent form resubmission on page refresh.
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (Exception ex)
+                catch (Exception exception)
                 {
-                    // changing terminology to testimonial
-                    _logger.LogError(ex, "Error saving testimonial.");
+                    // DEV NOTE: Log database or processing errors for troubleshooting.
+                    _logger.LogError(exception, "Error saving testimonial.");
                 }
             }
             else
             {
-                // Debugging code to log ModelState errors
+                // DEV NOTE: Log validation errors to help diagnose form submission issues.
                 foreach (var modelStateKey in ViewData.ModelState.Keys)
                 {
-                    var modelStateVal = ViewData.ModelState[modelStateKey];
-                    foreach (var error in modelStateVal.Errors)
+                    var modelStateValue = ViewData.ModelState[modelStateKey];
+
+                    foreach (var error in modelStateValue.Errors)
                     {
                         _logger.LogError(error.ErrorMessage);
                     }
                 }
             }
-            // If we got this far, something failed, redisplay form
-            return View("Index", feedback);
+
+            // DEV NOTE: Reload approved testimonials so the Index page can render correctly after a failed submission.
+            var activeFeedbackList = _context.Feedbacks
+                .Where(feedbackItem => feedbackItem.IsActive)
+                .OrderByDescending(feedbackItem => feedbackItem.DateSubmitted)
+                .ToList();
+
+            // DEV NOTE: Reload route schedule used by the home page.
+            RouteServices routeService = new RouteServices(_context);
+            ViewBag.RouteSchedule = routeService.GetScheduleRoutes();
+
+            return View("Index", activeFeedbackList);
         }
 
         private string getSchedule()

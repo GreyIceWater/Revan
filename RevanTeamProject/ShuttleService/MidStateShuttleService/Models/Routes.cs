@@ -26,20 +26,16 @@ namespace MidStateShuttleService.Models
         [Display(Name = "Pick Up Time")]
         [Required(ErrorMessage = "Please enter a valid pick-up time.")]
         [DataType(DataType.Time)]
-        [DisplayFormat(DataFormatString = "{0:hh:mm tt}", ApplyFormatInEditMode = true)]
-        [RegularExpression("^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$", ErrorMessage = "Please enter a valid time.")]
+        [DisplayFormat(DataFormatString = @"{0:hh\:mm}", ApplyFormatInEditMode = true)]
         public TimeSpan? PickUpTime { get; set; }
 
         [Display(Name = "Drop Off Time")]
         [Required(ErrorMessage = "Please enter a valid drop-off time.")]
         [DataType(DataType.Time)]
-        [DisplayFormat(DataFormatString = "{0:hh:mm tt}", ApplyFormatInEditMode = true)]
-        [RegularExpression("^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$", ErrorMessage = "Please enter a valid time.")]
+        [DisplayFormat(DataFormatString = @"{0:hh\:mm}", ApplyFormatInEditMode = true)]
         public TimeSpan? DropOffTime { get; set; }
 
-        [Display(Name = "Additional Details")]
-        [StringLength(500, ErrorMessage = "Additional details cannot exceed 500 characters.")]
-        [RegularExpression("^[a-zA-Z0-9.,!?'\";:@#$%^&*()_+=\\-\\/]*$", ErrorMessage = "Additional details can only contain letters, numbers, and important special characters.")]
+        [RegularExpression("^[a-zA-Z0-9 .,!?'\";:@#$%^&*()_+=\\-\\/]*$", ErrorMessage = "Additional details can only contain letters, numbers, spaces, and important special characters.")]
         public string? AdditionalDetails { get; set; }
 
         public int DriverId { get; set; }
@@ -47,13 +43,13 @@ namespace MidStateShuttleService.Models
         public bool IsActive { get; set; }
 
         [ForeignKey("PickUpLocationID")]
-        public virtual Location PickUpLocation { get; set; }
+        public virtual Location? PickUpLocation { get; set; }
 
         [ForeignKey("DropOffLocationID")]
-        public virtual Location DropOffLocation { get; set; }
+        public virtual Location? DropOffLocation { get; set; }
 
         [ForeignKey("DriverId")]
-        public virtual Driver Driver { get; set; }
+        public virtual Driver? Driver { get; set; }
 
         [NotMapped]
         public string? RouteInfo;
