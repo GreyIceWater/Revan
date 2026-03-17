@@ -30,6 +30,10 @@ namespace MidStateShuttleService
 
             builder.Services.AddScoped<DriverServices>();
 
+            builder.Services.AddScoped<CheckInServices>();
+
+            builder.Services.AddScoped<LocationServices>();
+
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;

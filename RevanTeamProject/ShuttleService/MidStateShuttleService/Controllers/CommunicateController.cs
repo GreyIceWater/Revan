@@ -172,7 +172,7 @@ namespace MidStateShuttleService.Controllers
                     return View();
                 }
 
-                return RedirectToAction("ViewAll");
+                return RedirectToAction("Index", "Dashboard");
             }
             catch (Exception ex)
             {

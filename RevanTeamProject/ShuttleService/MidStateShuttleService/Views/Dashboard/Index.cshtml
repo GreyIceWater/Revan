@@ -80,8 +80,138 @@
             </div>
 
         </section>
+
+        <!-- start message table -->
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="form-container tiled-background-2">
+                <div class="form-paper">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h2>Messages</h2>
+                            <p class="mb-0">View and manage user messages.</p>
+                        </div>
+                    </div>
+
+                    <div id="messageTableBody">
+
+                        @if (Model.Messages == null || !Model.Messages.Any())
+                        {
+                            <div class="form-paper p-3">
+                                <p>There are currently no messages.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var message in Model.Messages.OrderByDescending(m => m.id))
+                            {
+                                if (message.IsActive)
+                                {
+                                    <div class="form-paper mb-4 p-4 position-relative message-card">
+
+                                        <div class="d-flex justify-content-between align-items-start">
+
+                                            <div>
+
+                                                <h4 class="mb-2">@message.name</h4>
+
+                                                <div class="mb-2">
+                                                    <strong>Message:</strong>
+
+                                                    @if (message.message.Length > 50)
+                                                    {
+                                                        @message.message.Substring(0, 50)
+                                                        <span class="ellipsis">...</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @message.message
+                                                    }
+                                                </div>
+
+                                                <div>
+                                                    <span>
+                                                        <strong>Response Required:</strong>
+                                                        @(message.responseRequired ? "Yes" : "No")
+                                                    </span>
+
+                                                    <span> | </span>
+
+                                                    <span>
+                                                        <strong>Contact:</strong>
+                                                        @(string.IsNullOrEmpty(message.contactInfo) ? "N/A" : message.contactInfo)
+                                                    </span>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="text-end">
+
+                                                <a class="btn btn-midstate btn-sm me-2 viewButton"
+                                                   href="#"
+                                                   data-full-message="@message.message"
+                                                   data-name="@message.name"
+                                                   data-response-required="@(message.responseRequired ? "Yes" : "No")"
+                                                   data-contact-info="@(string.IsNullOrEmpty(message.contactInfo) ? "N/A" : message.contactInfo)">
+                                                    <i class="bi bi-eye-fill me-1"></i> View
+                                                </a>
+
+                                                <a asp-controller="Communicate"
+                                                   asp-action="Delete"
+                                                   asp-route-id="@message.id"
+                                                   class="btn btn-midstate btn-danger btn-sm">
+                                                    <i class="bi bi-check-circle-fill me-1"></i> Mark as Read
+                                                </a>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                }
+                            }
+                        }
+
+                    </div>
+
+                    <div id="pagination-controls-message" class="pagination"></div>
+
+                </div>
+            </div>
+
+            <!-- Message Modal -->
+            <div class="modal fade" id="messageDetailsModal" tabindex="-1" role="dialog" aria-labelledby="messageDetailsModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">Message Details</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div id="messageDetailsContent"></div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- end message table -->
+        }
+        
     </div>
 </body>
+
+<script src="~/js/tablePagination.js"></script>
+<script src="~/js/Dashboard/MessageModal.js"></script>
 
 
 <style>

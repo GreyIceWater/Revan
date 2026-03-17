@@ -42,33 +42,33 @@
             }
             else
             {
-                @foreach (var r in routes)
+                @foreach (var route in routes)
                 {
                     <div class="form-paper mb-4 p-4 position-relative route-card"
-                         data-pickup="@r.PickUpLocationID"
-                         data-dropoff="@r.DropOffLocationID"
-                         data-day="@r.DayOfWeek"
-                         data-active="@(r.IsActive ? "true" : "false")">
+                         data-pickup="@route.PickUpLocationID"
+                         data-dropoff="@route.DropOffLocationID"
+                         data-day="@route.DayOfWeek"
+                         data-active="@(route.IsActive ? "true" : "false")">
 
                         <div class="d-flex justify-content-between align-items-center">
 
                             <div>
                                 <h4 class="mb-1">
-                                    @r.PickUpLocation.ToStringPickup() → @r.DropOffLocation.ToStringDropoff()
+                                    @route.PickUpLocation.ToStringPickup() → @route.DropOffLocation.ToStringDropoff()
                                 </h4>
 
                                 <div>
-                                    <span><strong>Day:</strong> @r.DayOfWeek</span>
+                                    <span><strong>Day:</strong> @route.DayOfWeek</span>
                                     <span> | </span>
-                                    <span><strong>Pickup:</strong> @r.ToStringPickUpTime()</span>
+                                    <span><strong>Pickup:</strong> @route.ToStringPickUpTime()</span>
                                     <span> | </span>
-                                    <span><strong>Dropoff:</strong> @r.ToStringDropOffTime()</span>
+                                    <span><strong>Dropoff:</strong> @route.ToStringDropOffTime()</span>
                                     <span> | </span>
-                                    <span><strong>Driver:</strong> @r.Driver.ToStringDriver()</span>
+                                    <span><strong>Driver:</strong> @route.Driver.ToStringDriver()</span>
                                     <span> | </span>
                                     <span>
                                         <strong>Status:</strong>
-                                        @if (r.IsActive)
+                                        @if (route.IsActive)
                                         {
                                             <span class="text-success">Active</span>
                                         }
@@ -79,10 +79,10 @@
                                     </span>
                                 </div>
 
-                                @if (!string.IsNullOrEmpty(r.AdditionalDetails))
+                                @if (!string.IsNullOrEmpty(route.AdditionalDetails))
                                 {
                                     <div class="mt-2 text-muted">
-                                        <strong>Notes:</strong> @r.AdditionalDetails
+                                        <strong>Notes:</strong> @route.AdditionalDetails
                                     </div>
                                 }
                             </div>
@@ -90,7 +90,7 @@
                             <div class="text-end">
                                 <a asp-controller="Dashboard"
                                    asp-action="PassengerList"
-                                   asp-route-id="@r.RouteID"
+                                   asp-route-id="@route.RouteID"
                                    class="btn btn-midstate btn-sm mb-2">
                                     <i class="bi bi-people-fill me-1"></i> Reservations
                                 </a>
@@ -100,17 +100,22 @@
                                     <div>
                                         <a asp-controller="Routes"
                                            asp-action="Edit"
-                                           asp-route-id="@r.RouteID"
+                                           asp-route-id="@route.RouteID"
                                            class="btn btn-midstate btn-sm me-2">
                                             <i class="bi bi-pencil-fill me-1"></i> Update
                                         </a>
 
-                                        <a asp-controller="Routes"
-                                           asp-action="Delete"
-                                           asp-route-id="@r.RouteID"
-                                           class="btn btn-midstate btn-sm btn-danger">
-                                            <i class="bi bi-trash-fill me-1"></i> Remove
-                                        </a>
+                                        <form asp-controller="Routes"
+                                              asp-action="Delete"
+                                              asp-route-id="@route.RouteID"
+                                              method="post"
+                                              style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit"
+                                                    class="btn btn-midstate btn-sm me-2">
+                                                Remove
+                                            </button>
+                                        </form>
                                     </div>
                                 }
                             </div>

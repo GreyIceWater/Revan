@@ -35,22 +35,22 @@
             }
             else
             {
-                @foreach (var b in Model.OrderBy(b => b.BusNo))
+                @foreach (var shuttle in Model.Where(shuttle => shuttle.IsActive == true).OrderBy(shuttle => shuttle.BusNo))
                 {
                     <div class="form-paper mb-4 p-4 position-relative shuttle-card">
 
                         <div class="d-flex justify-content-between align-items-start">
 
                             <div>
-                                <h4 class="mb-1">Shuttle #@b.BusNo</h4>
+                                <h4 class="mb-1">Shuttle #@shuttle.BusNo</h4>
 
                                 <div class="mb-1">
-                                    <strong>Passenger Capacity:</strong> @b.PassengerCapacity
+                                    <strong>Passenger Capacity:</strong> @shuttle.PassengerCapacity
                                 </div>
 
                                 <div>
                                     <strong>Status:</strong>
-                                    @if (b.IsActive ?? false)
+                                    @if (shuttle.IsActive ?? false)
                                     {
                                         <span class="text-success">Active</span>
                                     }
@@ -66,14 +66,14 @@
                                 {
                                     <a asp-controller="Shuttles"
                                        asp-action="Edit"
-                                       asp-route-id="@b.BusId"
+                                       asp-route-id="@shuttle.BusId"
                                        class="btn btn-midstate btn-sm me-1">
                                         <i class="bi bi-pencil-fill me-1"></i> Update
                                     </a>
 
                                     <a asp-controller="Shuttles"
                                        asp-action="Delete"
-                                       asp-route-id="@b.BusId"
+                                       asp-route-id="@shuttle.BusId"
                                        class="btn btn-midstate btn-danger btn-sm">
                                         <i class="bi bi-trash-fill me-1"></i> Remove
                                     </a>

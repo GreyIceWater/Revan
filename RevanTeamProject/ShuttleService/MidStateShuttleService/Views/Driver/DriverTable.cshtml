@@ -68,12 +68,14 @@
                                     <i class="bi bi-pencil-fill me-1"></i> Update
                                 </a>
 
-                                <a asp-controller="Driver"
-                                   asp-action="Delete"
-                                   asp-route-id="@d.DriverId"
-                                   class="btn btn-midstate btn-danger btn-sm">
-                                    <i class="bi bi-trash-fill me-1"></i> Remove
-                                </a>
+                                <form asp-controller="Driver"
+                                      asp-action="Delete"
+                                      asp-route-id="@d.DriverId"
+                                      method="post"
+                                      style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-midstate p-0 align-baseline">Remove</button>
+                                </form>
                             </div>
 
                         </div>

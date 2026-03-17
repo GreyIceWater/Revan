@@ -198,20 +198,20 @@ namespace MidStateShuttleService.Controllers
                 if (route == null)
                 {
                     TempData["ErrorMessage"] = "Route not found.";
-                    return RedirectToAction("Index", "Dashboard");
+                    return RedirectToAction("ViewAll");
                 }
 
                 route.IsActive = !route.IsActive;
                 _context.SaveChanges();
 
-                return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("ViewAll");
             }
             catch (Exception ex)
             {
                 LogEvents.LogSqlException(ex, _environment);
                 _logger.LogError(ex, "An error occurred while toggling IsActive of the route.");
                 TempData["ErrorMessage"] = "An unexpected error occurred while updating the route.";
-                return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("ViewAll");
             }
             catch
             {
@@ -248,10 +248,6 @@ namespace MidStateShuttleService.Controllers
                 return "";
 
             return DateTime.Today.Add(time.Value).ToString("h:mm tt");
-        }
-    }
-}
-
         }
 
         // Helper method used by Create/Edit views to populate dropdown lists

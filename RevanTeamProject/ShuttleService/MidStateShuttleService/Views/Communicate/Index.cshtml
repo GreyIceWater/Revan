@@ -5,17 +5,14 @@
 @{
 
     ViewData["Title"] = "Admin Dashboard";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 
 }
-
-@await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
 
 @inject IListService listService
 @model MidStateShuttleService.Models.CommuncateModel
 
 @* page stylesheet *@
-<link rel="stylesheet" href="css/site.css"/>
+<link rel="stylesheet" href="css/site.css" />
 <link rel="stylesheet" href="css/Communication/Communicate.css" />
 
 <!-- Include jQuery and Bootstrap JS -->
@@ -35,10 +32,10 @@
                         <div>
 
 
-                                <div class="input-fields">
-                                    <textarea type="text" id="message" asp-for="message" class="input--style-1 text-box single-line p-2" placeholder="Enter message..." maxlength="160"></textarea>
-                                    <div id="message-Validation-Message" class="validation-message"></div>
-                                </div>
+                            <div class="input-fields">
+                                <textarea type="text" id="message" asp-for="message" class="input--style-1 text-box single-line p-2" placeholder="Enter message..." maxlength="160"></textarea>
+                                <div id="message-Validation-Message" class="validation-message"></div>
+                            </div>
 
                             <div class="row row-space">
                                 <div class="col-6">
@@ -126,3 +123,5 @@
 <script src="~/js/Communication/shuttleSelect.js"></script>
 <script src="~/js/Registeration/routeVisibility.js"></script>
 <script src="~/js/Registeration/RouteUpdater.js"></script>
+
+rewrite this page to have the bootstrap card system, keep the midstate buttons

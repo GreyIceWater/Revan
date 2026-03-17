@@ -11,12 +11,15 @@ namespace MidStateShuttleService.Controllers
         private readonly DriverServices _driverService;
         private readonly ILogger<DriverController> _logger;
         private readonly IWebHostEnvironment _environment;
+        private readonly ApplicationDbContext _context;
 
         public DriverController(
+            ApplicationDbContext context,
             DriverServices driverService,
             ILogger<DriverController> logger,
             IWebHostEnvironment environment)
         {
+            _context = context;
             _driverService = driverService;
             _logger = logger;
             _environment = environment;

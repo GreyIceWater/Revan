@@ -180,12 +180,11 @@ namespace MidStateShuttleService.Controllers
                 _context.Buses.Update(shuttle);
                 _context.SaveChanges();
 
-                return RedirectToAction("ViewAll");
                 TempData["SuccessMessage"] = shuttle.IsActive == true
                     ? "The shuttle has been restored successfully!"
                     : "The shuttle has been removed successfully!";
 
-                return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("ViewAll");
             }
             catch (Exception ex)
             {

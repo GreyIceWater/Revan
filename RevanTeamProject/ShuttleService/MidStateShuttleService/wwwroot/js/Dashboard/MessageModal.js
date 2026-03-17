@@ -1,44 +1,40 @@
-﻿$(document).ready(function () {
-    function resetPageState() {
-        // Reset page state here, e.g., reload the page
-        window.location.reload();
-    }
+﻿// MessageModal.js
+$(document).ready(function () {
 
-    
+    // Initialize the modal (Bootstrap 5)
+    var messageModal = new bootstrap.Modal(document.getElementById('messageDetailsModal'), {
+        keyboard: true
+    });
 
-    // Your existing code for opening the modal and populating it with data
-    $('.viewButton').click(function () {
-        var name = $(this).closest('tr').find('td:eq(0)').text();
-        var message = $(this).closest('tr').find('td:eq(1)').text();
-        var responseRequired = $(this).closest('tr').find('td:eq(2)').text();
-        var contactInfo = $(this).closest('tr').find('td:eq(3)').text();
+    // Click handler for "View" buttons
+    $('.viewButton').click(function (e) {
+        e.preventDefault();
 
-        // Retrieve the full message content from the data attribute
+        // Find the closest message card
+        var card = $(this).closest('.message-card');
+
+        // Grab the name from <h4> inside the card
+        var name = card.find('h4').text();
+
+        // Grab responseRequired and contactInfo from spans/divs (adjust selectors)
+        var responseRequired = card.find('strong:contains("Response Required")').parent().text().replace('Response Required:', '').trim();
+        var contactInfo = card.find('strong:contains("Contact")').parent().text().replace('Contact:', '').trim();
+
         var fullMessage = $(this).data('full-message');
 
-        console.log('Name: ' + name);
-        console.log('Message: ' + message);
-        console.log('Response Required: ' + responseRequired);
-        console.log('Contact Info: ' + contactInfo);
-        console.log('Full Message: ' + fullMessage);
-
-        // Update modal content with the data
         $('#messageDetailsContent').html(
-            '<div>' +
             '<p><strong>Name:</strong> ' + name + '</p>' +
-            '<p><strong>Message:</strong> ' + fullMessage + '</p>' + // Displaying the full message
+            '<p><strong>Message:</strong> ' + fullMessage + '</p>' +
             '<p><strong>Response Required:</strong> ' + responseRequired + '</p>' +
-            '<p><strong>Contact Info:</strong> ' + contactInfo + '</p>' +
-            '</div>'
+            '<p><strong>Contact Info:</strong> ' + (contactInfo ? contactInfo : "N/A") + '</p>'
         );
 
-        // Open the modal
-        $('#messageDetailsModal').modal('show');
+        messageModal.show();
     });
 
-    // Event handler for modal close event
+    // Clear modal content on close
     $('#messageDetailsModal').on('hidden.bs.modal', function () {
-        // Reset page state when the modal is closed
-        resetPageState();
+        $('#messageDetailsContent').html('');
     });
+
 });

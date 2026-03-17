@@ -27,7 +27,7 @@
 
         <div id="locationsTableBody">
 
-            @if (Model == null || !Model.Any())
+            @if (Model == null || !Model.Any(location => location.IsActive))
             {
                 <div class="form-paper p-3">
                     <p>No locations currently exist.</p>

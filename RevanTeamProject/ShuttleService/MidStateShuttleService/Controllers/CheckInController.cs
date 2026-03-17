@@ -14,13 +14,16 @@ namespace MidStateShuttleService.Controllers
         private readonly LocationServices _locationService;
         private readonly ILogger<CheckInController> _logger;
         private readonly IWebHostEnvironment _environment;
+        private readonly ApplicationDbContext _context;
 
         public CheckInController(
+            ApplicationDbContext context,
             CheckInServices checkInService,
             LocationServices locationService,
             ILogger<CheckInController> logger,
             IWebHostEnvironment environment)
         {
+            _context = context;
             _checkInService = checkInService;
             _locationService = locationService;
             _logger = logger;
