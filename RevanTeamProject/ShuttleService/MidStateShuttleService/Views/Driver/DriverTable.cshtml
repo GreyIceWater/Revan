@@ -47,37 +47,28 @@
                                 <div class="mb-1">
                                     <strong>Email:</strong> @d.Email
                                 </div>
-                                <div>
-                                    <strong>Status:</strong>
-                                    @if (d.IsActive)
-                                    {
-                                        <span class="text-success">Active</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-danger">Inactive</span>
-                                    }
-                                </div>
                             </div>
 
                             <div class="text-end">
-                                <a asp-controller="Driver"
-                                   asp-action="Edit"
-                                   asp-route-id="@d.DriverId"
-                                   class="btn btn-midstate btn-sm me-1">
-                                    <i class="bi bi-pencil-fill me-1"></i> Update
-                                </a>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a asp-controller="Driver"
+                                       asp-action="Edit"
+                                       asp-route-id="@d.DriverId"
+                                       class="btn btn-midstate btn-sm me-1">
+                                        <i class="bi bi-pencil-fill me-1"></i> Update
+                                    </a>
 
-                                <form asp-controller="Driver"
-                                      asp-action="Delete"
-                                      asp-route-id="@d.DriverId"
-                                      method="post"
-                                      style="display:inline;">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-midstate p-0 align-baseline">Remove</button>
-                                </form>
+                                    <form asp-controller="Driver" asp-action="Delete" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@d.DriverId" />
+                                        <button type="submit" class="btn btn-midstate btn-danger btn-sm"
+                                                onclick="return confirm('Are you sure you want to archive this check-in?');">
+                                            <i class="bi bi-trash-fill me-1"></i>Archive
+                                        </button>
+                                    </form>
+                                }
                             </div>
-
                         </div>
 
                     </div>

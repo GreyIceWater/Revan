@@ -264,11 +264,47 @@ namespace MidStateShuttleService.Controllers
         {
             var registrations = _context.RegisterModels
                 .Include(r => r.DaySchedules)
-                    .ThenInclude(d => d.Rides)
-                        .ThenInclude(r => r.Route)
+                .ThenInclude(d => d.Rides)
+                .ThenInclude(r => r.Route)
+                .Where(r => !r.IsArchived)
                 .ToList();
 
             return View("RegistrationTable", registrations);
+        }
+
+        /// <summary>
+        /// Views the passenger lists
+        /// </summary>
+        /// <param name="routeId">The ID for the route that you are viewing</param>
+        /// <returns></returns>
+        public IActionResult ViewPassengerList(int routeId)
+        {
+            // Get the route including Pickup and Dropoff locations
+            Routes route = _context.Routes
+                .Include(r => r.PickUpLocation)    // assuming navigation property
+                .Include(r => r.DropOffLocation)   // assuming navigation property
+                .FirstOrDefault(r => r.RouteID == routeId);
+
+            if (route != null)
+            {
+                // Build route info string
+                string pickupName = route.PickUpLocation?.Name ?? "Unknown Pickup";
+                string dropoffName = route.DropOffLocation?.Name ?? "Unknown Dropoff";
+                string dayOfWeek = route.DayOfWeek.ToString();
+
+                TempData["RouteInfo"] = $"Requests for Route: {dayOfWeek}, From: {pickupName} To {dropoffName}";
+            }
+
+            // Get registrations for this route
+            var registrations = _context.RegisterModels
+                .Include(r => r.DaySchedules)
+                    .ThenInclude(ds => ds.Rides)
+                .Where(r => r.DaySchedules
+                    .Any(ds => ds.Rides
+                        .Any(ride => ride.RouteId == routeId)))
+                .ToList();
+
+            return View("PassengerList", registrations);
         }
 
         // Displays the full breakdown of a single registration

@@ -70,12 +70,14 @@
                                         <i class="bi bi-pencil-fill me-1"></i> Update
                                     </a>
 
-                                    <a asp-controller="CheckIn"
-                                       asp-action="DeleteCheckIn"
-                                       asp-route-id="@c.CheckInId"
-                                       class="btn btn-midstate btn-danger btn-sm">
-                                        <i class="bi bi-trash-fill me-1"></i> Remove
-                                    </a>
+                                    <form asp-controller="CheckIn" asp-action="ToggleCheckInActive" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="checkInId" value="@c.CheckInId" />
+                                        <button type="submit" class="btn btn-midstate btn-danger btn-sm"
+                                                onclick="return confirm('Are you sure you want to archive this check-in?');">
+                                            <i class="bi bi-trash-fill me-1"></i>Archive
+                                        </button>
+                                    </form>
                                 }
                             </div>
 

@@ -1,0 +1,91 @@
+﻿@model List<MidStateShuttleService.Models.RegisterModel>
+
+@{
+    ViewData["Title"] = ViewBag.Title;
+}
+
+<link rel="stylesheet" href="~/css/PassengerList.css" />
+
+<div class="container mt-4">
+
+    @if (TempData["RouteInfo"] != null)
+    {
+        <h2 class="mb-3">@TempData["RouteInfo"]</h2>
+    }
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3 print-hide">
+        <h2>@ViewData["Title"]</h2>
+        <button id="printButton" class="btn btn-primary">
+            Print
+        </button>
+    </div>
+
+    <!-- TABLE -->
+    <table id="passengerTable" class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Student ID</th>
+                <th>Term</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model == null || Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="text-center">There are currently no requests</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var registration in Model.OrderBy(r => r.InsertDateTime))
+                {
+                    <tr>
+                        <td>@registration.Name</td>
+                        <td>@registration.Email</td>
+                        <td>@registration.Phone</td>
+                        <td>@registration.StudentId</td>
+                        <td>@registration.Term</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<script src="~/js/PassengerList.js"></script>
+
+<style>
+    @@media print {
+        .print-hide
+
+    {
+        display: none !important;
+    }
+
+    body {
+        margin: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    th, td {
+        border: 1px solid #000;
+        padding: 6px;
+        text-align: left;
+    }
+
+    thead {
+        background-color: #000 !important;
+        color: #fff !important;
+    }
+
+    }
+</style>

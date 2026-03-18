@@ -314,17 +314,11 @@
 
         <!-- ARCHIVE -->
         <form asp-action="ArchiveRegistration" method="post">
-
-            <input type="hidden"
-                   name="id"
-                   value="@Model.RegistrationId" />
-
-            <button type="submit"
-                    class="btn-midstate btn-warning"
+            <input type="hidden" name="id" value="@Model.RegistrationId" />
+            <button type="submit" class="btn-midstate btn-warning"
                     @(User.IsInRole("Driver") || User.IsInRole("Rider") ? "disabled" : "")>
                 Archive
             </button>
-
         </form>
 
     </div>

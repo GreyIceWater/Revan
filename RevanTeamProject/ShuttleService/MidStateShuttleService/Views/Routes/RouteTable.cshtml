@@ -66,17 +66,6 @@
                                     <span> | </span>
                                     <span><strong>Driver:</strong> @route.Driver.ToStringDriver()</span>
                                     <span> | </span>
-                                    <span>
-                                        <strong>Status:</strong>
-                                        @if (route.IsActive)
-                                        {
-                                            <span class="text-success">Active</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-danger">Inactive</span>
-                                        }
-                                    </span>
                                 </div>
 
                                 @if (!string.IsNullOrEmpty(route.AdditionalDetails))
@@ -88,9 +77,9 @@
                             </div>
 
                             <div class="text-end">
-                                <a asp-controller="Dashboard"
-                                   asp-action="PassengerList"
-                                   asp-route-id="@route.RouteID"
+                                <a asp-controller="Register"
+                                   asp-action="ViewPassengerList"
+                                   asp-route-routeId="@route.RouteID"
                                    class="btn btn-midstate btn-sm mb-2">
                                     <i class="bi bi-people-fill me-1"></i> Reservations
                                 </a>
@@ -113,7 +102,7 @@
                                             @Html.AntiForgeryToken()
                                             <button type="submit"
                                                     class="btn btn-midstate btn-sm me-2">
-                                                Remove
+                                                Archive
                                             </button>
                                         </form>
                                     </div>

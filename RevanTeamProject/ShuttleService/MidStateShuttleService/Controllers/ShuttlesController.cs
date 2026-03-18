@@ -154,7 +154,9 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin,Driver")]
         public ActionResult ViewAll()
         {
-            var shuttles = new BusServices(_context).GetAllEntities();
+            var shuttles = _context.Buses
+            .Where(b => b.IsActive == true)
+            .ToList();
 
             return View("ShuttleTable", shuttles);
         }

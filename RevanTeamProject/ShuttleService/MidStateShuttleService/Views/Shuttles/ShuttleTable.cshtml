@@ -47,18 +47,6 @@
                                 <div class="mb-1">
                                     <strong>Passenger Capacity:</strong> @shuttle.PassengerCapacity
                                 </div>
-
-                                <div>
-                                    <strong>Status:</strong>
-                                    @if (shuttle.IsActive ?? false)
-                                    {
-                                        <span class="text-success">Active</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-danger">Inactive</span>
-                                    }
-                                </div>
                             </div>
 
                             <div class="text-end">
@@ -75,7 +63,7 @@
                                        asp-action="Delete"
                                        asp-route-id="@shuttle.BusId"
                                        class="btn btn-midstate btn-danger btn-sm">
-                                        <i class="bi bi-trash-fill me-1"></i> Remove
+                                        <i class="bi bi-trash-fill me-1"></i> Archive
                                     </a>
                                 }
                             </div>

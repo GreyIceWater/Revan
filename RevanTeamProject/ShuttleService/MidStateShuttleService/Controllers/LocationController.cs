@@ -143,7 +143,9 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin,Driver")]
         public ActionResult ViewAll()
         {
-            var locations = new LocationServices(_context).GetAllEntities();
+            var locations = _context.Locations
+            .Where(l => l.IsActive == true)
+            .ToList();
 
             return View("LocationTable", locations);
         }

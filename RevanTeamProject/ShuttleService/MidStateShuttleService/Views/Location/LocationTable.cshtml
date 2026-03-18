@@ -56,17 +56,6 @@
                                     <span> | </span>
                                     <span><strong>Abbreviation:</strong> @loc.Abbreviation</span>
                                     <span> | </span>
-                                    <span>
-                                        <strong>Status:</strong>
-                                        @if (loc.IsActive)
-                                        {
-                                            <span class="text-success">Active</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-danger">Inactive</span>
-                                        }
-                                    </span>
                                 </div>
                             </div>
 
@@ -80,7 +69,7 @@
 
                                     <a asp-controller="Location" asp-action="DeleteLocation" asp-route-id="@loc.LocationId"
                                        class="btn btn-midstate btn-sm btn-danger">
-                                        <i class="bi bi-trash-fill me-1"></i> Remove
+                                        <i class="bi bi-trash-fill me-1"></i> Archive
                                     </a>
                                 </div>
                             }

@@ -128,7 +128,9 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult ViewAll()
         {
-            var drivers = new DriverServices(_context).GetAllEntities();
+            var drivers = _context.Drivers
+            .Where(d => d.IsActive == true)
+            .ToList();
 
             return View("DriverTable", drivers);
         }
