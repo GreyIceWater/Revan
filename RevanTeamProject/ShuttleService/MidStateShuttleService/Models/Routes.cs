@@ -38,8 +38,6 @@ namespace MidStateShuttleService.Models
         [RegularExpression("^[a-zA-Z0-9 .,!?'\";:@#$%^&*()_+=\\-\\/]*$", ErrorMessage = "Additional details can only contain letters, numbers, spaces, and important special characters.")]
         public string? AdditionalDetails { get; set; }
 
-        public int DriverId { get; set; }
-
         public bool IsActive { get; set; }
 
         [ForeignKey("PickUpLocationID")]
@@ -47,9 +45,6 @@ namespace MidStateShuttleService.Models
 
         [ForeignKey("DropOffLocationID")]
         public virtual Location? DropOffLocation { get; set; }
-
-        [ForeignKey("DriverId")]
-        public virtual Driver? Driver { get; set; }
 
         [NotMapped]
         public string? RouteInfo;

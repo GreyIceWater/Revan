@@ -24,7 +24,7 @@
 
                     <!-- Student ID -->
                     <div class="form-group">
-                        <label asp-for="StudentId"></label>
+                        <label>Student ID (Mid-State Students Only)</label>
                         <input asp-for="StudentId"
                                class="form-control midstate-textinput"
                                placeholder="Enter your Student ID" />
@@ -64,25 +64,27 @@
 
                     <!-- First Time Rider -->
                     <div class="form-group">
-                        <p>Is this your first time riding?</p>
+                        <fieldset>
+                            <legend>Is this your first time riding?</legend>
 
-                        <div class="radiobtn-midstate">
-                            <input asp-for="FirstTime"
-                                   type="radio"
-                                   value="true"
-                                   id="newRiderYes"
-                                   required />
-                            <label for="newRiderYes">Yes</label>
-                        </div>
+                            <div class="radiobtn-midstate">
+                                <input asp-for="FirstTime"
+                                       type="radio"
+                                       value="true"
+                                       id="newRiderYes"
+                                       required />
+                                <label for="newRiderYes">Yes</label>
+                            </div>
 
-                        <div class="radiobtn-midstate">
-                            <input asp-for="FirstTime"
-                                   type="radio"
-                                   value="false"
-                                   id="newRiderNo"
-                                   required />
-                            <label for="newRiderNo">No</label>
-                        </div>
+                            <div class="radiobtn-midstate">
+                                <input asp-for="FirstTime"
+                                       type="radio"
+                                       value="false"
+                                       id="newRiderNo"
+                                       required />
+                                <label for="newRiderNo">No</label>
+                            </div>
+                        </fieldset>
                     </div>
 
                     <!-- Comments -->
@@ -114,8 +116,6 @@
 
         </div>
     </div>
-
-    <script src="/js/CheckIn.js"></script>
 </body>
 
 <!-- Success Modal -->

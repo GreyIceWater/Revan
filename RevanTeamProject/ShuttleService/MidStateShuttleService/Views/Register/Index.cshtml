@@ -21,8 +21,13 @@
             {
                 <!-- Sign In Note if the user is not signed in -->
                 <section class="form-section special-request">
-                    <h6>Are you a student?</h6>
-                    <p>You’re welcome to submit without signing in. However, signing in helps us report accurate student usage numbers — which directly supports keeping the shuttle service available.</p>
+                    <h6>Attention Shuttle Riders:</h6>
+                    <p>
+                        Are you currently a Mid-State student? You can create an account so that your information will be autopopulated for future requests. To create an account, select sign in from the menu.
+                        <br />
+                        <br />
+                        If you are not a Mid-State Student or do not want to make an account, proceed with the form below.
+                    </p>
                 </section>
             }
             
@@ -37,15 +42,18 @@
 
                     <!-- TERM -->
                     <div class="form-group">
+                        <label asp-for="Term" class="control-label"></label>
+
                         @Html.DropDownListFor(x => x.Term,
-                            (IEnumerable<SelectListItem>)ViewBag.Terms,
-                            "Select Term",
-                            new { @class = "dropdown-midstate", required = "required" })
+                        (IEnumerable<SelectListItem>)ViewBag.Terms,
+                                        "Select Term",
+                                        new { @class = "dropdown-midstate", required = "required" })
                     </div>
 
                     <!-- LENGTH OF REQUEST -->
                     <div class="form-group">
-                        <label asp-for="LengthOfRequest" class="control-label"></label>
+                        <label>Length Of Request</label>
+
                         <select asp-for="LengthOfRequest"
                                 class="form-control  dropdown-midstate"
                                 asp-items="Html.GetEnumSelectList<LengthOfRequest>()">

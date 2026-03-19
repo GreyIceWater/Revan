@@ -11,6 +11,7 @@
 <!-- Include Bootstrap CSS -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 <link rel="stylesheet" href="/css/Feedback.css" />
+<link rel="stylesheet" href="/css/Input.css" />
 
 <!-- Include jQuery and Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -147,23 +148,73 @@
             </div>
 
             <div class="form-group">
-                <label for="emojiRating">Satisfaction Level</label>
-                <div id="emojiRating" class="emoji-rating">
-                    <input id="emoji-5" type="radio" name="rating" value="5"><label for="emoji-5">😄</label>
-                    <input id="emoji-4" type="radio" name="rating" value="4"><label for="emoji-4">😊</label>
-                    <input id="emoji-3" type="radio" name="rating" value="3"><label for="emoji-3">😐</label>
-                    <input id="emoji-2" type="radio" name="rating" value="2"><label for="emoji-2">😠</label>
-                    <input id="emoji-1" type="radio" name="rating" value="1"><label for="emoji-1">😡</label>
-                    <div id="satisfaction-validation-message" class="validation-message">Please select your satisfaction level.</div>
+                <fieldset>
+                    <legend>Satisfaction Level</legend>
+
+                    <div class="radiobtn-midstate">
+                        <input type="radio"
+                               name="rating"
+                               value="5"
+                               id="emoji-5"
+                               required />
+                        <label for="emoji-5">
+                            😄 Very satisfied
+                        </label>
+                    </div>
+
+                    <div class="radiobtn-midstate">
+                        <input type="radio"
+                               name="rating"
+                               value="4"
+                               id="emoji-4" />
+                        <label for="emoji-4">
+                            😊 Satisfied
+                        </label>
+                    </div>
+
+                    <div class="radiobtn-midstate">
+                        <input type="radio"
+                               name="rating"
+                               value="3"
+                               id="emoji-3" />
+                        <label for="emoji-3">
+                            😐 Neutral
+                        </label>
+                    </div>
+
+                    <div class="radiobtn-midstate">
+                        <input type="radio"
+                               name="rating"
+                               value="2"
+                               id="emoji-2" />
+                        <label for="emoji-2">
+                            😠 Unsatisfied
+                        </label>
+                    </div>
+
+                    <div class="radiobtn-midstate">
+                        <input type="radio"
+                               name="rating"
+                               value="1"
+                               id="emoji-1" />
+                        <label for="emoji-1">
+                            😡 Very unsatisfied
+                        </label>
+                    </div>
+
+                </fieldset>
+
+                <div id="satisfaction-validation-message" class="validation-message">
+                    Please select your satisfaction level.
                 </div>
             </div>
             <div class="form-group">
                 <label>Would you like to share your testimonials with others?</label>
-                <div class="form-check">
+                <div class="form-check radiobtn-midstate">
                     <input class="form-check-input" type="radio" name="DisplayTestimonial" id="recommendYes" value="true" checked>
                     <label class="form-check-label" for="recommendYes">Yes</label>
                 </div>
-                <div class="form-check">
+                <div class="form-check radiobtn-midstate">
                     <input class="form-check-input" type="radio" name="DisplayTestimonial" id="recommendNo" value="false">
                     <label class="form-check-label" for="recommendNo">No</label>
                 </div>

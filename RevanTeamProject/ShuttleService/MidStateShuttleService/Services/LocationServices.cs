@@ -15,7 +15,7 @@ namespace MidStateShuttleService.Service
         {
             var locations = new List<SelectListItem>();
 
-            foreach (Location l in GetAllEntities())
+            foreach (Location l in GetAllEntities().Where(l => l.IsActive))
             {
                 locations.Add(new SelectListItem
                 {

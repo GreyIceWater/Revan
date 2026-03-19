@@ -133,52 +133,52 @@ input {
         display: inline-block;
     }
 
-/*
- Emoji Rating */
+
+/* Emoji Rating */
 .emoji-rating {
-    font-size: 1.5em;
-    cursor: pointer;
+    display: flex;
+    gap: 10px;
 }
 
     .emoji-rating input {
-        display: none; /* Removing the default radio button styles */
+        position: absolute;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
     }
 
     .emoji-rating label {
         cursor: pointer;
-        transition: transform 0.3s ease-in-out;
-        color: #ccc;
+        font-size: 2rem;
+        padding: 8px;
+        display: inline-block;
+        transition: transform 0.2s ease;
     }
 
-    .emoji-rating input:checked + label {
-        transform: scale(1.3); /*Scale the emoji a little on select */
-    }
+        .emoji-rating input:checked + span,
+        .emoji-rating label:has(input:checked) {
+            transform: scale(1.3);
+        }
 
-Colors for different levels of satisfaction
-#emoji-5:checked ~ label[for="emoji-5"],
-#emoji-5:hover ~ label[for="emoji-5"] {
-    color: #006400;
-}
+        .emoji-rating label:has(input[value="5"]:checked) {
+            color: #006400;
+        }
 
-#emoji-4:checked ~ label[for="emoji-4"],
-#emoji-4:hover ~ label[for="emoji-4"] {
-    color: #32CD32;
-}
+        .emoji-rating label:has(input[value="4"]:checked) {
+            color: #32CD32;
+        }
 
-#emoji-3:checked ~ label[for="emoji-3"],
-#emoji-3:hover ~ label[for="emoji-3"] {
-    color: #808080;
-}
+        .emoji-rating label:has(input[value="3"]:checked) {
+            color: #808080;
+        }
 
-#emoji-2:checked ~ label[for="emoji-2"],
-#emoji-2:hover ~ label[for="emoji-2"] {
-    color: #FF6347; /*golden rod*/
-}
+        .emoji-rating label:has(input[value="2"]:checked) {
+            color: #FF6347;
+        }
 
-#emoji-1:checked ~ label[for="emoji-1"],
-#emoji-1:hover ~ label[for="emoji-1"] {
-    color: #FF0000;
-}
+        .emoji-rating label:has(input[value="1"]:checked) {
+            color: #FF0000;
+        }
 
 /* ==========================================================================
    #BUTTON

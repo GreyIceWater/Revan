@@ -141,7 +141,6 @@ namespace MidStateShuttleService.Controllers
             var routes = _context.Routes
                 .Include(r => r.PickUpLocation)
                 .Include(r => r.DropOffLocation)
-                .Include(r => r.Driver)
                 .Where(r => r.IsActive)
                 .ToList();
 

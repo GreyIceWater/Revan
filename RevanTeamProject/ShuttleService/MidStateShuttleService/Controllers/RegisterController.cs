@@ -180,26 +180,30 @@ namespace MidStateShuttleService.Controllers
                     }
                 }
 
-                // Ensure at least one ride exists
-                bool hasRide = model.DaySchedules != null &&
-                               model.DaySchedules.Any(d => d.Rides != null && d.Rides.Any());
-
-                if (!hasRide)
+                // Skip ride/day validation if custom
+                if (!model.isCustom)
                 {
-                    TempData["Error"] = "At least one ride must be added to submit a registration.";
-                    ViewBag.Terms = GetSchoolTermSelectList();
-                    return View("Index", model);
-                }
+                    // Ensure at least one ride exists
+                    bool hasRide = model.DaySchedules != null &&
+                                   model.DaySchedules.Any(d => d.Rides != null && d.Rides.Any());
 
-                // Ensure no request day has zero rides
-                bool emptyDayExists = model.DaySchedules != null &&
-                                      model.DaySchedules.Any(d => d.Rides == null || !d.Rides.Any());
+                    if (!hasRide)
+                    {
+                        TempData["Error"] = "At least one ride must be added to submit a registration.";
+                        ViewBag.Terms = GetSchoolTermSelectList();
+                        return View("Index", model);
+                    }
 
-                if (emptyDayExists)
-                {
-                    TempData["Error"] = "Every request day must contain at least one ride.";
-                    ViewBag.Terms = GetSchoolTermSelectList();
-                    return View("Index", model);
+                    // Ensure no request day has zero rides
+                    bool emptyDayExists = model.DaySchedules != null &&
+                                          model.DaySchedules.Any(d => d.Rides == null || !d.Rides.Any());
+
+                    if (emptyDayExists)
+                    {
+                        TempData["Error"] = "Every request day must contain at least one ride.";
+                        ViewBag.Terms = GetSchoolTermSelectList();
+                        return View("Index", model);
+                    }
                 }
 
                 // Ensure each ride has either Route OR Time

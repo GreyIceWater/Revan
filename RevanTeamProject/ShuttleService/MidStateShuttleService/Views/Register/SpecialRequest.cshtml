@@ -61,18 +61,18 @@
             <div class="row row-space">
                 <div class="col-6">
                     <div class="form-group">
-                        @Html.LabelFor(m => m.customTime1, "First Ride Time")
+                        @Html.LabelFor(m => m.customTime1, "Pickup Time")
                         <span class="help-icon" data-help="Enter the pickup time for your first ride.">?</span>
                         @Html.TextBoxFor(m => m.customTime1,
                                      "{0:HH\\:mm}",
                                      new { @class = "midstate-textinput", type = "time" })
                     </div>
                 </div>
-
+                
                 <div class="col-6">
                     <div class="form-group">
                         @Html.LabelFor(m => m.customTime2, "Return Ride Time")
-                        <span class="help-icon" data-help="Required only if Round Trip is selected.">?</span>
+                        <span class="help-icon" data-help="The time needed for a ride back if you need one.">?</span>
                         @Html.TextBoxFor(m => m.customTime2,
                                      "{0:HH\\:mm}",
                                      new { @class = "midstate-textinput", type = "time" })

@@ -118,16 +118,8 @@
 
                                                 <div class="mb-2">
                                                     <strong>Message:</strong>
-
-                                                    @if (message.message.Length > 50)
-                                                    {
-                                                        @message.message.Substring(0, 50)
-                                                        <span class="ellipsis">...</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        @message.message
-                                                    }
+                                                    @message.message
+                                                    
                                                 </div>
 
                                                 <div>
@@ -147,15 +139,6 @@
                                             </div>
 
                                             <div class="text-end">
-
-                                                <a class="btn btn-midstate btn-sm me-2 viewButton"
-                                                   href="#"
-                                                   data-full-message="@message.message"
-                                                   data-name="@message.name"
-                                                   data-response-required="@(message.responseRequired ? "Yes" : "No")"
-                                                   data-contact-info="@(string.IsNullOrEmpty(message.contactInfo) ? "N/A" : message.contactInfo)">
-                                                    <i class="bi bi-eye-fill me-1"></i> View
-                                                </a>
 
                                                 <a asp-controller="Communicate"
                                                    asp-action="Delete"
@@ -179,31 +162,6 @@
 
                 </div>
             </div>
-
-            <!-- Message Modal -->
-            <div class="modal fade" id="messageDetailsModal" tabindex="-1" role="dialog" aria-labelledby="messageDetailsModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-
-                        <div class="modal-header">
-                            <h5 class="modal-title">Message Details</h5>
-                            <button type="button" class="close" data-dismiss="modal">
-                                <span>&times;</span>
-                            </button>
-                        </div>
-
-                        <div class="modal-body">
-                            <div id="messageDetailsContent"></div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
             <!-- end message table -->
         }
         
@@ -215,6 +173,12 @@
 
 
 <style>
+    .message-card {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+
     .dashboard-stat-card {
         border-radius: 12px;
         padding: 15px;

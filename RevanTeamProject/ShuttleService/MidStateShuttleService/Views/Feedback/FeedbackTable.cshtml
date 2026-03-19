@@ -37,18 +37,9 @@
                             <div>
                                 <h4 class="mb-1">@f.CustomerName</h4>
 
-                                <div class="mb-1">
+                                <div class="mb-1 comment-text">
                                     <strong>Comment:</strong>
-                                    @if (f.Comment.Length > 50)
-                                    {
-                                        @f.Comment.Substring(0, 50)
-                            
-                                        <span class="ellipsis">...</span>
-                                    }
-                                    else
-                                    {
-                                        @f.Comment
-                                    }
+                                    @f.Comment
                                 </div>
 
                                 <div>
@@ -63,17 +54,6 @@
                             </div>
 
                             <div class="text-end">
-                                <a href="#" class="btn btn-midstate btn-sm mb-2"
-                                   data-toggle="modal"
-                                   data-target="#feedbackDetailsModal"
-                                   data-feedback-id="@f.FeedbackId"
-                                   data-customer-name="@f.CustomerName"
-                                   data-comment="@f.Comment"
-                                   data-rating="@f.Rating"
-                                   data-share-testimonial="@(f.DisplayTestimonial ? "Yes" : "No")"
-                                   data-date-submitted="@f.DateSubmitted.ToString("MM-dd-yyyy")">
-                                    <i class="bi bi-eye-fill me-1"></i> View
-                                </a>
 
                                 <form asp-controller="Feedback"
                                       asp-action="ArchiveFeedback"
@@ -121,6 +101,13 @@
         </div>
     </div>
 </div>
+
+<style>
+    .comment-text {
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+</style>
 
 <script src="~/js/tablePagination.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

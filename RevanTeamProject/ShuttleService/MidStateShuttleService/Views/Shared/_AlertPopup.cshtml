@@ -5,7 +5,12 @@
 
 @if (!string.IsNullOrEmpty(success))
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div id="successAlert"
+         class="alert alert-success alert-dismissible fade show"
+         role="alert"
+         aria-live="polite"
+         aria-atomic="true"
+         tabindex="-1">
         @success
         <button type="button" class="close" data-dismiss="alert">
             <span>&times;</span>
@@ -15,10 +20,31 @@
 
 @if (!string.IsNullOrEmpty(error))
 {
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @error
-        <button type="button" class="close" data-dismiss="alert">
-            <span>&times;</span>
-        </button>
-    </div>
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div id="errorAlert"
+             class="alert alert-danger alert-dismissible fade show"
+             role="alert"
+             aria-live="assertive"
+             aria-atomic="true"
+             tabindex="-1">
+            @error
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    }
 }
+
+<script>
+              document.addEventListener("DOMContentLoaded", function () {
+        var errorAlert = document.getElementById("errorAlert");
+        var successAlert = document.getElementById("successAlert");
+
+        if (errorAlert) {
+            errorAlert.focus();
+        } else if (successAlert) {
+            successAlert.focus();
+        }
+    });
+</script>

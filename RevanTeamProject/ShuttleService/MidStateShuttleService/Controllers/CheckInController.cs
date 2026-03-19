@@ -46,22 +46,21 @@ namespace MidStateShuttleService.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.Locations = GetLocationOptions();
+
+                TempData["Error"] = "Please fill out all required fields.";
+
                 return View(submittedCheckIn);
             }
 
-            submittedCheckIn.Date = DateTime.UtcNow;
+            submittedCheckIn.Date = DateTime.Now;
             submittedCheckIn.IsActive = true;
 
-            // DEV NOTE: Database operations should remain inside service classes.
             _checkInService.AddEntity(submittedCheckIn);
 
-            // DEV NOTE: Session tracking logic could be moved to a SessionTrackingService if reused elsewhere.
             int currentCheckInCount = HttpContext.Session.GetInt32("CheckInCount") ?? 0;
             HttpContext.Session.SetInt32("CheckInCount", currentCheckInCount + 1);
 
-            // DEV NOTE: Used to trigger a success modal after redirect.
-            HttpContext.Session.SetString("CheckInSuccess", "true");
-            TempData["CheckInSuccess"] = true;
+            TempData["Success"] = "Check-in successful!";
 
             return RedirectToAction(nameof(CheckIn));
         }
@@ -179,7 +178,7 @@ namespace MidStateShuttleService.Controllers
         // into LocationServices as something like GetLocationSelectList().
         private List<SelectListItem> GetLocationOptions()
         {
-            var locations = _locationService.GetAllEntities();
+            var locations = _context.Locations.Where(l => l.IsActive);
 
             return locations.Select(location => new SelectListItem
             {

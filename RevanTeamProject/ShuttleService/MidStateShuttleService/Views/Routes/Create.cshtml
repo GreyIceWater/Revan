@@ -74,18 +74,6 @@
                     </div>
 
                     <div class="input-fields">
-                        <label>Assigned Driver</label>
-                        <select asp-for="DriverId"
-                                asp-items="ViewBag.Drivers"
-                                class="form-control input--style-1"
-                                required>
-                            <option value="">--Select--</option>
-                        </select>
-                        <div class="div-line"></div>
-                        <span asp-validation-for="DriverId" class="text-danger"></span>
-                    </div>
-
-                    <div class="input-fields">
                         <label>Additional Details</label>
                         <textarea asp-for="AdditionalDetails"
                                   class="form-control input--style-1"

@@ -19,32 +19,45 @@
 
                 <!-- Emergency Toggle -->
                 <div class="form-group">
-                    <p>Is this message an emergency?</p>
+                    <fieldset>
+                        <legend>Is this message an emergency?</legend>
 
-                    <div class="radiobtn-midstate">
-                        <input type="radio"
-                               name="EmergencyToggle"
-                               id="formToggle"
-                               value="emergency"
-                               onclick="toggleForm()" />
-                        <label for="formToggle">Yes</label>
-                    </div>
+                        <div class="radiobtn-midstate">
+                            <input type="radio"
+                                   name="EmergencyToggle"
+                                   id="formToggle"
+                                   value="emergency"
+                                   onclick="toggleForm()" />
+                            <label for="formToggle">Yes</label>
+                        </div>
 
-                    <div class="radiobtn-midstate">
-                        <input type="radio"
-                               name="EmergencyToggle"
-                               id="formToggleNo"
-                               value="notemergency"
-                               onclick="toggleForm()" />
-                        <label for="formToggleNo">No</label>
-                    </div>
+                        <div class="radiobtn-midstate">
+                            <input type="radio"
+                                   name="EmergencyToggle"
+                                   id="formToggleNo"
+                                   value="notemergency"
+                                   onclick="toggleForm()" />
+                            <label for="formToggleNo">No</label>
+                        </div>
+                    </fieldset>
                 </div>
 
                 <!-- Emergency Contact -->
-                <div id="emergencyContact" style="display:none;" class="form-section">
+                <div id="emergencyContact"
+                     class="form-section"
+                     style="display:none;"
+                     tabindex="-1"
+                     aria-live="assertive"
+                     aria-atomic="true">
+
+                    <h3>Emergency Contact</h3>
+
                     <p>For an emergency response, please call or text:</p>
-                    <h3 class="mt-3">715-581-9284</h3>
-                </div>
+
+                    <a href="tel:1234567890" id="emergencyPhone">
+                        715-581-9284
+                    </a>
+                </div>  
 
                 <!-- Form Container -->
                 <div id="formContainer" style="display:none;">
@@ -78,28 +91,31 @@
 
                         <!-- Response Required -->
                         <div class="form-group">
-                            <p>Would you like to receive a response?</p>
-                            <p style="font-size: 0.9rem; color: #666;">
-                                If requesting route changes, please select yes so we can confirm changes with you.
-                            </p>
+                            <fieldset>
+                                <legend>Would you like to receive a response?</legend>
 
-                            <div class="radiobtn-midstate">
-                                <input asp-for="responseRequired"
-                                       type="radio"
-                                       value="true"
-                                       id="responseRequest"
-                                       onclick="toggleDisplay()" />
-                                <label for="responseRequest">Yes</label>
-                            </div>
+                                <p style="font-size: 0.9rem; color: #666;">
+                                    If requesting route changes, please select yes so we can confirm changes with you.
+                                </p>
 
-                            <div class="radiobtn-midstate">
-                                <input asp-for="responseRequired"
-                                       type="radio"
-                                       value="false"
-                                       id="no"
-                                       onclick="toggleDisplay()" />
-                                <label for="no">No</label>
-                            </div>
+                                <div class="radiobtn-midstate">
+                                    <input asp-for="responseRequired"
+                                           type="radio"
+                                           value="true"
+                                           id="responseRequest"
+                                           onclick="toggleDisplay()" />
+                                    <label for="responseRequest">Yes</label>
+                                </div>
+
+                                <div class="radiobtn-midstate">
+                                    <input asp-for="responseRequired"
+                                           type="radio"
+                                           value="false"
+                                           id="no"
+                                           onclick="toggleDisplay()" />
+                                    <label for="no">No</label>
+                                </div>
+                            </fieldset>
                         </div>
 
                         <!-- Contact Info -->

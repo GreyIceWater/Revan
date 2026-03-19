@@ -191,9 +191,6 @@ public partial class ApplicationDbContext : DbContext
                 .HasAnnotation("RegularExpression", "^[a-zA-Z0-9.,!?'\";:@#$%^&*()_+=\\-\\/]*$")
                 .HasAnnotation("ErrorMessage", "Additional details can only contain letters, numbers, and important special characters.");
 
-            entity.Property(e => e.DriverId)
-                .IsRequired();
-
             entity.Property(b => b.IsActive)
                 .HasDefaultValue(false);
 
@@ -205,11 +202,6 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(e => e.DropOffLocation)
                 .WithMany()
                 .HasForeignKey(e => e.DropOffLocationID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.Driver)
-                .WithMany()
-                .HasForeignKey(e => e.DriverId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
