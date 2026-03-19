@@ -32,8 +32,8 @@
         const visibleCards = cards.filter(c => c.style.display !== "none");
 
         visibleCards.sort((a, b) => {
-            const aCreated = parseInt(a.dataset.created || "0", 10);
-            const bCreated = parseInt(b.dataset.created || "0", 10);
+            const aCreated = new Date(a.dataset.created).getTime();
+            const bCreated = new Date(b.dataset.created).getTime();
             const aRides = parseInt(a.dataset.rides || "0", 10);
             const bRides = parseInt(b.dataset.rides || "0", 10);
 

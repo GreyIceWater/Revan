@@ -75,7 +75,7 @@
                          data-studentid="@registration.StudentId"
                          data-term="@registration.Term"
                          data-iscustom="@(registration.isCustom == true ? "true" : "false")"
-                         data-created="@registration.InsertDateTime.ToString()"
+                         data-created="@(registration.InsertDateTime.HasValue? registration.InsertDateTime.Value.ToString("o") : "")"
                          data-rides="@rideCount">
 
                         @if (registration.isCustom == true)
