@@ -1,0 +1,112 @@
+﻿@model MidStateShuttleService.Models.MailItem
+
+@{
+    ViewData["Title"] = "Mail Tracking";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
+
+<link rel="stylesheet" href="/css/Form.css" />
+<link rel="stylesheet" href="/css/Input.css" />
+<link rel="stylesheet" href="/css/Modal.css" />
+
+<div class="form-container tiled-background-1">
+    <div class="form-paper">
+
+        <section class="form-section">
+            <h2>Mail Tracking</h2>
+
+            <!-- 🔴 SHOW MODEL ERRORS -->
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <label asp-for="SenderName">Sender Name</label>
+                    <input asp-for="SenderName"
+                           class="form-control midstate-textinput"
+                           placeholder="Enter sender name" />
+                    <span asp-validation-for="SenderName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="RecipientName">Recipient Name</label>
+                    <input asp-for="RecipientName"
+                           class="form-control midstate-textinput"
+                           placeholder="Enter recipient name" />
+                    <span asp-validation-for="RecipientName" class="text-danger"></span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label asp-for="PickupLocation">Pick-Up Location</label>
+                        <input asp-for="PickupLocation"
+                               class="form-control midstate-textinput"
+                               placeholder="Enter pickup location" />
+                        <span asp-validation-for="PickupLocation" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label asp-for="DropoffLocation">Drop-Off Location</label>
+                        <input asp-for="DropoffLocation"
+                               class="form-control midstate-textinput"
+                               placeholder="Enter drop-off location" />
+                        <span asp-validation-for="DropoffLocation" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MailType">Mail Type</label>
+                    <input asp-for="MailType"
+                           class="form-control midstate-textinput"
+                           placeholder="Envelope, package, interoffice mail, etc." />
+                    <span asp-validation-for="MailType" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="TrackingNumber">Tracking Number</label>
+                    <input asp-for="TrackingNumber"
+                           class="form-control midstate-textinput"
+                           placeholder="Enter tracking number if available" />
+                    <span asp-validation-for="TrackingNumber" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Notes">Notes</label>
+                    <textarea asp-for="Notes"
+                              class="form-control midstate-textinput"
+                              rows="4"
+                              maxlength="500"
+                              placeholder="Add any helpful notes"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+                <div class="form-group submit-group">
+                    <button type="submit" class="btn-midstate btn-primary">
+                        Submit Mail Entry
+                    </button>
+
+                    <a asp-controller="Dashboard"
+                       asp-action="Index"
+                       class="btn-midstate btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </section>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

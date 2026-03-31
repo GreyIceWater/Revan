@@ -34,6 +34,8 @@ namespace MidStateShuttleService
 
             builder.Services.AddScoped<LocationServices>();
 
+            builder.Services.AddScoped<MailServices>();
+
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;

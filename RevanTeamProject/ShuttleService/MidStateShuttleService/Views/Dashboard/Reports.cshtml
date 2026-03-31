@@ -13,12 +13,14 @@
 
     var isRequests = reportType.Equals("requests", StringComparison.OrdinalIgnoreCase);
     var isCheckins = reportType.Equals("checkins", StringComparison.OrdinalIgnoreCase);
+    var isMail = reportType.Equals("mail", StringComparison.OrdinalIgnoreCase);
 
     // DEV NOTE:
     // Convert model collections to lists so we can safely use Count(), Any(), and foreach.
     // Also prevents null reference errors if the controller didn't populate them.
     var requestRows = (Model.Register ?? Enumerable.Empty<RegisterModel>()).ToList();
     var checkinRows = (Model.CheckIn ?? Enumerable.Empty<CheckIn>()).ToList();
+    var mailRows = (Model.MailItems ?? Enumerable.Empty<MailItem>()).ToList();
 }
 
 <!-- DEV NOTE: Page styling -->
@@ -36,7 +38,7 @@
 
         <!-- DEV NOTE: Returns user to the dashboard reports widget -->
         <a class="rptBtn rptBtnGhost"
-           href="@Url.Action("Index", "Dashboard", new { section = "reports" })">
+           href="@Url.Action("Index", "Dashboard")">
             ← Back to Dashboard
         </a>
     </div>
@@ -71,13 +73,13 @@
 
                         <!-- DEV NOTE: Loads the Rider Requests report -->
                         <a class="rptBtn"
-                           href="@Url.Action("Reports", "Dashboard", new { report = "requests" })">
+                           href="@Url.Action("Reports", "Reports", new { report = "requests" })">
                             Run
                         </a>
 
                         <!-- DEV NOTE: CSV export of rider request data -->
                         <a class="rptBtn rptBtnOutline"
-                           href="@Url.Action("ExportRiderRequestsCsv", "Dashboard")">
+                           href="@Url.Action("ExportRiderRequestsCsv", "Reports")">
                             Export CSV
                         </a>
                     </div>
@@ -100,13 +102,42 @@
 
                         <!-- DEV NOTE: Loads the Check-ins report -->
                         <a class="rptBtn"
-                           href="@Url.Action("Reports", "Dashboard", new { report = "checkins" })">
+                           href="@Url.Action("Reports", "Reports", new { report = "checkins" })">
                             Run
                         </a>
 
                         <!-- DEV NOTE: CSV export for check-in data -->
                         <a class="rptBtn rptBtnOutline"
-                           href="@Url.Action("ExportCheckInsCsv", "Dashboard")">
+                           href="@Url.Action("ExportCheckInsCsv", "Reports")">
+                            Export CSV
+                        </a>
+                    </div>
+                </div>
+
+                <!-- DEV NOTE: Mail report option -->
+                <div class="reportOption @(isMail ? "reportOptionActive" : "")">
+                    <div class="reportOptionTop">
+                        <div class="reportOptionText">
+                            <p class="reportOptionTitle">Mail Check-Ins</p>
+                            <p class="reportOptionDesc">All mail entries (newest first)</p>
+                        </div>
+
+                        <div class="reportOptionMeta">
+                            <span class="pill pill-neutral">All time</span>
+                        </div>
+                    </div>
+
+                    <div class="reportOptionActions">
+
+                        <!-- DEV NOTE: Loads the Mail report -->
+                        <a class="rptBtn"
+                           href="@Url.Action("Reports", "Reports", new { report = "mail" })">
+                            Run
+                        </a>
+
+                        <!-- DEV NOTE: CSV export for mail data -->
+                        <a class="rptBtn rptBtnOutline"
+                           href="@Url.Action("ExportMailCsv", "Reports")">
                             Export CSV
                         </a>
                     </div>
@@ -134,7 +165,7 @@
 
                     <!-- Back to report picker -->
                     <a class="rptBtn rptBtnGhost"
-                       href="@Url.Action("Index", "Dashboard", new { section = "reports" })">
+                       href="@Url.Action("Index", "Reports", new { section = "reports" })">
                         ← Back
                     </a>
 
@@ -143,7 +174,7 @@
 
                     <!-- Export same data shown in table -->
                     <a class="rptBtn rptBtnOutline"
-                       href="@Url.Action("ExportRiderRequestsCsv", "Dashboard")">
+                       href="@Url.Action("ExportRiderRequestsCsv", "Reports")">
                         Export CSV
                     </a>
                 </div>
@@ -240,14 +271,14 @@
 
                 <div class="reportStickyRight">
                     <a class="rptBtn rptBtnGhost"
-                       href="@Url.Action("Index", "Dashboard", new { section = "reports" })">
+                       href="@Url.Action("Index", "Reports", new { section = "reports" })">
                         ← Back
                     </a>
 
                     <span class="pill pill-neutral">Rows: @checkinRows.Count</span>
 
                     <a class="rptBtn rptBtnOutline"
-                       href="@Url.Action("ExportCheckInsCsv", "Dashboard")">
+                       href="@Url.Action("ExportCheckInsCsv", "Reports")">
                         Export CSV
                     </a>
                 </div>
@@ -299,6 +330,81 @@
                                     <td>@(c.DropOffLocation?.Name ?? $"#{c.DropOffLocationId}")</td>
 
                                     <td class="truncate" title="@c.Comments">@c.Comments</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (isMail)
+    {
+        <!-- DEV NOTE: Mail report table -->
+        <div class="reportCard reportResultsBlock">
+            <div class="reportStickyBar">
+                <div class="reportStickyLeft">
+                    <h3>Mail Check-Ins</h3>
+                    <span class="reportSubtitle">All time</span>
+                </div>
+
+                <div class="reportStickyRight">
+                    <a class="rptBtn rptBtnGhost"
+                       href="@Url.Action("Index", "Reports", new { section = "reports" })">
+                        ← Back
+                    </a>
+
+                    <span class="pill pill-neutral">Rows: @mailRows.Count</span>
+
+                    <a class="rptBtn rptBtnOutline"
+                       href="@Url.Action("ExportMailCsv", "Reports")">
+                        Export CSV
+                    </a>
+                </div>
+            </div>
+
+            <div class="reportScrollArea">
+                <table class="reportsTable">
+                    <thead>
+                        <tr>
+                            <th>MailItemId</th>
+                            <th>Sender</th>
+                            <th>Recipient</th>
+                            <th>Pick Up</th>
+                            <th>Drop Off</th>
+                            <th>Mail Type</th>
+                            <th>Tracking Number</th>
+                            <th>Notes</th>
+                            <th>Submitted By</th>
+                            <th>Submitted At</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <!-- DEV NOTE: Empty state -->
+                        @if (!mailRows.Any())
+                        {
+                            <tr>
+                                <td colspan="10" class="emptyCell">No mail records found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            // DEV NOTE: Loop through mail records
+                            foreach (var m in mailRows)
+                            {
+                                <tr>
+                                    <td>@m.MailItemId</td>
+                                    <td>@m.SenderName</td>
+                                    <td>@m.RecipientName</td>
+                                    <td>@m.PickupLocation</td>
+                                    <td>@m.DropoffLocation</td>
+                                    <td>@m.MailType</td>
+                                    <td>@m.TrackingNumber</td>
+                                    <td class="truncate" title="@m.Notes">@m.Notes</td>
+                                    <td>@m.SubmittedBy</td>
+                                    <td>@m.SubmittedAt.ToString("g")</td>
                                 </tr>
                             }
                         }
