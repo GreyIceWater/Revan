@@ -463,7 +463,7 @@ namespace MidStateShuttleService.Controllers
             {
                 times.Add(new SelectListItem
                 {
-                    Value = time.ToString("h:mm tt"),
+                    Value = time.ToString("HH:mm"),
                     Text = time.ToString("h:mm tt")
                 });
             }

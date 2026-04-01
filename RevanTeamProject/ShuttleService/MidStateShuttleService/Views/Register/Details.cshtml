@@ -202,7 +202,7 @@
                                                     @foreach (var time in Model.TimeOptions)
                                                     {
                                                         <option value="@time.Value"
-                                                                selected="@(time.Value == ride.DropOffTime.ToString())">
+                                                                selected="@(time.Value == ride.DropOffTime?.ToString("HH:mm"))">
                                                             @time.Text
                                                         </option>
                                                     }
