@@ -40,8 +40,6 @@
 
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-
-                            <a class="nav-item nav-link" asp-area="" asp-controller="User" asp-action="Account">Account</a>
                             
                             if (User.IsInRole("Admin") || User.IsInRole("Driver"))
                             {

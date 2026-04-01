@@ -82,6 +82,50 @@ namespace MidStateShuttleService.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
+        public ActionResult CreateFromRide(int rideId)
+        {
+            Ride ride = _context.Rides.Where(r => r.RideId == rideId).FirstOrDefault();
+            RequestDay rDay = _context.RequestDays.Where(d => d.RequestDayId == ride.RequestDayId).FirstOrDefault();
+
+            WeekDay dayOfWeek = rDay.WeekDay;
+
+            //fallback incase of null
+            if (ride == null)
+            {
+                RedirectToAction(nameof(Create));
+            }
+
+            Routes route = new Routes();
+
+            route.IsActive = true;
+            route.PickUpTime = ride.DropOffTime.Value.ToTimeSpan();
+            route.DropOffTime = route.PickUpTime.Value.Add(TimeSpan.FromMinutes(30));
+            route.DropOffLocationID = ride.DropOffLocationID;
+            route.PickUpLocationID = ride.PickUpLocationID;
+            route.DayOfWeek = dayOfWeek;
+
+            try
+            {
+                RouteServices rs = new RouteServices(_context);
+                route.IsActive = true;
+                rs.AddEntity(route);
+
+                HttpContext.Session.SetString("RouteSuccess", "true");
+                TempData["RouteSuccess"] = true;
+
+                return RedirectToAction(nameof(Create));
+            }
+            catch (Exception ex)
+            {
+                LogEvents.LogSqlException(ex, _environment);
+                _logger.LogError(ex, "An error occurred while creating the route.");
+                LoadRouteDropdowns();
+                ModelState.AddModelError("", "An unexpected error occurred while creating the route.");
+                return View(route);
+            }
+        }
+
         // GET: RoutesController/Edit/5
         [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id)

@@ -14,7 +14,7 @@ namespace MidStateShuttleService.Controllers
             return Challenge(
                 new AuthenticationProperties
                 {
-                    RedirectUri = "/User/PostLoginCheck" // DEV NOTE: Redirect after successful authentication.
+                    RedirectUri = "/Home/Index" // DEV NOTE: Redirect after successful authentication.
                 },
                 OpenIdConnectDefaults.AuthenticationScheme);
         }

@@ -87,40 +87,6 @@ namespace MidStateShuttleService.Controllers
             string fullName = "";
             string studentId = "";
 
-            try
-            {
-                var oidClaim = User.FindFirst("oid")
-                ?? User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier");
-
-                string userId = "";
-                if (oidClaim != null)
-                {
-                    userId = oidClaim?.Value;
-                }
-
-                var dbUser = _context.Users
-                .FirstOrDefault(u => u.AzureAdObjectId == userId);
-
-                if (dbUser != null)
-                {
-                    phone = dbUser.PhoneNumber;
-                    fullName = dbUser.FirstName + " " + dbUser.LastName;
-                    studentId = dbUser.StudentId;
-                }
-
-                email = User.FindFirst("email")?.Value
-                            ?? User.FindFirst("preferred_username")?.Value
-                            ?? User.Identity?.Name
-                            ?? "";
-            }
-            catch (Exception ex)
-            {
-                email = "";
-                phone = "";
-                fullName = "";
-                studentId = "";
-            }
-
             var model = new RegisterModel();
             model.LocationNames = ls.GetLocationNames();
 
@@ -514,40 +480,6 @@ namespace MidStateShuttleService.Controllers
             string phone = "";
             string fullName = "";
             string studentId = "";
-
-            try
-            {
-                var oidClaim = User.FindFirst("oid")
-                ?? User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier");
-
-                string userId = "";
-                if (oidClaim != null)
-                {
-                    userId = oidClaim?.Value;
-                }
-
-                var dbUser = _context.Users
-                .FirstOrDefault(u => u.AzureAdObjectId == userId);
-
-                if (dbUser != null)
-                {
-                    phone = dbUser.PhoneNumber;
-                    fullName = dbUser.FirstName + " " + dbUser.LastName;
-                    studentId = dbUser.StudentId;
-                }
-
-                email = User.FindFirst("email")?.Value
-                            ?? User.FindFirst("preferred_username")?.Value
-                            ?? User.Identity?.Name
-                            ?? "";
-            }
-            catch (Exception ex)
-            {
-                email = "";
-                phone = "";
-                fullName = "";
-                studentId = "";
-            }
 
             var model = new RegisterModel();
             model.isCustom = true;

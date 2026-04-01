@@ -210,6 +210,18 @@
                                                 </select>
                                             </div>
 
+                                            <!-- Hot SHortcut To Create Route -->
+                                            @if (ride.RouteId == null || ride.RouteId == 0)
+                                            {
+                                                <div class="mt-2">
+                                                <a href="@Url.Action("CreateFromRide", "Routes", new { rideId = ride.RideId })"
+                                                   class="btn-midstate btn-warning">
+                                                    + Create Route From This Ride Request
+                                                </a>
+                                                </div>
+                                            }
+                                            
+
                                             <!-- REMOVE -->
                                             <div>
                                                 <button type="button"

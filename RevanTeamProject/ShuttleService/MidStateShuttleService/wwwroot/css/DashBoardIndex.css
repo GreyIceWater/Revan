@@ -1,0 +1,136 @@
+﻿.message-card {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.dashboard-stat-card {
+    border-radius: 12px;
+    padding: 15px;
+    transition: transform 0.2s;
+}
+
+    /* Make all stat cards maroon */
+    .dashboard-stat-card.bg-primary,
+    .dashboard-stat-card.bg-success,
+    .dashboard-stat-card.bg-warning,
+    .dashboard-stat-card.bg-danger {
+        background-color: #800000 !important; /* maroon */
+        color: white !important;
+    }
+
+    /* Icons white */
+    .dashboard-stat-card i {
+        color: white;
+    }
+
+    /* Hover effect */
+    .dashboard-stat-card:hover {
+        transform: translateY(-5px);
+        background-color: #a00000 !important; /* lighter maroon */
+    }
+
+.dashboard-landing {
+    margin-left: 300px;
+    padding: 40px 20px;
+    min-height: 100vh;
+}
+
+.dashboard-header h1 {
+    font-weight: 700;
+    color: #800000; /* Maroon heading */
+}
+
+.dashboard-stats-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+}
+
+.dashboard-stat-card {
+    width: 220px;
+    border-radius: 12px;
+    padding: 15px;
+    transition: transform 0.2s;
+    color: white;
+    background-color: #800000; /* Maroon background */
+}
+
+    .dashboard-stat-card:hover {
+        transform: translateY(-5px);
+        background-color: #a00000; /* Slightly lighter maroon on hover */
+    }
+
+.dashboard-quick-access {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.quick-access-card {
+    width: 220px;
+}
+
+    .quick-access-card .card {
+        border-radius: 12px;
+        padding: 20px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        background-color: #800000; /* Maroon card */
+        color: white;
+    }
+
+        .quick-access-card .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(128, 0, 0, 0.4); /* Maroonish shadow */
+            background-color: #a00000; /* Slightly lighter maroon hover */
+        }
+
+    .quick-access-card i {
+        color: #ffc107; /* Use gold/yellow for icons to contrast maroon */
+    }
+
+.dashboard-header-container {
+    display: flex;
+    justify-content: center;
+}
+
+.dashboard-header-card {
+    background-color: #800000; /* Maroon background */
+    border-radius: 20px; /* Rounded corners */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    max-width: 800px;
+    width: 100%;
+    padding: 40px 30px;
+    color: white;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .dashboard-header-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .dashboard-header-card h1 {
+        font-weight: 700;
+    }
+
+    .dashboard-header-card p {
+        margin-top: 10px;
+        font-size: 1.2rem;
+    }
+
+@@media (max-width: 768px) {
+    .dashboard-landing {
+        margin-left: 0;
+        padding: 40px 20px;
+        min-height: 100vh;
+    }
+
+    .dashboard-stats-container,
+    .dashboard-quick-access {
+        flex-direction: column;
+        align-items: center;
+    }
+}
