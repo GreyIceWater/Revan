@@ -180,6 +180,10 @@ footer {
     margin: 0px 5px;
 }
 
+.footerBottom p {
+    color: white !important;
+}
+
 /* Adjusted media query for smaller screens */
 @media (max-width: 768px) {
     .footerNav ul {
