@@ -18,9 +18,9 @@
     <header>
         <div class="container-fluid">
             <nav class="navbar navbar-expand-lg ">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                    <img src="~/img/MSTCBanner.png" alt="Mid-State Technical College" style="height:40px;" />
-                </a>
+                <img src="~/img/MSTCBanner.png"
+                     alt="Mid-State Shuttle Service banner"
+                     style="height:40px;" />
 
                 <button class="navbar-toggler navbar-light bg-light" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -55,7 +55,7 @@
                         else
                         {
                             <a class="nav-item nav-link" asp-controller="Auth" asp-action="Login">
-                                Sign In
+                                Admin Sign In
                             </a>
                         }
                     </div>
@@ -72,6 +72,7 @@
     </div>
 
     <!-- Footer -->
+
     <footer>
         <div class="footerContainer">
             <div class="footerNav">
@@ -80,13 +81,12 @@
                     <li><a href="@Url.Action("Index", "Register")">Request A Ride</a></li>
                     <li><a href="https://www.mstc.edu/">Mid-State Technical College</a></li>
                     <li><a href="https://www.mstc.edu/shuttle">Shuttle Service Info</a></li>
-                    <li><a href="https://wedc.org/workforce-innovation-grant-helps-youth-discover-career-path/">Learn More!</a></li>
                 </ul>
             </div>
             
         </div>
         <div class="footerBottom">
-            <p>Copyright &copy;2024; Designed by <span class="desinger">Team Revan</span></p>
+            <p>Copyright &copy;2024; Designed by <span class="desinger">Team Shuttle & Team Revan</span></p>
         </div>
     </footer>
 
