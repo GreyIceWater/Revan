@@ -40,10 +40,17 @@ namespace MidStateShuttleService.Controllers
 
             MessageServices mes = new MessageServices(_context);
 
+            NotificationService note = new NotificationService(_context);
+
             dashboardViewModel.TotalMonthlyCheckins = cis.GetAllEntities().Where(c => c.Date >= DateTime.Today.AddDays(-30)).Count();
             dashboardViewModel.PastWeekRegistrations = reg.GetRegistrationCount("week");
             dashboardViewModel.TotalRequests = reg.GetAllEntities().Where(r => !r.IsArchived).Count();
-            dashboardViewModel.Messages = mes.GetAllEntities().ToList();
+
+            if (User.IsInRole("Admin"))
+            {
+                dashboardViewModel.Messages = mes.GetAllEntities().ToList();
+                dashboardViewModel.Notifications = note.GetAllEntities().Where(r => !r.IsArchived).ToList();
+            }
 
             // Retrieve the registration success flag and count from the session
             var registrationSuccess = HttpContext.Session.GetString("RegistrationSuccess") == "true";

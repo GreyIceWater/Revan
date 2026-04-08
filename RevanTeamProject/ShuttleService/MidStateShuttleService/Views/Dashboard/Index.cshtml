@@ -5,14 +5,15 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<link rel="stylesheet" href="/css/DashBoardIndex.css" />
-
 @await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
+
+
+<link rel="stylesheet" href="/css/DashBoardIndex.css" />
 
 <body>
     <div class="dashboard-landing tiled-background-2">
         <!-- Key Metrics -->
-        <section class="dashboard-stats-container mb-5">
+        <section class="dashboard-stats-container mb-2">
 
             <a asp-controller="Register" asp-action="ViewAll" class="text-decoration-none">
                 <div class="dashboard-stat-card bg-primary text-white shadow-sm">
@@ -55,35 +56,6 @@
         </section>
 
         <!-- NOTIFICATIOSN -->
-        <section class="dashboard-notifications mb-5">
-
-            <div class="card shadow-sm">
-
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-chat-left-text me-2"></i>
-                        Recent Notifications
-                    </h5>
-
-                    <span class="badge bg-danger"
-                          data-message-count="@ViewData["MessageCount"]"
-                          data-feedback-count="@ViewData["FeedbackCount"]">
-                    </span>
-                </div>
-
-                <ul class="list-group list-group-flush"
-                    id="notificationMessageDropdown"
-                    data-message-count="@ViewData["MessageCount"]"
-                    data-feedback-count="@ViewData["FeedbackCount"]"
-                    data-last-message="@ViewData["LastMessage"]"
-                    data-last-feedback="@ViewData["LastFeedback"]">
-                </ul>
-
-            </div>
-
-        </section>
-
-        <!-- start message table -->
         @if (User.IsInRole("Admin"))
         {
             <div class="form-container tiled-background-2">
@@ -91,86 +63,83 @@
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <h2>Messages</h2>
-                            <p class="mb-0">View and manage user messages.</p>
+                            <h2>Notifications</h2>
+                            <p class="mb-0">View and manage notifications.</p>
                         </div>
                     </div>
 
-                    <div id="messageTableBody">
+                    <div id="notificationTableBody">
 
-                        @if (Model.Messages == null || !Model.Messages.Any())
+                        @if (Model.Notifications == null || !Model.Notifications.Any())
                         {
                             <div class="form-paper p-3">
-                                <p>There are currently no messages.</p>
+                                <p>There are currently no notifications.</p>
                             </div>
                         }
                         else
                         {
-                            @foreach (var message in Model.Messages.OrderByDescending(m => m.id))
+                            @foreach (var notification in Model.Notifications
+                                                    .Where(n => !n.IsArchived)
+                                                    .OrderByDescending(n => n.TimeSent))
                             {
-                                if (message.IsActive)
-                                {
-                                    <div class="form-paper mb-4 p-4 position-relative message-card">
+                                <div class="form-paper mb-4 p-4 position-relative message-card">
 
-                                        <div class="d-flex justify-content-between align-items-start">
+                                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
 
-                                            <div>
+                                        <div class="flex-grow-1 min-width-0">
 
-                                                <h4 class="mb-2">@message.name</h4>
+                                            <h4 class="mb-2">
+                                                @(string.IsNullOrEmpty(notification.Subject) ? "No Subject" : notification.Subject)
+                                            </h4>
 
-                                                <div class="mb-2">
-                                                    <strong>Message:</strong>
-                                                    @message.message
-                                                    
-                                                </div>
-
-                                                <div>
-                                                    <span>
-                                                        <strong>Response Required:</strong>
-                                                        @(message.responseRequired ? "Yes" : "No")
-                                                    </span>
-
-                                                    <span> | </span>
-
-                                                    <span>
-                                                        <strong>Contact:</strong>
-                                                        @(string.IsNullOrEmpty(message.contactInfo) ? "N/A" : message.contactInfo)
-                                                    </span>
-                                                </div>
-
+                                            <div class="mb-2">
+                                                <strong>Message:</strong>
+                                                <span style="display: block; overflow-wrap: break-word; word-break: break-word;">@notification.Body</span>
                                             </div>
 
-                                            <div class="text-end">
-
-                                                <a asp-controller="Communicate"
-                                                   asp-action="Delete"
-                                                   asp-route-id="@message.id"
-                                                   class="btn btn-midstate btn-danger btn-sm">
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Mark as Read
-                                                </a>
-
+                                            <div>
+                                                <span>
+                                                    <strong>Sent:</strong>
+                                                    @(notification.TimeSent?.ToString("g") ?? "N/A")
+                                                </span>
                                             </div>
 
                                         </div>
 
+                                        <div class="d-flex flex-row flex-md-column gap-2 flex-shrink-0 flex-wrap">
+                                            <a asp-controller="Notification"
+                                               asp-action="ViewNotificationContents"
+                                               asp-route-id="@notification.Id"
+                                               class="btn btn-midstate btn-sm">
+                                                <i class="bi bi-eye me-1"></i> View
+                                            </a>
+                                            <form asp-controller="Notification"
+                                                  asp-action="Archive"
+                                                  asp-route-id="@notification.Id"
+                                                  method="post">
+                                                <button type="submit" class="btn btn-midstate btn-danger btn-sm w-100">
+                                                    <i class="bi bi-archive-fill me-1"></i> Mark as Read
+                                                </button>
+                                            </form>
+                                        </div>
+
                                     </div>
-                                }
+
+                                </div>
                             }
                         }
 
                     </div>
 
-                    <div id="pagination-controls-message" class="pagination"></div>
+                    <div id="pagination-controls-notification" class="pagination"></div>
 
                 </div>
             </div>
-            <!-- end message table -->
         }
         
     </div>
 </body>
 
+
 <script src="~/js/tablePagination.js"></script>
 <script src="~/js/Dashboard/MessageModal.js"></script>
-<script src="/js/Dashboard/DisplayNotification.js"></script>
-<script src="/js/Dashboard/notification.js"></script>

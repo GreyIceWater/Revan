@@ -113,7 +113,7 @@
 
     <div class="container mt-5">
         <h2>Rider Testimonial</h2>
-        <form id="feedbackForm" asp-action="Create" method="post">
+        <form id="feedbackForm" asp-controller="FeedBack" asp-action="Create" method="post">
 
             <!-- Success Modal -->
             <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -208,20 +208,7 @@
                     Please select your satisfaction level.
                 </div>
             </div>
-            <div class="form-group">
-                <label>Would you like to share your testimonials with others?</label>
-                <div class="form-check radiobtn-midstate">
-                    <input class="form-check-input" type="radio" name="DisplayTestimonial" id="recommendYes" value="true" checked>
-                    <label class="form-check-label" for="recommendYes">Yes</label>
-                </div>
-                <div class="form-check radiobtn-midstate">
-                    <input class="form-check-input" type="radio" name="DisplayTestimonial" id="recommendNo" value="false">
-                    <label class="form-check-label" for="recommendNo">No</label>
-                </div>
-                <div id="displayTestimonial-validation-message" class="validation-message" style="display: none;">
-                    Please let us know if you would like to share your testimonials with others.
-                </div>
-            </div>
+            
             <button type="submit" class="button button--radius button--submit">Submit</button>
         </form>
 

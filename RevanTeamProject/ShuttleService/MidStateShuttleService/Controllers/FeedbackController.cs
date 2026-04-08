@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
+using MidStateShuttleService.Services;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -42,15 +43,24 @@ namespace MidStateShuttleService.Controllers
                     feedback.CustomerName = string.IsNullOrWhiteSpace(feedback.CustomerName) ? "Anonymous" : feedback.CustomerName;
 
                     feedback.DateSubmitted = DateTime.Now; // Set submission date to current date and time
-                    feedback.IsActive = false;
+                    feedback.IsActive = true;
+                    feedback.DisplayTestimonial = false;
                     _context.Add(feedback);
                     await _context.SaveChangesAsync();
 
                     // changing terminology to testimonial
                     _logger.LogInformation("Testimonial successfully saved.");
 
+                    Notification notif = new Notification();
+                    notif.Subject = "Shuttle Service Review!";
+                    notif.Body = feedback.CustomerName + " Just left a " + feedback.Rating + " star review.";
+                    notif.TimeSent = DateTime.Now;
+                    notif.FeedbackId = feedback.FeedbackId;
+
+                    new NotificationService(_context).SendNotification(notif);
+
                     TempData["FeedbackSuccess"] = "True"; // Use TempData to signal that feedback was successful
-                    return RedirectToAction(nameof(Index)); // Redirect back to the form page to show the success modal
+                    return RedirectToAction("Index", "Home"); // Redirect back to the form page to show the success modal
                 }
                 catch (Exception ex)
                 {
@@ -71,14 +81,14 @@ namespace MidStateShuttleService.Controllers
                 }
             }
             // If we got this far, something failed, redisplay form
-            return View("Index", feedback);
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public ActionResult ViewAll()
         {
-            var feedbacks = new FeedbackServices(_context).GetAllEntities().Where(f => !f.IsActive);
+            var feedbacks = new FeedbackServices(_context).GetAllEntities().Where(f => f.IsActive);
 
             return View("FeedbackTable", feedbacks);
         }
@@ -114,6 +124,46 @@ namespace MidStateShuttleService.Controllers
 
                 // Optionally add a model error for displaying an error message to the user
                 ModelState.AddModelError("", "An unexpected error occurred while toggling IsActive of the feedback, please try again.");
+
+                // Return the view with an error message
+                return View();
+            }
+        }
+
+        /// <summary>
+        /// Approves the testimonial to display on the home page
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ApproveTestimonial(int id)
+        {
+            try
+            {
+                var feedback = _context.Feedbacks.Find(id);
+
+                if (feedback != null)
+                {
+                    feedback.DisplayTestimonial = true;
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    // Handle the case where the feedback with the specified id is not found
+                    ModelState.AddModelError("", "Feedback not found.");
+                    return View();
+                }
+
+                return RedirectToAction("ViewAll");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                LogEvents.LogSqlException(ex, (IWebHostEnvironment)_context);
+                _logger.LogError(ex, "An error occurred while appriving a testimonial.");
+
+                ModelState.AddModelError("", "An unexpected error occurred while aproving of the feedback, please try again.");
 
                 // Return the view with an error message
                 return View();

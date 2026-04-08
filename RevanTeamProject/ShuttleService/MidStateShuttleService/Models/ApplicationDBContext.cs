@@ -40,6 +40,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<MailItem> MailItems { get; set; }
 
+    public virtual DbSet<Notification> Notifications { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Bus table

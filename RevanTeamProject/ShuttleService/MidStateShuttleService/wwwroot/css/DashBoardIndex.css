@@ -31,7 +31,6 @@
     }
 
 .dashboard-landing {
-    margin-left: 300px;
     padding: 40px 20px;
     min-height: 100vh;
 }
@@ -121,6 +120,11 @@
         font-size: 1.2rem;
     }
 
+.dashboard-landing .form-container {
+    min-height: unset;
+    padding: 0 20px 20px 20px;
+}
+
 @@media (max-width: 768px) {
     .dashboard-landing {
         margin-left: 0;
@@ -133,4 +137,5 @@
         flex-direction: column;
         align-items: center;
     }
+
 }

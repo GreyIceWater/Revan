@@ -4,6 +4,7 @@ using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MidStateShuttleService.Models;
 
@@ -12,9 +13,11 @@ using MidStateShuttleService.Models;
 namespace MidStateShuttleService.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260403034032_Notifications")]
+    partial class Notifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -387,17 +390,8 @@ namespace MidStateShuttleService.Migrations
                     b.Property<string>("Body")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("FeedbackId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
-
-                    b.Property<int?>("MessageId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RegistrationId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Subject")
                         .HasColumnType("nvarchar(max)");
