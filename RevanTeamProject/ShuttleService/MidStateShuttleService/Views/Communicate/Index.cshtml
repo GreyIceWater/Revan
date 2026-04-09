@@ -1,93 +1,102 @@
 ﻿@using MidStateShuttleService.Service
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
 @{
-
     ViewData["Title"] = "Admin Dashboard";
-
 }
 
 @inject IListService listService
 @model MidStateShuttleService.Models.CommuncateModel
 
-@* page stylesheet *@
+<link rel="stylesheet" href="/css/Form.css" />
+<link rel="stylesheet" href="/css/Input.css" />
+<link rel="stylesheet" href="/css/HelpIcon.css" />
 <link rel="stylesheet" href="css/site.css" />
 <link rel="stylesheet" href="css/Communication/Communicate.css" />
 
-<!-- Include jQuery and Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
-<body>
-    <div>
-        <div class="wrapper wrapper--w680">
-            <div class="card card-1">
-                <div class="card-heading"></div>
-                <div class="card-body">
-                    <h2 class="title">Send Message</h2>
-                    <form id="CommunicateForm" method="post" asp-action="Index">
-                        @Html.AntiForgeryToken()
-                        <div>
+<div class="form-container tiled-background-1">
+    <div class="form-paper">
 
+        <section class="form-section">
+            <h2>Send Message</h2>
 
-                            <div class="input-fields">
-                                <textarea type="text" id="message" asp-for="message" class="input--style-1 text-box single-line p-2" placeholder="Enter message..." maxlength="160"></textarea>
-                                <div id="message-Validation-Message" class="validation-message"></div>
-                            </div>
+            <form id="CommunicateForm" method="post" asp-action="Index">
+                @Html.AntiForgeryToken()
 
-                            <div class="row row-space">
-                                <div class="col-6">
-                                    <div class="input-fields">
-                                        @if (Model.LocationNames != null)
-                                        {
-                                            @Html.DropDownListFor(model => model.PickUpLocationID, Model.LocationNames, "Select Pick-Up Location", new { @class = "input--style-1", id = "PickUpLocation" })
-                                        }
-                                        else
-                                        {
-                                            <p>Error: Location names not loaded.</p>
-                                        }
-                                        <div class="form-line"></div>
-                                        <div id="PickUpLocation-Validation-Message" class="validation-message">Please select pickup location</div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="input-fields">
-                                        @if (Model.LocationNames != null)
-                                        {
-                                            @Html.DropDownListFor(model => model.DropOffLocationID, Model.LocationNames, "Select Drop-Off Location", new { @class = "input--style-1", id = "DropOffLocation" })
-                                        }
-                                        else
-                                        {
-                                            <p>Error: Location names not loaded.</p>
-                                        }
-                                        <div class="form-line"></div>
-                                        <div id="DropOffLocation-Validation-Message" class="validation-message">Please select dropoff location</div>
-                                    </div>
-                                </div>
-
-                                <div class="route-location-schedule">
-                                    <div class="input-fields">
-                                        <div class="radio-route-type">
-                                            <div id="routeOptions" class="radio-route-options"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <p class="trip-info">*Message will be sent to all students who requested the selected route.</p>
-                        </div>
-                        <div class="p-t-20">
-                            <button class="btn btn--radius btn--submit" type="submit">Send</button>
-                            <button class="btn btn--radius btn--cancel" type="button" onclick="location.href='../Dashboard'">Cancel</button>
-                        </div>
-                    </form>
+                <!-- Message -->
+                <div class="form-group">
+                    <label asp-for="message">Message</label>
+                    <textarea asp-for="message"
+                              class="form-control midstate-textinput"
+                              maxlength="160"
+                              rows="4"
+                              placeholder="Enter message..."></textarea>
+                    <div id="message-Validation-Message" class="text-danger"></div>
                 </div>
-            </div>
-        </div>
+
+                <!-- Pick-Up Location -->
+                <div class="form-group">
+                    <label asp-for="PickUpLocationID">Pick-Up Location</label>
+                    @if (Model.LocationNames != null)
+                    {
+                        @Html.DropDownListFor(
+                        model => model.PickUpLocationID,
+                                        Model.LocationNames,
+                                        "Select Pick-Up Location",
+                                        new { @class = "form-control midstate-textinput", id = "PickUpLocation" })
+                                        }
+                    else
+                    {
+                        <p>Error: Location names not loaded.</p>
+                    }
+                    <div id="PickUpLocation-Validation-Message" class="text-danger"></div>
+                </div>
+
+                <!-- Drop-Off Location -->
+                <div class="form-group">
+                    <label asp-for="DropOffLocationID">Drop-Off Location</label>
+                    @if (Model.LocationNames != null)
+                    {
+                        @Html.DropDownListFor(
+                        model => model.DropOffLocationID,
+                                        Model.LocationNames,
+                                        "Select Drop-Off Location",
+                                        new { @class = "form-control midstate-textinput", id = "DropOffLocation" })
+                                        }
+                    else
+                    {
+                        <p>Error: Location names not loaded.</p>
+                    }
+                    <div id="DropOffLocation-Validation-Message" class="text-danger"></div>
+                </div>
+
+                <!-- Route Options -->
+                <div class="form-group">
+                    <div class="route-location-schedule">
+                        <div id="routeOptions" class="radio-route-options"></div>
+                    </div>
+                </div>
+
+                <p class="trip-info" style="font-size: 0.9rem; color: #666;">
+                    *Message will be sent to all students who requested the selected route.
+                </p>
+
+                <!-- Submit -->
+                <div class="form-group submit-group">
+                    <button type="submit" class="btn-midstate btn-primary">Send</button>
+                    <button type="button"
+                            class="btn-midstate btn-secondary"
+                            onclick="location.href='../Dashboard'">
+                        Cancel
+                    </button>
+                </div>
+
+            </form>
+        </section>
+
     </div>
-</body>
+</div>
 
 <!-- Success Modal -->
 <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -103,8 +112,8 @@
                 Message Sent Successfully!
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="location.href='../../Dashboard'">Return</button>
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Send Another</button>
+                <button type="button" class="btn-midstate btn-primary" onclick="location.href='../../Dashboard'">Return</button>
+                <button type="button" class="btn-midstate btn-secondary" data-dismiss="modal">Send Another</button>
             </div>
         </div>
     </div>
@@ -123,5 +132,3 @@
 <script src="~/js/Communication/shuttleSelect.js"></script>
 <script src="~/js/Registeration/routeVisibility.js"></script>
 <script src="~/js/Registeration/RouteUpdater.js"></script>
-
-rewrite this page to have the bootstrap card system, keep the midstate buttons
