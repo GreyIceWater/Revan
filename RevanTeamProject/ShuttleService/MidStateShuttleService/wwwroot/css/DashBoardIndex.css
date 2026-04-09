@@ -33,6 +33,7 @@
 .dashboard-landing {
     padding: 40px 20px;
     min-height: 100vh;
+    margin-left: 300px;
 }
 
 .dashboard-header h1 {
