@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Services;
+using MidStateShuttleService.Helpers;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -127,7 +128,7 @@ namespace MidStateShuttleService.Controllers
                     $"{Csv(riderRequest.isCustom ? "Special" : "Regular")}," +
                     $"{BoolToYesNo(riderRequest.IsFieldTrip)}," +
                     $"{BoolToYesNo(riderRequest.IsInternalInquiry)}," +
-                    $"{(riderRequest.InsertDateTime.HasValue ? riderRequest.InsertDateTime.Value.ToString("MM/dd/yyyy h:mm tt") : "")}," +
+                    $"{DateTimeHelper.ToCentralTimeString(riderRequest.InsertDateTime)}," +
                     $"{BoolToYesNo(riderRequest.IsArchived)}"
                 );
             }
@@ -137,7 +138,7 @@ namespace MidStateShuttleService.Controllers
             return File(
                 System.Text.Encoding.UTF8.GetBytes(stringBuilder.ToString()),
                 "text/csv",
-                $"rider-requests-ALLTIME-{DateTime.Now:yyyyMMdd-HHmm}.csv"
+                $"rider-requests-ALLTIME-{DateTime.UtcNow:yyyyMMdd-HHmm}.csv"
             );
         }
 
@@ -187,7 +188,7 @@ namespace MidStateShuttleService.Controllers
                     $"{checkIn.CheckInId}," +
                     $"{Csv(checkIn.Name)}," +
                     $"{Csv(checkIn.StudentId)}," +
-                    $"{checkIn.Date:MM/dd/yyyy h:mm tt}," +
+                    $"{DateTimeHelper.ToCentralTimeString(checkIn.Date)}," +
                     $"{BoolToYesNo(checkIn.FirstTime)}," +
                     $"{Csv(checkIn.PickUpLocation)}," +
                     $"{Csv(checkIn.DropOffLocation)}," +
@@ -198,7 +199,7 @@ namespace MidStateShuttleService.Controllers
             return File(
                 System.Text.Encoding.UTF8.GetBytes(stringBuilder.ToString()),
                 "text/csv",
-                $"checkins-ALLTIME-{DateTime.Now:yyyyMMdd-HHmm}.csv"
+                $"checkins-ALLTIME-{DateTime.UtcNow:yyyyMMdd-HHmm}.csv"
             );
         }
 
@@ -241,14 +242,14 @@ namespace MidStateShuttleService.Controllers
                     $"{Csv(mailItem.MailType.ToString())}," +
                     $"{Csv(mailItem.Notes)}," +
                     $"{Csv(mailItem.SubmittedBy)}," +
-                    $"{mailItem.SubmittedAt:MM/dd/yyyy h:mm tt}"
+                    $"{DateTimeHelper.ToCentralTimeString(mailItem.SubmittedAt)}"
                 );
             }
 
             return File(
                 System.Text.Encoding.UTF8.GetBytes(stringBuilder.ToString()),
                 "text/csv",
-                $"mail-ALLTIME-{DateTime.Now:yyyyMMdd-HHmm}.csv"
+                $"mail-ALLTIME-{DateTime.UtcNow:yyyyMMdd-HHmm}.csv"
             );
         }
 

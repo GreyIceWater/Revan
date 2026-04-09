@@ -42,7 +42,7 @@
                                 <h4 class="mb-1">@c.Name</h4>
 
                                 <div class="mb-1">
-                                    <strong>Date:</strong> @c.Date.ToString("MM/dd/yyyy hh:mm tt")
+                                    <strong>Date:</strong> @MidStateShuttleService.Helpers.DateTimeHelper.ToCentralTimeString(c.Date, "MM/dd/yyyy hh:mm tt")
                                 </div>
 
                                 <div class="mb-1">

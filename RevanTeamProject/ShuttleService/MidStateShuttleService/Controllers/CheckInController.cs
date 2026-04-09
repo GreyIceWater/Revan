@@ -52,7 +52,7 @@ namespace MidStateShuttleService.Controllers
                 return View(submittedCheckIn);
             }
 
-            submittedCheckIn.Date = DateTime.Now;
+            submittedCheckIn.Date = DateTime.UtcNow;
             submittedCheckIn.IsActive = true;
 
             _checkInService.AddEntity(submittedCheckIn);

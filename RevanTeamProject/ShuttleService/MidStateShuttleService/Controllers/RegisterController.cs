@@ -120,7 +120,7 @@ namespace MidStateShuttleService.Controllers
 
             model.TimeOptions = GetTimeSelectList();
 
-            model.InsertDateTime = DateTime.Now;
+            model.InsertDateTime = DateTime.UtcNow;
 
             // Repopulate LocationNames in case we return to the view
             model.LocationNames = ls.GetLocationNames();

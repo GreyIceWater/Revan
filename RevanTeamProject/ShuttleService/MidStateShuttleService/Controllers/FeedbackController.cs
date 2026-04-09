@@ -41,7 +41,7 @@ namespace MidStateShuttleService.Controllers
                     // Check if CustomerName is null or empty, and set it to "Anonymous" if it is.
                     feedback.CustomerName = string.IsNullOrWhiteSpace(feedback.CustomerName) ? "Anonymous" : feedback.CustomerName;
 
-                    feedback.DateSubmitted = DateTime.Now; // Set submission date to current date and time
+                    feedback.DateSubmitted = DateTime.UtcNow; // Set submission date to current date and time
                     feedback.IsActive = false;
                     _context.Add(feedback);
                     await _context.SaveChangesAsync();

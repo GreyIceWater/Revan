@@ -172,7 +172,7 @@
                                 <td>@(request.isCustom ? "Special" : "Regular")</td>
                                 <td>@(request.IsFieldTrip ? "Yes" : "No")</td>
                                 <td>@(request.IsInternalInquiry ? "Yes" : "No")</td>
-                                <td>@request.InsertDateTime?.ToString("g")</td>
+                                <td>@MidStateShuttleService.Helpers.DateTimeHelper.ToCentralTimeString(request.InsertDateTime)</td>
                                 <td>@(request.IsArchived ? "Yes" : "No")</td>
                             </tr>
                         }
@@ -210,7 +210,7 @@
                                 <td>@checkIn.CheckInId</td>
                                 <td>@checkIn.Name</td>
                                 <td>@checkIn.StudentId</td>
-                                <td>@checkIn.Date.ToString("g")</td>
+                                <td>@MidStateShuttleService.Helpers.DateTimeHelper.ToCentralTimeString(checkIn.Date)</td>
                                 <td>@(checkIn.FirstTime ? "Yes" : "No")</td>
                                 <td>@checkIn.Location?.Name</td>
                                 <td>@checkIn.DropOffLocation?.Name</td>
@@ -257,7 +257,7 @@
                                 <td>@mailItem.MailType</td>
                                 <td>@mailItem.Notes</td>
                                 <td>@mailItem.SubmittedBy</td>
-                                <td>@mailItem.SubmittedAt.ToString("g")</td>
+                                <td>@MidStateShuttleService.Helpers.DateTimeHelper.ToCentralTimeString(mailItem.SubmittedAt)</td>
                             </tr>
                         }
                     </tbody>
