@@ -213,6 +213,17 @@ namespace MidStateShuttleService.Controllers
                         isHtml: true
                     );
 
+                    //Send notification for the admin page
+
+                    Notification notif = new Notification();
+                    notif.Subject = "New Request";
+                    notif.Body = "A new request was created for " + model.Name + "!";
+                    notif.TimeSent = DateTime.Now;
+                    notif.RegistrationId = model.RegistrationId;
+
+                    new NotificationService(_context).SendNotification(notif);
+
+
                     TempData["Success"] = "Registration created successfully.";
                     return RedirectToAction("Index");
                 }
