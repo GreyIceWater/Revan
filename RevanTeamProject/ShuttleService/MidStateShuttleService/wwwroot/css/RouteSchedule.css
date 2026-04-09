@@ -1,0 +1,34 @@
+﻿.day-section:focus {
+    outline: 2px solid #8B0000;
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+.route-card:focus {
+    outline: 2px solid #8B0000;
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+.table tbody tr:focus {
+    outline: 2px solid #8B0000;
+    outline-offset: -2px;
+    background-color: rgba(139, 0, 0, 0.08);
+}
+
+/* Skip to content link for screen readers / keyboard users */
+.skip-link {
+    position: absolute;
+    top: -999px;
+    left: 0;
+    background: #8B0000;
+    color: white;
+    padding: 8px 16px;
+    z-index: 9999;
+    border-radius: 0 0 4px 0;
+    font-weight: bold;
+}
+
+    .skip-link:focus {
+        top: 0;
+    }

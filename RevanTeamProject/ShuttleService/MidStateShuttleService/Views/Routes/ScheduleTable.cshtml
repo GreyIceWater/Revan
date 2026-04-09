@@ -1,0 +1,112 @@
+﻿@model IEnumerable<MidStateShuttleService.Models.Routes>
+@{
+    ViewData["Title"] = "Route Schedule";
+}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/Form.css" />
+<link rel="stylesheet" href="/css/Input.css" />
+<link rel="stylesheet" href="/css/HelpIcon.css" />
+<link rel="stylesheet" href="/css/RouteSchedule.css" />
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<a href="#schedule-content" class="skip-link">Skip to schedule</a>
+
+<div class="form-container tiled-background-1">
+    <div class="form-paper">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 id="schedule-heading">Route Schedule</h2>
+                <p class="mb-0">View shuttle routes organized by day of the week.</p>
+            </div>
+        </div>
+
+        @{
+            var days = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+            var groupedByDay = Model
+            .GroupBy(r => r.DayOfWeek)
+            .OrderBy(g => Array.IndexOf(days, g.Key.ToString()));
+        }
+
+        <div id="schedule-content" tabindex="-1">
+
+            @if (!Model.Any())
+            {
+                <div class="form-paper p-3" role="status">
+                    <p>There are currently no routes scheduled.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var dayGroup in groupedByDay)
+                {
+                    var dayKey = dayGroup.Key.ToString().Replace(" ", "-");
+
+                    <section class="mb-4 day-section"
+                             aria-labelledby="day-@dayKey"
+                             tabindex="0">
+
+                        <h4 class="mb-3" id="day-@dayKey">
+                            <i class="bi bi-calendar-week me-2" aria-hidden="true"></i>@dayGroup.Key
+                        </h4>
+
+                        @{
+                            var groupedByPickup = dayGroup
+                            .GroupBy(r => r.PickUpLocation.Name)
+                            .OrderBy(g => g.Min(r => r.PickUpTime));
+                        }
+
+                        @foreach (var pickupGroup in groupedByPickup)
+                        {
+                            var tableId = $"table-{dayGroup.Key.ToString().Replace(" ", "-")}-{pickupGroup.Key.Replace(" ", "-")}";
+
+                            <div class="form-paper mb-3 p-0 overflow-hidden route-card"
+                                 tabindex="0"
+                                 role="region"
+                                 aria-labelledby="header-@tableId">
+
+                                <div class="px-4 py-2" style="background-color: var(--midstate-red, #8B0000); color: white;">
+                                    <strong id="header-@tableId">
+                                        <i class="bi bi-geo-alt-fill me-1" aria-hidden="true"></i>
+                                        @pickupGroup.Key
+                                    </strong>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-striped mb-0"
+                                           id="@tableId">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Shuttle Leaves</th>
+                                                <th scope="col">Shuttle Arrives</th>
+                                                <th scope="col">Final Destination</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var route in pickupGroup.OrderBy(r => r.PickUpTime))
+                                            {
+                                                var leaveTime = route.PickUpTime.HasValue ? DateTime.Today.Add(route.PickUpTime.Value).ToString("hh:mm tt") : "N/A";
+                                                var arriveTime = route.DropOffTime.HasValue ? DateTime.Today.Add(route.DropOffTime.Value).ToString("hh:mm tt") : "N/A";
+
+                                                <tr tabindex="0"
+                                                    aria-label="Leaving @leaveTime, arriving @arriveTime, Final Destination: @route.DropOffLocation.Name">
+                                                    <td>@leaveTime</td>
+                                                    <td>@arriveTime</td>
+                                                    <td>@route.DropOffLocation.Name</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        }
+
+                    </section>
+                }
+            }
+
+        </div>
+    </div>
+</div>

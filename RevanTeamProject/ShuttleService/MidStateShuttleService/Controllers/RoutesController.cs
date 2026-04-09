@@ -191,6 +191,18 @@ namespace MidStateShuttleService.Controllers
             return View("RouteTable", routes);
         }
 
+        [HttpGet]
+        public ActionResult ViewScheduleTable()
+        {
+            var routes = _context.Routes
+                .Include(r => r.PickUpLocation)
+                .Include(r => r.DropOffLocation)
+                .Where(r => r.IsActive)
+                .ToList();
+
+            return View("ScheduleTable", routes);
+        }
+
         // GET: RoutesController/Delete/5
         [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
