@@ -117,9 +117,17 @@ namespace MidStateShuttleService.Controllers
                     // Optionally, save the last message or a summary
                     HttpContext.Session.SetString("LastMessage", "You have a new message!");
 
-                    HttpContext.Session.SetString("CommunicationSuccess", "true"); // Using session to set Communication success.
+                    HttpContext.Session.SetString("CommunicationSuccess", "true");
 
                     TempData["CommunicationSuccess"] = true;
+
+                    Notification notif = new Notification();
+                    notif.Subject = "Shuttle Service Review!";
+                    notif.Body = c.name + " Sent a message!";
+                    notif.TimeSent = DateTime.Now;
+                    notif.MessageId = c.id;
+
+                    new NotificationService(_context).SendNotification(notif);
 
                     return RedirectToAction("StudentCommunicate");
                 }
@@ -172,7 +180,7 @@ namespace MidStateShuttleService.Controllers
                     return View();
                 }
 
-                return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("ViewAll");
             }
             catch (Exception ex)
             {

@@ -28,7 +28,7 @@ namespace MidStateShuttleService.Controllers
             //return View(feedbackList);
             // Fetch active feedback entries only
             var activeFeedbackList = _context.Feedbacks
-                                      .Where(f => f.IsActive)
+                                      .Where(f => f.IsActive && f.DisplayTestimonial)
                                       .OrderByDescending(f => f.DateSubmitted)
                                       .ToList();
             RouteServices rs = new RouteServices(_context);

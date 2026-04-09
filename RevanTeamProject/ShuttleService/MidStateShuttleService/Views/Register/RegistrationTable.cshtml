@@ -110,7 +110,7 @@
                                         <span> | </span>
                                     }
 
-                                    <strong>Created:</strong> @(registration.InsertDateTime.HasValue? registration.InsertDateTime.Value.ToString("MM/dd/yyyy") : "")
+                                    <strong>Created:</strong> @MidStateShuttleService.Helpers.DateTimeHelper.ToCentralTimeString(registration.InsertDateTime, "MM/dd/yyyy")
                                 </small>
                             </div>
 

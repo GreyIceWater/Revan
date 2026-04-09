@@ -116,7 +116,7 @@
                 </li>
             }
 
-            @if (User.IsInRole("Admin"))
+            @* @if (User.IsInRole("Admin"))
             {
                 <li>
                     <a asp-controller="Feedback" asp-action="ViewAll">
@@ -124,13 +124,24 @@
                         <span class="title">Testimonials</span>
                     </a>
                 </li>
+            } *@
+
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a asp-controller="Communicate" asp-action="ViewAll">
+                        <span class="icon"><i class="bi bi-chat-left-text"></i></span>
+                        <span class="title">View Messages
+                        </span>
+                    </a>
+                </li>
             }
 
-            @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
+            @if (User.IsInRole("Admin"))
             {
                 <li>
                     <a asp-controller="Communicate" asp-action="Index">
-                        <span class="icon"><i class="bi bi-chat-left-text"></i></span>
+                        <span class="icon"><i class="bi bi-send-plus"></i></span>
                         <span class="title">Send Messages</span>
                     </a>
                 </li>

@@ -120,7 +120,7 @@ namespace MidStateShuttleService.Controllers
 
             model.TimeOptions = GetTimeSelectList();
 
-            model.InsertDateTime = DateTime.Now;
+            model.InsertDateTime = DateTime.UtcNow;
 
             // Repopulate LocationNames in case we return to the view
             model.LocationNames = ls.GetLocationNames();
@@ -212,6 +212,17 @@ namespace MidStateShuttleService.Controllers
                         emailBody,
                         isHtml: true
                     );
+
+                    //Send notification for the admin page
+
+                    Notification notif = new Notification();
+                    notif.Subject = "New Request";
+                    notif.Body = "A new request was created for " + model.Name + "!";
+                    notif.TimeSent = DateTime.Now;
+                    notif.RegistrationId = model.RegistrationId;
+
+                    new NotificationService(_context).SendNotification(notif);
+
 
                     TempData["Success"] = "Registration created successfully.";
                     return RedirectToAction("Index");

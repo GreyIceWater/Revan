@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Services;
+using MidStateShuttleService.Helpers;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -35,7 +36,7 @@ namespace MidStateShuttleService.Controllers
                 // Load rider request records newest first for the Requests report.
                 allModels.Register = await _context.RegisterModels
                     .AsNoTracking()
-                    .OrderByDescending(r => r.InsertDateTime)
+                    .OrderByDescending(registerModel => registerModel.InsertDateTime)
                     .ToListAsync();
 
                 // DEV NOTE:
@@ -49,33 +50,23 @@ namespace MidStateShuttleService.Controllers
                 // Include related pickup/dropoff locations so names can be shown in the view.
                 allModels.CheckIn = await _context.CheckIns
                     .AsNoTracking()
-                    .Include(c => c.Location)
-                    .Include(c => c.DropOffLocation)
-                    .OrderByDescending(c => c.Date)
+                    .Include(checkIn => checkIn.Location)
+                    .Include(checkIn => checkIn.DropOffLocation)
+                    .OrderByDescending(checkIn => checkIn.Date)
                     .ToListAsync();
-
-                // DEV NOTE:
-                // Stored dates are UTC, so convert them to Central before displaying.
-                if (allModels.CheckIn != null)
-                {
-                    foreach (var checkIn in allModels.CheckIn)
-                        checkIn.Date = TimeService.ConvertUtcToCentral(checkIn.Date);
-                }
 
                 ViewBag.ReportType = "checkins";
             }
             else if (string.Equals(report, "mail", StringComparison.OrdinalIgnoreCase))
             {
                 // DEV NOTE:
-                // Load mail records newest first for the Mail report.
+                // Load active mail records newest first for the Mail report.
                 allModels.MailItems = await _context.MailItems
                     .AsNoTracking()
-                    .Where(m => m.IsActive)
-                    .OrderByDescending(m => m.SubmittedAt)
+                    .Where(mailItem => mailItem.IsActive)
+                    .OrderByDescending(mailItem => mailItem.SubmittedAt)
                     .ToListAsync();
 
-                // DEV NOTE:
-                // Passed to the view so it knows which report table to render.
                 ViewBag.ReportType = "mail";
             }
             else
@@ -85,11 +76,10 @@ namespace MidStateShuttleService.Controllers
                 ViewBag.ReportType = "";
             }
 
-            // IMPORTANT: this is the FULL page view
+            // IMPORTANT:
+            // This returns the full Reports page that lives under the Dashboard views folder.
             return View("~/Views/Dashboard/Reports.cshtml", allModels);
         }
-
-
 
         // ==========================================================
         // EXPORT RIDER REQUESTS (CSV) - Admin Only, ALL TIME
@@ -100,61 +90,58 @@ namespace MidStateShuttleService.Controllers
         {
             // DEV NOTE:
             // Pull only the fields needed for CSV export.
-            var rows = await _context.RegisterModels
+            var riderRequests = await _context.RegisterModels
                 .AsNoTracking()
-                .OrderByDescending(r => r.InsertDateTime)
-                .Select(r => new
+                .OrderByDescending(registerModel => registerModel.InsertDateTime)
+                .Select(registerModel => new
                 {
-                    r.RegistrationId,
-                    r.Name,
-                    r.StudentId,
-                    r.Email,
-                    r.Phone,
-                    r.IsAdult,
-                    r.isCustom,
-                    r.IsFieldTrip,
-                    r.IsInternalInquiry,
-                    r.InsertDateTime,
-                    r.IsArchived
+                    registerModel.RegistrationId,
+                    registerModel.Name,
+                    registerModel.StudentId,
+                    registerModel.Email,
+                    registerModel.Phone,
+                    registerModel.IsAdult,
+                    registerModel.isCustom,
+                    registerModel.IsFieldTrip,
+                    registerModel.IsInternalInquiry,
+                    registerModel.InsertDateTime,
+                    registerModel.IsArchived
                 })
                 .ToListAsync();
 
             // DEV NOTE:
             // Build CSV content manually with a StringBuilder.
-            var sb = new System.Text.StringBuilder();
-            sb.AppendLine("RegistrationId,Name,StudentId,Email,Phone,IsAdult,RequestType,IsFieldTrip,IsInternalInquiry,InsertDateTime,IsArchived");
+            var stringBuilder = new System.Text.StringBuilder();
+            stringBuilder.AppendLine("RegistrationId,Name,StudentId,Email,Phone,IsAdult,RequestType,IsFieldTrip,IsInternalInquiry,InsertDateTime,IsArchived");
 
-            foreach (var r in rows)
+            foreach (var riderRequest in riderRequests)
             {
                 // DEV NOTE:
                 // Csv(...) safely escapes text values that may contain commas, quotes, or line breaks.
-                sb.AppendLine(
-                    $"{r.RegistrationId}," +
-                    $"{Csv(r.Name)}," +
-                    $"{CsvExcelText(r.StudentId)}," +
-                    $"{Csv(r.Email)}," +
-                    $"{CsvExcelText(r.Phone)}," +
-                    $"{r.IsAdult}," +
-                    $"{Csv(r.isCustom ? "Special" : "Regular")}," +
-                    $"{r.IsFieldTrip}," +
-                    $"{r.IsInternalInquiry}," +
-                    $"{(r.InsertDateTime.HasValue ? r.InsertDateTime.Value.ToString("MM/dd/yyyy h:mm tt") : "")}," +
-                    $"{r.IsArchived}"
+                stringBuilder.AppendLine(
+                    $"{riderRequest.RegistrationId}," +
+                    $"{Csv(riderRequest.Name)}," +
+                    $"{CsvExcelText(riderRequest.StudentId)}," +
+                    $"{Csv(riderRequest.Email)}," +
+                    $"{CsvExcelText(riderRequest.Phone)}," +
+                    $"{BoolToYesNo(riderRequest.IsAdult)}," +
+                    $"{Csv(riderRequest.isCustom ? "Special" : "Regular")}," +
+                    $"{BoolToYesNo(riderRequest.IsFieldTrip)}," +
+                    $"{BoolToYesNo(riderRequest.IsInternalInquiry)}," +
+                    $"{DateTimeHelper.ToCentralTimeString(riderRequest.InsertDateTime)}," +
+                    $"{BoolToYesNo(riderRequest.IsArchived)}"
                 );
             }
-
-
 
             // DEV NOTE:
             // Return the CSV as a downloadable file.
             return File(
-                System.Text.Encoding.UTF8.GetBytes(sb.ToString()),
+                System.Text.Encoding.UTF8.GetBytes(stringBuilder.ToString()),
                 "text/csv",
-                $"rider-requests-ALLTIME-{DateTime.Now:yyyyMMdd-HHmm}.csv"
+                $"rider-requests-ALLTIME-{DateTime.UtcNow:yyyyMMdd-HHmm}.csv"
             );
-
-
         }
+
         // DEV NOTE:
         // Excel likes to auto-format long numeric-looking values like phone numbers
         // and student IDs into scientific notation. This forces Excel to keep them as text.
@@ -165,8 +152,6 @@ namespace MidStateShuttleService.Controllers
             return $"=\"{value}\"";
         }
 
-
-
         // ==========================================================
         // EXPORT CHECK-INS (CSV) - Admin Only, ALL TIME
         // ==========================================================
@@ -176,53 +161,47 @@ namespace MidStateShuttleService.Controllers
         {
             // DEV NOTE:
             // Pull only the fields needed for check-in CSV export.
-            var rows = await _context.CheckIns
+            var checkIns = await _context.CheckIns
                 .AsNoTracking()
-                .OrderByDescending(c => c.Date)
-                .Include(c => c.Location)
-                .Include(c => c.DropOffLocation)
-                .Select(c => new
+                .OrderByDescending(checkIn => checkIn.Date)
+                .Include(checkIn => checkIn.Location)
+                .Include(checkIn => checkIn.DropOffLocation)
+                .Select(checkIn => new
                 {
-                    c.CheckInId,
-                    c.Name,
-                    c.StudentId,
-                    c.Date,
-                    c.FirstTime,
-                    PickUpLocation = c.Location != null ? c.Location.Name : "",
-                    DropOffLocation = c.DropOffLocation != null ? c.DropOffLocation.Name : "",
-                    c.Comments
+                    checkIn.CheckInId,
+                    checkIn.Name,
+                    checkIn.StudentId,
+                    checkIn.Date,
+                    checkIn.FirstTime,
+                    PickUpLocation = checkIn.Location != null ? checkIn.Location.Name : "",
+                    DropOffLocation = checkIn.DropOffLocation != null ? checkIn.DropOffLocation.Name : "",
+                    checkIn.Comments
                 })
                 .ToListAsync();
 
-            var sb = new System.Text.StringBuilder();
-            sb.AppendLine("CheckInId,Name,StudentId,DateCentral,FirstTime,PickUpLocation,DropOffLocation,Comments");
+            var stringBuilder = new System.Text.StringBuilder();
+            stringBuilder.AppendLine("CheckInId,Name,StudentId,Date,FirstTime,PickUpLocation,DropOffLocation,Comments");
 
-            foreach (var c in rows)
+            foreach (var checkIn in checkIns)
             {
-                // DEV NOTE:
-                // Convert stored UTC time to Central before writing it to the CSV.
-                var centralTime = TimeService.ConvertUtcToCentral(c.Date);
-
-                sb.AppendLine(
-                    $"{c.CheckInId}," +
-                    $"{Csv(c.Name)}," +
-                    $"{Csv(c.StudentId)}," +
-                    $"{centralTime:MM/dd/yyyy h:mm tt}," +
-                    $"{c.FirstTime}," +
-                    $"{Csv(c.PickUpLocation)}," +
-                    $"{Csv(c.DropOffLocation)}," +
-                    $"{Csv(c.Comments)}"
+                stringBuilder.AppendLine(
+                    $"{checkIn.CheckInId}," +
+                    $"{Csv(checkIn.Name)}," +
+                    $"{Csv(checkIn.StudentId)}," +
+                    $"{DateTimeHelper.ToCentralTimeString(checkIn.Date)}," +
+                    $"{BoolToYesNo(checkIn.FirstTime)}," +
+                    $"{Csv(checkIn.PickUpLocation)}," +
+                    $"{Csv(checkIn.DropOffLocation)}," +
+                    $"{Csv(checkIn.Comments)}"
                 );
             }
 
             return File(
-                System.Text.Encoding.UTF8.GetBytes(sb.ToString()),
+                System.Text.Encoding.UTF8.GetBytes(stringBuilder.ToString()),
                 "text/csv",
-                $"checkins-ALLTIME-{DateTime.Now:yyyyMMdd-HHmm}.csv"
+                $"checkins-ALLTIME-{DateTime.UtcNow:yyyyMMdd-HHmm}.csv"
             );
         }
-
-
 
         // ==========================================================
         // EXPORT MAIL (CSV) - Admin Only, ALL TIME
@@ -233,52 +212,46 @@ namespace MidStateShuttleService.Controllers
         {
             // DEV NOTE:
             // Pull only the fields needed for mail CSV export.
-            var rows = await _context.MailItems
+            var mailItems = await _context.MailItems
                 .AsNoTracking()
-                .Where(m => m.IsActive)
-                .OrderByDescending(m => m.SubmittedAt)
-                .Select(m => new
+                .Where(mailItem => mailItem.IsActive)
+                .OrderByDescending(mailItem => mailItem.SubmittedAt)
+                .Select(mailItem => new
                 {
-                    m.MailItemId,
-                    m.SenderName,
-                    m.RecipientName,
-                    m.PickupLocation,
-                    m.DropoffLocation,
-                    m.MailType,
-                    m.TrackingNumber,
-                    m.Notes,
-                    m.SubmittedBy,
-                    m.SubmittedAt
+                    mailItem.MailItemId,
+                    mailItem.DriverName,
+                    mailItem.PickupLocation,
+                    mailItem.DropoffLocation,
+                    mailItem.MailType,
+                    mailItem.Notes,
+                    mailItem.SubmittedBy,
+                    mailItem.SubmittedAt
                 })
                 .ToListAsync();
 
-            var sb = new System.Text.StringBuilder();
-            sb.AppendLine("MailItemId,SenderName,RecipientName,PickupLocation,DropoffLocation,MailType,TrackingNumber,Notes,SubmittedBy,SubmittedAt");
+            var stringBuilder = new System.Text.StringBuilder();
+            stringBuilder.AppendLine("MailItemId,DriverName,PickupLocation,DropoffLocation,MailType,Notes,SubmittedBy,SubmittedAt");
 
-            foreach (var m in rows)
+            foreach (var mailItem in mailItems)
             {
-                sb.AppendLine(
-                    $"{m.MailItemId}," +
-                    $"{Csv(m.SenderName)}," +
-                    $"{Csv(m.RecipientName)}," +
-                    $"{Csv(m.PickupLocation)}," +
-                    $"{Csv(m.DropoffLocation)}," +
-                    $"{Csv(m.MailType)}," +
-                    $"{Csv(m.TrackingNumber)}," +
-                    $"{Csv(m.Notes)}," +
-                    $"{Csv(m.SubmittedBy)}," +
-                    $"{m.SubmittedAt:MM/dd/yyyy h:mm tt}"
+                stringBuilder.AppendLine(
+                    $"{mailItem.MailItemId}," +
+                    $"{Csv(mailItem.DriverName)}," +
+                    $"{Csv(mailItem.PickupLocation)}," +
+                    $"{Csv(mailItem.DropoffLocation)}," +
+                    $"{Csv(mailItem.MailType.ToString())}," +
+                    $"{Csv(mailItem.Notes)}," +
+                    $"{Csv(mailItem.SubmittedBy)}," +
+                    $"{DateTimeHelper.ToCentralTimeString(mailItem.SubmittedAt)}"
                 );
             }
 
             return File(
-                System.Text.Encoding.UTF8.GetBytes(sb.ToString()),
+                System.Text.Encoding.UTF8.GetBytes(stringBuilder.ToString()),
                 "text/csv",
-                $"mail-ALLTIME-{DateTime.Now:yyyyMMdd-HHmm}.csv"
+                $"mail-ALLTIME-{DateTime.UtcNow:yyyyMMdd-HHmm}.csv"
             );
         }
-
-
 
         // ==========================================================
         // CSV HELPER
@@ -304,5 +277,11 @@ namespace MidStateShuttleService.Controllers
             return mustQuote ? $"\"{value}\"" : value;
         }
 
+        // DEV NOTE:
+        // Converts bool values into user-friendly Yes/No text for reports and exports.
+        private static string BoolToYesNo(bool value)
+        {
+            return value ? "Yes" : "No";
+        }
     }
 }
