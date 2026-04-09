@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Services;
 
@@ -9,15 +10,18 @@ namespace MidStateShuttleService.Controllers
     public class MailController : Controller
     {
         private readonly MailServices _mailServices;
+        private readonly ApplicationDbContext _context;
 
-        public MailController(MailServices mailServices)
+        public MailController(MailServices mailServices, ApplicationDbContext context)
         {
             _mailServices = mailServices;
+            _context = context;
         }
 
         [HttpGet]
         public IActionResult Create()
         {
+            LoadLocations();
             return View(new MailItem());
         }
 
@@ -27,6 +31,7 @@ namespace MidStateShuttleService.Controllers
         {
             if (!ModelState.IsValid)
             {
+                LoadLocations();
                 return View(mailItem);
             }
 
@@ -45,6 +50,19 @@ namespace MidStateShuttleService.Controllers
         {
             var mailItems = _mailServices.GetAllMailItems();
             return View(mailItems);
+        }
+
+        private void LoadLocations()
+        {
+            ViewBag.Locations = _context.Locations
+                .Where(l => l.IsActive)
+                .OrderBy(l => l.Name)
+                .Select(l => new SelectListItem
+                {
+                    Value = l.Name,
+                    Text = l.Name
+                })
+                .ToList();
         }
     }
 }

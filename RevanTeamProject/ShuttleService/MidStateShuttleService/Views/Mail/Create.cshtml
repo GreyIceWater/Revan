@@ -17,7 +17,7 @@
         <section class="form-section">
             <h2>Mail Tracking</h2>
 
-            <!-- 🔴 SHOW MODEL ERRORS -->
+            <!-- SHOW MODEL ERRORS -->
             <div asp-validation-summary="All" class="text-danger"></div>
 
             @if (TempData["SuccessMessage"] != null)
@@ -31,53 +31,43 @@
                 @Html.AntiForgeryToken()
 
                 <div class="form-group">
-                    <label asp-for="SenderName">Sender Name</label>
-                    <input asp-for="SenderName"
+                    <label asp-for="DriverName">Driver Name</label>
+                    <input asp-for="DriverName"
                            class="form-control midstate-textinput"
-                           placeholder="Enter sender name" />
-                    <span asp-validation-for="SenderName" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="RecipientName">Recipient Name</label>
-                    <input asp-for="RecipientName"
-                           class="form-control midstate-textinput"
-                           placeholder="Enter recipient name" />
-                    <span asp-validation-for="RecipientName" class="text-danger"></span>
+                           placeholder="Enter driver name" />
+                    <span asp-validation-for="DriverName" class="text-danger"></span>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label asp-for="PickupLocation">Pick-Up Location</label>
-                        <input asp-for="PickupLocation"
-                               class="form-control midstate-textinput"
-                               placeholder="Enter pickup location" />
+                        <select asp-for="PickupLocation"
+                                asp-items="ViewBag.Locations"
+                                class="form-control midstate-textinput">
+                            <option value="">Select pickup location</option>
+                        </select>
                         <span asp-validation-for="PickupLocation" class="text-danger"></span>
                     </div>
 
                     <div class="form-group col-md-6">
                         <label asp-for="DropoffLocation">Drop-Off Location</label>
-                        <input asp-for="DropoffLocation"
-                               class="form-control midstate-textinput"
-                               placeholder="Enter drop-off location" />
+                        <select asp-for="DropoffLocation"
+                                asp-items="ViewBag.Locations"
+                                class="form-control midstate-textinput">
+                            <option value="">Select drop-off location</option>
+                        </select>
                         <span asp-validation-for="DropoffLocation" class="text-danger"></span>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label asp-for="MailType">Mail Type</label>
-                    <input asp-for="MailType"
-                           class="form-control midstate-textinput"
-                           placeholder="Envelope, package, interoffice mail, etc." />
+                    <select asp-for="MailType"
+                            asp-items="Html.GetEnumSelectList<MailType>()"
+                            class="form-control midstate-textinput">
+                        <option value="">Select mail type</option>
+                    </select>
                     <span asp-validation-for="MailType" class="text-danger"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="TrackingNumber">Tracking Number</label>
-                    <input asp-for="TrackingNumber"
-                           class="form-control midstate-textinput"
-                           placeholder="Enter tracking number if available" />
-                    <span asp-validation-for="TrackingNumber" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">

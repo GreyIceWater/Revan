@@ -10,11 +10,7 @@ namespace MidStateShuttleService.Models
 
         [Required]
         [StringLength(100)]
-        public string SenderName { get; set; }
-
-        [Required]
-        [StringLength(100)]
-        public string RecipientName { get; set; }
+        public string DriverName { get; set; }
 
         [Required]
         [StringLength(100)]
@@ -25,11 +21,7 @@ namespace MidStateShuttleService.Models
         public string DropoffLocation { get; set; }
 
         [Required]
-        [StringLength(100)]
-        public string MailType { get; set; }
-
-        [StringLength(250)]
-        public string? TrackingNumber { get; set; }
+        public MailType MailType { get; set; }
 
         [StringLength(500)]
         public string? Notes { get; set; }
@@ -41,5 +33,13 @@ namespace MidStateShuttleService.Models
         public string? SubmittedBy { get; set; }
 
         public bool IsActive { get; set; } = true;
+    }
+    public enum MailType
+    {
+        Envelope,
+        Package,
+        Interoffice,
+        Certified,
+        Other
     }
 }

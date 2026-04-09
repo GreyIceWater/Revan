@@ -116,7 +116,7 @@
                 </li>
             }
 
-            @if (User.IsInRole("Admin"))
+            @* @if (User.IsInRole("Admin"))
             {
                 <li>
                     <a asp-controller="Feedback" asp-action="ViewAll">
@@ -124,7 +124,7 @@
                         <span class="title">Testimonials</span>
                     </a>
                 </li>
-            }
+            } *@
 
             @if (User.IsInRole("Admin") || User.IsInRole("Driver"))
             {
