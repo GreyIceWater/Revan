@@ -137,16 +137,14 @@
                 </li>
             }
 
-            @if (User.IsInRole("Admin"))
-            {
-                <li>
-                    <a asp-controller="Communicate" asp-action="Index">
-                        <span class="icon"><i class="bi bi-send-plus"></i></span>
-                        <span class="title">Send Messages</span>
-                    </a>
-                </li>
-            }
-
+            <li>
+                <a asp-controller="Routes" asp-action="ViewScheduleTable">
+                    <span class="icon"><i class="bi bi-calendar3"></i></span>
+                    <span class="title">View Route Schedule
+                    </span>
+                </a>
+            </li>
+            
             <li>
                 <a asp-controller="Home" asp-action="Index">
                     <span class="icon"><i class="bi bi-escape"></i></span>

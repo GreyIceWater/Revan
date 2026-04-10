@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@model MidStateShuttleService.Models.Message
+
+@await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
+
+<link rel="stylesheet" href="/css/Form.css" />
+<link rel="stylesheet" href="/css/Input.css" />
+
+<div class="form-container tiled-background-1">
+    <div class="form-paper">
+        <section class="form-section">
+            <h2>Respond to Message</h2>
+
+            <!-- Original Message Info -->
+            <div class="form-group">
+                <label>From</label>
+                <p class="form-control midstate-textinput" style="background-color: #f8f8f8;">
+                    @Model.name
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <p class="form-control midstate-textinput" style="background-color: #f8f8f8;">
+                    @Model.Email
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label>Original Message</label>
+                <p class="form-control midstate-textinput"
+                   style="background-color: #f8f8f8; overflow-wrap: break-word; word-break: break-word; height: auto;">
+                    @Model.message
+                </p>
+            </div>
+
+            <!-- Response Form -->
+            <form method="post" asp-action="MessageRespond" asp-route-id="@Model.id">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.id" />
+
+                <div class="form-group">
+                    <label for="responseMessage">Your Response</label>
+                    <textarea id="responseMessage"
+                              name="responseMessage"
+                              class="form-control midstate-textinput"
+                              rows="5"
+                              maxlength="500"
+                              placeholder="Enter your response..."></textarea>
+                    <div class="text-danger"></div>
+                </div>
+
+                <div class="form-group submit-group">
+                    <button type="submit" class="btn-midstate btn-primary">
+                        <i class="bi bi-send-fill me-1"></i> Send Response
+                    </button>
+                    <button type="button"
+                            class="btn-midstate btn-secondary"
+                            onclick="location.href='../Messages'">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+
+        </section>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Response Sent</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Your response was sent successfully!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-midstate btn-primary"
+                        onclick="location.href='../Messages'">
+                    Return to Messages
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var success = '@TempData["ResponseSuccess"]';
+        if (success === 'True') {
+            $('#successModal').modal('show');
+        }
+    });
+</script>

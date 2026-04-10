@@ -21,8 +21,26 @@
         <section class="form-section">
             <h2>Send Message</h2>
 
+            @if (ViewData["RouteInfo"] != null)
+            {
+                <input type="hidden" name="routeId" value="@ViewData["RouteId"]" />
+
+                <div class="form-group">
+                    <label>Sending to route</label>
+                    <p class="form-control midstate-textinput" style="background-color: #f8f8f8;">
+                        @ViewData["RouteInfo"]
+                    </p>
+                </div>
+            }
+
             <form id="CommunicateForm" method="post" asp-action="Index">
                 @Html.AntiForgeryToken()
+
+                <!-- Pass in route id -->
+                @if (ViewData["RouteId"] != null)
+                {
+                    <input type="hidden" name="routeId" value="@ViewData["RouteId"]" />
+                }
 
                 <!-- Message -->
                 <div class="form-group">
@@ -33,42 +51,6 @@
                               rows="4"
                               placeholder="Enter message..."></textarea>
                     <div id="message-Validation-Message" class="text-danger"></div>
-                </div>
-
-                <!-- Pick-Up Location -->
-                <div class="form-group">
-                    <label asp-for="PickUpLocationID">Pick-Up Location</label>
-                    @if (Model.LocationNames != null)
-                    {
-                        @Html.DropDownListFor(
-                        model => model.PickUpLocationID,
-                                        Model.LocationNames,
-                                        "Select Pick-Up Location",
-                                        new { @class = "form-control midstate-textinput", id = "PickUpLocation" })
-                                        }
-                    else
-                    {
-                        <p>Error: Location names not loaded.</p>
-                    }
-                    <div id="PickUpLocation-Validation-Message" class="text-danger"></div>
-                </div>
-
-                <!-- Drop-Off Location -->
-                <div class="form-group">
-                    <label asp-for="DropOffLocationID">Drop-Off Location</label>
-                    @if (Model.LocationNames != null)
-                    {
-                        @Html.DropDownListFor(
-                        model => model.DropOffLocationID,
-                                        Model.LocationNames,
-                                        "Select Drop-Off Location",
-                                        new { @class = "form-control midstate-textinput", id = "DropOffLocation" })
-                                        }
-                    else
-                    {
-                        <p>Error: Location names not loaded.</p>
-                    }
-                    <div id="DropOffLocation-Validation-Message" class="text-danger"></div>
                 </div>
 
                 <!-- Route Options -->

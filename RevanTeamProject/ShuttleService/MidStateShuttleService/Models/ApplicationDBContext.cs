@@ -314,9 +314,6 @@ public partial class ApplicationDbContext : DbContext
                 .IsRequired()
                 .HasDefaultValue(false);
 
-            entity.Property(e => e.contactInfo)
-                .HasMaxLength(50);
-
             entity.Property(b => b.IsActive)
                 .HasDefaultValue(false);
         });

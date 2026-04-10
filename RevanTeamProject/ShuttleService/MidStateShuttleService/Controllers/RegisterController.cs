@@ -629,84 +629,145 @@ namespace MidStateShuttleService.Controllers
         private string BuildEmailForRegisterSubmit(int id)
         {
             var registration = _context.RegisterModels
-            .Include(r => r.DaySchedules)
-                .ThenInclude(d => d.Rides)
-                    .ThenInclude(r => r.PickUpLocation)
-            .Include(r => r.DaySchedules)
-                .ThenInclude(d => d.Rides)
-                    .ThenInclude(r => r.DropOffLocation)
-            .FirstOrDefault(r => r.RegistrationId == id);
+                .Include(r => r.DaySchedules)
+                    .ThenInclude(d => d.Rides)
+                        .ThenInclude(r => r.PickUpLocation)
+                .Include(r => r.DaySchedules)
+                    .ThenInclude(d => d.Rides)
+                        .ThenInclude(r => r.DropOffLocation)
+                .Include(r => r.DaySchedules)
+                    .ThenInclude(d => d.Rides)
+                        .ThenInclude(r => r.Route)
+                            .ThenInclude(r => r.PickUpLocation)
+                .Include(r => r.DaySchedules)
+                    .ThenInclude(d => d.Rides)
+                        .ThenInclude(r => r.Route)
+                            .ThenInclude(r => r.DropOffLocation)
+                .FirstOrDefault(r => r.RegistrationId == id);
 
             if (registration == null)
                 return "<p>Registration not found.</p>";
 
-            string isAdultText = registration.IsAdult
-                ? "The Rider is an Adult"
-                : "The Rider is NOT an Adult";
+            string isAdultText = registration.IsAdult ? "Adult Rider" : "Minor Rider";
+            string sId = string.IsNullOrEmpty(registration.StudentId) ? "N/A" : registration.StudentId;
 
-            string sId = "N/A";
-            if (registration.StudentId != "")
-            {
-                sId = registration.StudentId;
-            }
-
-            string html = $@"
-        <html>
-        <body style='font-family: Arial, sans-serif;'>
-            <h2>MSTC Shuttle Service Request Confirmation</h2>
-            <h3><strong>Student Name:</strong> {registration.Name}</h3>
-            <h3><strong>Student Id:</strong> {sId}</h3>
-            <p><strong>Email:</strong> {registration.Email}</p>
-            <p><strong>Phone:</strong> {registration.Phone}</p>
-            <p><strong>Status:</strong> {isAdultText}</p>
-            <hr/>
-            ";
+            string scheduleSections = "";
 
             if (registration.DaySchedules != null)
             {
                 foreach (var day in registration.DaySchedules)
                 {
-                    html += $"<h3>Day: {day.WeekDay}</h3>";
+                    string rideRows = "";
 
                     if (day.Rides != null && day.Rides.Any())
                     {
-                        html += @"
-                    <table border='1' cellpadding='6' cellspacing='0' style='border-collapse: collapse; margin-bottom:15px;'>
-                        <tr style='background-color:#f2f2f2;'>
-                            <th>Pick-Up</th>
-                            <th>Drop-Off</th>
-                            <th>Time</th>
-                        </tr>
-                        ";
-
                         foreach (var ride in day.Rides)
                         {
-                            html += $@"
-                        <tr>
-                            <td>{ride.PickUpLocation?.Name ?? "Unknown"}</td>
-                            <td>{ride.DropOffLocation?.Name ?? "Unknown"}</td>
-                            <td>{ride.DropOffTime}</td>
-                        </tr>
-                    ";
-                        }
+                            string dropOffTime = ride.DropOffTime.HasValue
+                                ? ride.DropOffTime.Value.ToString("hh:mm tt")
+                                : "N/A";
 
-                        html += "</table>";
+                            if (ride.Route != null)
+                            {
+                                string routeLeaveTime = ride.Route.PickUpTime.HasValue
+                                    ? DateTime.Today.Add(ride.Route.PickUpTime.Value).ToString("hh:mm tt")
+                                    : "N/A";
+                                string routeArriveTime = ride.Route.DropOffTime.HasValue
+                                    ? DateTime.Today.Add(ride.Route.DropOffTime.Value).ToString("hh:mm tt")
+                                    : "N/A";
+
+                                rideRows += $@"
+                                <tr>
+                                    <td style='padding: 10px 16px;'>{ride.Route.PickUpLocation?.Name ?? "Unknown"}</td>
+                                    <td style='padding: 10px 16px;'>{ride.Route.DropOffLocation?.Name ?? "Unknown"}</td>
+                                    <td style='padding: 10px 16px;'>{routeLeaveTime} > {routeArriveTime}</td>
+                                </tr>";
+                                                }
+                                                else
+                                                {
+                                                    rideRows += $@"
+                                <tr>
+                                    <td style='padding: 10px 16px;'>{ride.PickUpLocation?.Name ?? "Unknown"}</td>
+                                    <td style='padding: 10px 16px;'>{ride.DropOffLocation?.Name ?? "Unknown"}</td>
+                                    <td style='padding: 10px 16px;'>{dropOffTime}</td>
+                                </tr>";
+                            }
+                        }
                     }
                     else
                     {
-                        html += "<p>No rides scheduled for this day.</p>";
+                        rideRows = "<tr><td colspan='3' style='padding: 10px 16px; color:#888;'>No rides scheduled for this day.</td></tr>";
                     }
+
+                    scheduleSections += $@"
+                <h3 style='margin: 24px 0 8px; color: #8B0000;'>{day.WeekDay}</h3>
+                <table width='100%' cellpadding='0' cellspacing='0' style='border-collapse: collapse; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; margin-bottom: 16px;'>
+                    <thead>
+                        <tr style='background-color: #8B0000; color: white;'>
+                            <th style='padding: 10px 16px; text-align: left;'>Pick-Up</th>
+                            <th style='padding: 10px 16px; text-align: left;'>Drop-Off</th>
+                            <th style='padding: 10px 16px; text-align: left;'>Arrival Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rideRows}
+                    </tbody>
+                </table>";
                 }
             }
 
-            html += @"
-            <hr/>
-            <p>This request will be reviewed by the shuttle program and is not guaranteed.</p>
-        </body>
-        </html>
-            ";
+            return $@"
+<html>
+<body style='font-family: Arial, sans-serif; color: #333; max-width: 680px; margin: 0 auto; padding: 24px;'>
 
-            return html;
+    <div style='background-color: #8B0000; padding: 24px; border-radius: 6px 6px 0 0;'>
+        <h1 style='margin: 0; color: white; font-size: 20px;'>MSTC Shuttle Service</h1>
+        <p style='margin: 4px 0 0; color: #f5c0c0; font-size: 14px;'>Registration Request Confirmation</p>
+    </div>
+
+    <div style='background: #fff; border: 1px solid #ddd; border-top: none; padding: 24px; border-radius: 0 0 6px 6px;'>
+
+        <h2 style='margin: 0 0 16px; font-size: 18px;'>{registration.Name}</h2>
+
+        <table cellpadding='0' cellspacing='0' style='width: 100%; margin-bottom: 24px;'>
+            <tr>
+                <td style='padding: 6px 0; color: #888; width: 140px;'>Student ID</td>
+                <td style='padding: 6px 0;'>{sId}</td>
+            </tr>
+            <tr>
+                <td style='padding: 6px 0; color: #888;'>Email</td>
+                <td style='padding: 6px 0;'>{registration.Email}</td>
+            </tr>
+            <tr>
+                <td style='padding: 6px 0; color: #888;'>Phone</td>
+                <td style='padding: 6px 0;'>{registration.Phone}</td>
+            </tr>
+            <tr>
+                <td style='padding: 6px 0; color: #888;'>Rider Status</td>
+                <td style='padding: 6px 0;'>
+                    <span style='background-color: {(registration.IsAdult ? "#e6f4ea" : "#fff3e0")}; color: {(registration.IsAdult ? "#2e7d32" : "#e65100")}; padding: 2px 10px; border-radius: 12px; font-size: 13px;'>
+                        {isAdultText}
+                    </span>
+                </td>
+            </tr>
+        </table>
+
+        <hr style='border: none; border-top: 1px solid #eee; margin-bottom: 16px;'/>
+
+        <h3 style='margin: 0 0 12px; font-size: 16px;'>Requested Schedule</h3>
+
+        {scheduleSections}
+
+        <hr style='border: none; border-top: 1px solid #eee; margin: 24px 0 16px;'/>
+
+        <p style='margin: 0; font-size: 13px; color: #888;'>
+            This request will be reviewed by the shuttle program and is not guaranteed.
+        </p>
+
+    </div>
+
+</body>
+</html>";
         }
 
         /// <summary>

@@ -42,7 +42,7 @@
             }
             else
             {
-                @foreach (var registration in Model.OrderBy(r => r.InsertDateTime))
+                @foreach (var registration in Model.OrderBy(r => r.InsertDateTime).Where(r => !r.IsArchived))
                 {
                     <tr>
                         <td>@registration.Name</td>

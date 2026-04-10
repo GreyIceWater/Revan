@@ -74,13 +74,16 @@
                                 </div>
 
                                 <div class="table-responsive">
-                                    <table class="table table-striped mb-0"
-                                           id="@tableId">
+                                    <table class="table table-striped mb-0" id="@tableId">
                                         <thead>
                                             <tr>
                                                 <th scope="col">Shuttle Leaves</th>
                                                 <th scope="col">Shuttle Arrives</th>
                                                 <th scope="col">Final Destination</th>
+                                                @if (User.IsInRole("Admin"))
+                                                {
+                                                    <th scope="col"></th>
+                                                }
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -94,6 +97,16 @@
                                                     <td>@leaveTime</td>
                                                     <td>@arriveTime</td>
                                                     <td>@route.DropOffLocation.Name</td>
+                                                    @if (User.IsInRole("Admin"))
+                                                    {
+                                                        <td>
+                                                            <a href="/Communicate?routeId=@route.RouteID"
+                                                               class="btn-midstate btn-primary"
+                                                               style="white-space: nowrap;">
+                                                                Message Riders
+                                                            </a>
+                                                        </td>
+                                                    }
                                                 </tr>
                                             }
                                         </tbody>

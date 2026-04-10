@@ -24,8 +24,10 @@ namespace MidStateShuttleService.Models
         [DefaultValue(false)]
         public bool responseRequired { get; set; }
 
-        [StringLength(50)]
-        public string? contactInfo { get; set; }
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+        [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters.")]
+        public string Email { get; set; }
 
         public bool IsActive { get; set; }
     }

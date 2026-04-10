@@ -1,14 +1,15 @@
-﻿using System.Net;
-using System.Net.Mail;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Build.Framework;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
 using MidStateShuttleService.Services;
+using System.Net;
+using System.Net.Mail;
 
 namespace MidStateShuttleService.Controllers
 {
@@ -30,21 +31,33 @@ namespace MidStateShuttleService.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(int? routeId)
         {
             var model = new CommuncateModel();
             model.LocationNames = GetLocationNames();
+
+            if (routeId.HasValue)
+            {
+                var route = _context.Routes
+                    .Include(r => r.PickUpLocation)
+                    .Include(r => r.DropOffLocation)
+                    .FirstOrDefault(r => r.RouteID == routeId.Value);
+
+                if (route != null)
+                {
+                    ViewData["RouteId"] = route.RouteID;
+                    ViewData["RouteInfo"] = $"{route.PickUpLocation.Name} → {route.DropOffLocation.Name}";
+                }
+            }
+
             return View(model);
         }
 
-        // When the form submits, this method will play out.
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public IActionResult Index(CommuncateModel c)
+        public IActionResult Index(CommuncateModel c, int? routeId)
         {
-
             c.LocationNames = GetLocationNames();
-
             if (ModelState.IsValid)
             {
                 try
@@ -52,34 +65,24 @@ namespace MidStateShuttleService.Controllers
                     CommunicationServices cs = new CommunicationServices(_context);
                     c.IsActive = true;
                     cs.AddEntity(c);
-
                     RegisterServices rs = new RegisterServices(_context);
-
-                    var registeredStudents = rs.GetEmailsByRoute(c.SelectedRouteDetail);
-
+                    var registeredStudents = rs.GetEmailsByRoute(routeId ?? 0);
                     foreach (var student in registeredStudents)
                     {
                         _emailServices.SendEmail(student.Email, "Mid State Shuttle Service Update", c.message);
-
                     }
-
-                    HttpContext.Session.SetString("CommunicationSuccess", "true"); // Using session to set Communication success.
-
                     TempData["CommunicationSuccess"] = true;
-
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error Sending Message");
-
                     return View("Error");
                 }
             }
-
-            
             return View(c);
         }
+
         [AllowAnonymous]
         public IActionResult MessageSent()
         {
@@ -158,6 +161,42 @@ namespace MidStateShuttleService.Controllers
             var messages = new MessageServices(_context).GetAllEntities();
 
             return View("MessagesTable", messages);
+        }
+
+        public IActionResult MessageRespond(int id)
+        {
+            var message = _context.Messages.FirstOrDefault(m => m.id == id);
+            if (message == null)
+            {
+                return NotFound();
+            }
+            return View(message);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MessageRespond(int id, string responseMessage)
+        {
+            var message = _context.Messages.FirstOrDefault(m => m.id == id);
+            if (message == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                string subject = "Message reply from Mid-State Shuttle Services";
+
+                _emailServices.SendEmail(message.Email, subject, responseMessage);
+
+                TempData["Success"] = "Response sent successfully.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Failed to send response: {ex.Message}";
+                return View(message);
+            }
         }
 
         // GET: DriverController/Delete/5
