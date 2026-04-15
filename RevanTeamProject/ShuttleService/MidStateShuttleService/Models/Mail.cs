@@ -36,10 +36,10 @@ namespace MidStateShuttleService.Models
     }
     public enum MailType
     {
+        Books,
         Envelope,
         Package,
-        Interoffice,
-        Certified,
+        Bulk,
         Other
     }
 }
