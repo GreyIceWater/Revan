@@ -8,6 +8,16 @@
 
 @await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
 
+<!-- If true use the inverted version to show a difference -->
+@if ((bool?)ViewData["Archives"] == true)
+{
+    <style>
+        .tiled-background-2 {
+            background-image: url('/img/tiled_background_variant_3.png');
+        }
+    </style>
+}
+
 <div class="form-container tiled-background-2">
     <div class="form-paper">
 
@@ -35,7 +45,7 @@
             }
             else
             {
-                @foreach (var shuttle in Model.Where(shuttle => shuttle.IsActive == true).OrderBy(shuttle => shuttle.BusNo))
+                @foreach (var shuttle in Model.OrderBy(shuttle => shuttle.BusNo))
                 {
                     <div class="form-paper mb-4 p-4 position-relative shuttle-card">
 
@@ -59,12 +69,22 @@
                                         <i class="bi bi-pencil-fill me-1"></i> Update
                                     </a>
 
-                                    <a asp-controller="Shuttles"
-                                       asp-action="Delete"
-                                       asp-route-id="@shuttle.BusId"
-                                       class="btn btn-midstate btn-danger btn-sm">
-                                        <i class="bi bi-trash-fill me-1"></i> Archive
-                                    </a>
+                                    if ((bool?)ViewData["Archives"] == true)
+                                    {
+                                        <form asp-action="Unarchive" method="post">
+                                            <input type="hidden" name="id" value="@shuttle.BusId" />
+                                            <button class="btn btn-midstate btn-danger btn-sm" type="submit">Unarchive</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                       <a asp-controller="Shuttles"
+                                           asp-action="Delete"
+                                           asp-route-id="@shuttle.BusId"
+                                           class="btn btn-midstate btn-danger btn-sm">
+                                            <i class="bi bi-trash-fill me-1"></i> Archive
+                                        </a> 
+                                    }
                                 }
                             </div>
 

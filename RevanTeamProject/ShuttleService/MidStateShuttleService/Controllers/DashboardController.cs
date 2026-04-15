@@ -209,5 +209,10 @@ namespace MidStateShuttleService.Controllers
 
             return View("ReportsTable.cshtml", allModels);
         }
+
+        public ActionResult ViewArchives()
+        {
+            return View();
+        }
     }
 }

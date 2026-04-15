@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Service;
 using MidStateShuttleService.Services;
@@ -123,9 +124,15 @@ namespace MidStateShuttleService.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin,Driver")]
-        public ActionResult ViewAll()
+        public ActionResult ViewAll(bool viewArchived = false)
         {
-            var checkins = new CheckInServices(_context).GetAllEntities();
+            var checkins = _context.CheckIns
+                .Include(c => c.Location)
+                .Include(c => c.DropOffLocation)
+                .Where(c => c.IsActive == !viewArchived)
+                .ToList();
+
+            ViewData["Archives"] = viewArchived;
 
             return View("CheckInTable", checkins);
         }
@@ -162,6 +169,21 @@ namespace MidStateShuttleService.Controllers
 
                 return RedirectToAction("Index", "Dashboard");
             }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Unarchive(int id)
+        {
+            var checkin = _context.CheckIns.Find(id);
+
+            if (checkin == null)
+                return NotFound();
+
+            checkin.IsActive = true;
+            _context.SaveChanges();
+
+            return RedirectToAction("ViewAll", new { viewArchived = true });
         }
 
         [AllowAnonymous] // DEV NOTE: Shared error view for failed check-in operations.

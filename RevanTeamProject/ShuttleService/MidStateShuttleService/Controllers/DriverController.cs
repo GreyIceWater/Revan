@@ -126,11 +126,13 @@ namespace MidStateShuttleService.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public ActionResult ViewAll()
+        public ActionResult ViewAll(bool viewArchived = false)
         {
             var drivers = _context.Drivers
-            .Where(d => d.IsActive == true)
+            .Where(d => d.IsActive == !viewArchived)
             .ToList();
+
+            ViewData["Archives"] = viewArchived;
 
             return View("DriverTable", drivers);
         }
@@ -166,6 +168,21 @@ namespace MidStateShuttleService.Controllers
 
                 return RedirectToAction("Index", "Dashboard");
             }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Unarchive(int id)
+        {
+            var driver = _context.Drivers.Find(id);
+
+            if (driver == null)
+                return NotFound();
+
+            driver.IsActive = true;
+            _context.SaveChanges();
+
+            return RedirectToAction("ViewAll", new { viewArchived = true });
         }
     }
 }

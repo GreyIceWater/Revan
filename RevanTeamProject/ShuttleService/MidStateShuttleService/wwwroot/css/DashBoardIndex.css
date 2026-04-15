@@ -126,9 +126,9 @@
     padding: 0 20px 20px 20px;
 }
 
-@@media (max-width: 768px) {
+@media (max-width: 768px) {
     .dashboard-landing {
-        margin-left: 0;
+        margin-left: 0 !important;
         padding: 40px 20px;
         min-height: 100vh;
     }

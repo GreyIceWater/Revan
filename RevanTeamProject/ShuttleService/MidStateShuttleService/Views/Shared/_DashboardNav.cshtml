@@ -116,6 +116,16 @@
                 </li>
             }
 
+            @if (User.IsInRole("Admin"))
+            {
+                <li>
+                    <a asp-controller="Dashboard" asp-action="ViewArchives">
+                        <span class="icon"><i class="bi bi-archive"></i></span>
+                        <span class="title">The Archives</span>
+                    </a>
+                </li>
+            }
+
             @* @if (User.IsInRole("Admin"))
             {
                 <li>
