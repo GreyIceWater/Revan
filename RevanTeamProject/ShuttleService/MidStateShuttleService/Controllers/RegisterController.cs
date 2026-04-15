@@ -241,14 +241,16 @@ namespace MidStateShuttleService.Controllers
         /// Returns all registrations as RegisterModel entities
         /// </summary>
         [Authorize(Roles = "Admin")]
-        public IActionResult ViewAll()
+        public IActionResult ViewAll(bool viewArchived = false)
         {
             var registrations = _context.RegisterModels
                 .Include(r => r.DaySchedules)
                 .ThenInclude(d => d.Rides)
                 .ThenInclude(r => r.Route)
-                .Where(r => !r.IsArchived)
+                .Where(r => r.IsArchived == viewArchived)
                 .ToList();
+
+            ViewData["Archives"] = viewArchived;
 
             return View("RegistrationTable", registrations);
         }
@@ -546,6 +548,20 @@ namespace MidStateShuttleService.Controllers
             return Json(formattedRoutesList);
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Unarchive(int id)
+        {
+            var registration = _context.RegisterModels.Find(id);
+
+            if (registration == null)
+                return NotFound();
+
+            registration.IsArchived = false;
+            _context.SaveChanges();
+
+            return RedirectToAction("ViewAll", new { viewArchived = true });
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

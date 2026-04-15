@@ -8,6 +8,16 @@
 
 @await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
 
+<!-- If true use the inverted version to show a difference -->
+@if ((bool?)ViewData["Archives"] == true)
+{
+    <style>
+        .tiled-background-2 {
+            background-image: url('/img/tiled_background_variant_3.png');
+        }
+    </style>
+}
+
 <div class="form-container tiled-background-2">
     <div class="form-paper">
 
@@ -27,7 +37,7 @@
 
         <div id="locationsTableBody">
 
-            @if (Model == null || !Model.Any(location => location.IsActive))
+            @if (Model == null || !Model.Any())
             {
                 <div class="form-paper p-3">
                     <p>No locations currently exist.</p>
@@ -67,10 +77,26 @@
                                         <i class="bi bi-pencil-fill me-1"></i> Update
                                     </a>
 
-                                    <a asp-controller="Location" asp-action="DeleteLocation" asp-route-id="@loc.LocationId"
-                                       class="btn btn-midstate btn-sm btn-danger">
-                                        <i class="bi bi-trash-fill me-1"></i> Archive
-                                    </a>
+                                    @if ((bool?)ViewData["Archives"] == true)
+                                    {
+                                        <form asp-action="Unarchive" method="post">
+                                            <input type="hidden" name="id" value="@loc.LocationId" />
+                                            <button class="btn btn-midstate btn-danger btn-sm" type="submit">Unarchive</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-controller="Location" asp-action="DeleteLocation" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@loc.LocationId" />
+
+                                            <button type="submit" class="btn btn-midstate btn-sm btn-danger">
+                                                <i class="bi bi-trash-fill me-1"></i> Archive
+                                            </button>
+                                        </form>
+                                    }
+
+                                    
                                 </div>
                             }
 

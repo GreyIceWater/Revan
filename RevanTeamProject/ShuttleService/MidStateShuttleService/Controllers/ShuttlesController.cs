@@ -152,11 +152,13 @@ namespace MidStateShuttleService.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin,Driver")]
-        public ActionResult ViewAll()
+        public ActionResult ViewAll(bool viewArchived = false)
         {
             var shuttles = _context.Buses
-            .Where(b => b.IsActive == true)
+            .Where(b => b.IsActive == !viewArchived)
             .ToList();
+
+            ViewData["Archives"] = viewArchived;
 
             return View("ShuttleTable", shuttles);
         }
@@ -211,6 +213,21 @@ namespace MidStateShuttleService.Controllers
                 _logger.LogError(ex, "An error occurred while posting delete for shuttle {BusId}.", id);
                 return View();
             }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Unarchive(int id)
+        {
+            var shuttle = _context.Buses.Find(id);
+
+            if (shuttle == null)
+                return NotFound();
+
+            shuttle.IsActive = true;
+            _context.SaveChanges();
+
+            return RedirectToAction("ViewAll", new { viewArchived = true });
         }
 
         private void LoadDrivers()

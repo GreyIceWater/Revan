@@ -7,6 +7,16 @@
 
 @await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
 
+<!-- If true use the inverted version to show a difference -->
+@if ((bool?)ViewData["Archives"] == true)
+{
+    <style>
+        .tiled-background-2 {
+            background-image: url('/img/tiled_background_variant_3.png');
+        }
+    </style>
+}
+
 <div class="form-container tiled-background-2">
     <div class="form-paper">
 
@@ -29,58 +39,70 @@
             {
                 @foreach (var message in Model.OrderByDescending(m => m.id))
                 {
-                    if (message.IsActive)
-                    {
-                        <div class="form-paper mb-4 p-4 position-relative message-card">
 
-                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                    <div class="form-paper mb-4 p-4 position-relative message-card">
 
-                                <div class="flex-grow-1 min-width-0">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
 
-                                    <h4 class="mb-2">@message.name</h4>
+                            <div class="flex-grow-1 min-width-0">
 
-                                    <div class="mb-2">
-                                        <strong>Message:</strong>
+                                <h4 class="mb-2">@message.name</h4>
 
-                                        <span style="display: block; overflow-wrap: break-word; word-break: break-word;">@message.message</span>
+                                <div class="mb-2">
+                                    <strong>Message:</strong>
 
-                                    </div>
-
-                                    <div>
-                                        <span>
-                                            <strong>Response Required:</strong>
-                                            @(message.responseRequired ? "Yes" : "No")
-                                        </span>
-
-                                        <span> | </span>
-
-                                        <span>
-                                            <strong>Contact:</strong>
-                                            @(string.IsNullOrEmpty(message.Email) ? "N/A" : message.Email)
-                                        </span>
-                                    </div>
+                                    <span style="display: block; overflow-wrap: break-word; word-break: break-word;">@message.message</span>
 
                                 </div>
 
-                                <div class="d-flex flex-row flex-md-column gap-2 flex-shrink-0 flex-wrap">
-                                    <a asp-controller="Communicate"
-                                       asp-action="MessageRespond"
-                                       asp-route-id="@message.id"
-                                       class="btn btn-midstate btn-sm">
-                                        <i class="bi bi-reply-fill me-1"></i> Respond
-                                    </a>
-                                    <a asp-controller="Communicate"
-                                       asp-action="Delete"
-                                       asp-route-id="@message.id"
-                                       class="btn btn-midstate btn-danger btn-sm">
-                                        <i class="bi bi-check-circle-fill me-1"></i> Mark as Read
-                                    </a>
+                                <div>
+                                    <span>
+                                        <strong>Response Required:</strong>
+                                        @(message.responseRequired ? "Yes" : "No")
+                                    </span>
+
+                                    <span> | </span>
+
+                                    <span>
+                                        <strong>Contact:</strong>
+                                        @(string.IsNullOrEmpty(message.Email) ? "N/A" : message.Email)
+                                    </span>
                                 </div>
 
                             </div>
 
+                            <div class="d-flex flex-row flex-md-column gap-2 flex-shrink-0 flex-wrap">
+                                <a asp-controller="Communicate"
+                                    asp-action="MessageRespond"
+                                    asp-route-id="@message.id"
+                                    class="btn btn-midstate btn-sm">
+                                    <i class="bi bi-reply-fill me-1"></i> Respond
+                                </a>
+
+                                @if ((bool?)ViewData["Archives"] == true)
+                                {
+                                    <form asp-action="Unarchive" method="post">
+                                        <input type="hidden" name="id" value="@message.id" />
+                                        <button class="btn btn-midstate btn-danger btn-sm" type="submit">Unarchive</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Communicate"
+                                        asp-action="Delete"
+                                        asp-route-id="@message.id"
+                                        class="btn btn-midstate btn-danger btn-sm">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Mark as Read
+                                    </a>
+                                }
+
+                                    
+                            </div>
+
                         </div>
-                    }
+
+                    </div>
+                    
                 }
             }
 

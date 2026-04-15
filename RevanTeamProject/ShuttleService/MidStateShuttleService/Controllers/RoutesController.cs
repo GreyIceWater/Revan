@@ -181,13 +181,15 @@ namespace MidStateShuttleService.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin,Driver")]
-        public ActionResult ViewAll()
+        public ActionResult ViewAll(bool viewArchived = false)
         {
             var routes = _context.Routes
                 .Include(r => r.PickUpLocation)
                 .Include(r => r.DropOffLocation)
-                .Where(r => r.IsActive)
+                .Where(r => r.IsActive == !viewArchived)
                 .ToList();
+
+            ViewData["Archives"] = viewArchived;
 
             return View("RouteTable", routes);
         }
@@ -274,6 +276,21 @@ namespace MidStateShuttleService.Controllers
             {
                 return View();
             }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Unarchive(int id)
+        {
+            var route = _context.Routes.Find(id);
+
+            if (route == null)
+                return NotFound();
+
+            route.IsActive = true;
+            _context.SaveChanges();
+
+            return RedirectToAction("ViewAll", new { viewArchived = true });
         }
 
         [HttpGet]

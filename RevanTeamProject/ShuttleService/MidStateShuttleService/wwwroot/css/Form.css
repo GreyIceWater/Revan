@@ -87,3 +87,11 @@
     background-position: top left;
     background-attachment: fixed;
 }
+
+.tiled-background-3 {
+    background-image: url('/img/tiled_background_variant_3.png');
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    background-position: top left;
+    background-attachment: fixed;
+}

@@ -8,6 +8,16 @@
 
 @await Html.PartialAsync("~/Views/Shared/_DashboardNav.cshtml")
 
+<!-- If true use the inverted version to show a difference -->
+@if ((bool?)ViewData["Archives"] == true)
+{
+    <style>
+        .tiled-background-2 {
+            background-image: url('/img/tiled_background_variant_3.png');
+        }
+    </style>
+}
+
 <div class="form-container tiled-background-2">
     <div class="form-paper">
 
@@ -59,14 +69,26 @@
                                         <i class="bi bi-pencil-fill me-1"></i> Update
                                     </a>
 
-                                    <form asp-controller="Driver" asp-action="Delete" method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@d.DriverId" />
-                                        <button type="submit" class="btn btn-midstate btn-danger btn-sm"
-                                                onclick="return confirm('Are you sure you want to archive this check-in?');">
-                                            <i class="bi bi-trash-fill me-1"></i>Archive
-                                        </button>
-                                    </form>
+                                    if ((bool?)ViewData["Archives"] == true)
+                                    {
+                                        <form asp-action="Unarchive" method="post">
+                                            <input type="hidden" name="id" value="@d.DriverId" />
+                                            <button class="btn btn-midstate btn-danger btn-sm" type="submit">Unarchive</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-controller="Driver" asp-action="Delete" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@d.DriverId" />
+                                            <button type="submit" class="btn btn-midstate btn-danger btn-sm"
+                                                    onclick="return confirm('Are you sure you want to archive this check-in?');">
+                                                <i class="bi bi-trash-fill me-1"></i>Archive
+                                            </button>
+                                        </form>
+                                    }
+
+                                    
                                 }
                             </div>
                         </div>

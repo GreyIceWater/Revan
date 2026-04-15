@@ -156,9 +156,11 @@ namespace MidStateShuttleService.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public ActionResult ViewAll()
+        public ActionResult ViewAll(bool viewArchived = false)
         {
-            var messages = new MessageServices(_context).GetAllEntities();
+            var messages = _context.Messages.Where(m => m.IsActive == !viewArchived);
+
+            ViewData["Archives"] = viewArchived;
 
             return View("MessagesTable", messages);
         }
@@ -233,6 +235,21 @@ namespace MidStateShuttleService.Controllers
                 // Return the view with an error message
                 return View();
             }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Unarchive(int id)
+        {
+            var message = _context.Messages.Find(id);
+
+            if (message == null)
+                return NotFound();
+
+            message.IsActive = true;
+            _context.SaveChanges();
+
+            return RedirectToAction("ViewAll", new { viewArchived = true });
         }
     }
 }

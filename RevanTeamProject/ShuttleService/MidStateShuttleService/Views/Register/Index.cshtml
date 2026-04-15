@@ -19,7 +19,9 @@
            
             <!-- Main Form -->
             <section class="form-section main-form">
-                <h2>Request a Ride</h2>
+                <h2>Thank you for choosing the Shuttle!</h2>
+                <h5>Please complete the form below to request transportation from the shuttle.</h5>
+                <h5>Don’t see what you are looking for? See information on Special Requests at the bottom of this form.</h5>
 
                 @using (Html.BeginForm("Register", "Register", FormMethod.Post, new { id = "registrationForm" }))
                 {
@@ -105,7 +107,7 @@
                         <div class="checkbox-midstate">
                             <input asp-for="IsAdult" type="checkbox" id="IsAdult" name="IsAdult" value="true" />
                             <label for="IsAdult">
-                                Are you older than the age of 18?
+                                Are you 18 or older?
                             </label>
                         </div>
                     </div>
@@ -134,10 +136,13 @@
                 <h5>Need to Schedule a Special Ride?</h5>
                 <p>Please submit a <strong>Special Request</strong> if:</p>
                 <ul>
-                    <li>Your ride is during the <strong>summer term</strong></li>
                     <li>Your ride is on a <strong>Friday</strong></li>
                     <li>You only need to ride once</li>
-                    <li>All <strong>center</strong> rides are considered a special request</li>
+                    <li>You need to ride during Winterim, spring break, or the summer term.</li>
+                    <li>You need to go to another location for class.</li>
+                    <li>You are a Mid-State Employee</li>
+                    <li>All <strong>center</strong> rides are considered a special request. (AMETA, Simulation Center, ect.)</li>
+                    <li>You need a ride to/from the dorms.</li>
                 </ul>
                 <a class="btn-midstate btn-primary"
                    asp-area=""
