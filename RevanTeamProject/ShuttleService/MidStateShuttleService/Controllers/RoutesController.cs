@@ -370,12 +370,7 @@ namespace MidStateShuttleService.Controllers
             if (time == null)
                 return "";
 
-            var utcDateTime = DateTime.SpecifyKind(
-                DateTime.Today.Add(time.Value),
-                DateTimeKind.Utc
-            );
-
-            return DateTimeHelper.ToCentralTimeString(utcDateTime, "h:mm tt");
+            return DateTime.Today.Add(time.Value).ToString("h:mm tt");
         }
 
         // Helper method used by Create/Edit views to populate dropdown lists
