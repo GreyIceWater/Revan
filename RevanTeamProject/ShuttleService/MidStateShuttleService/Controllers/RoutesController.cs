@@ -28,17 +28,21 @@ namespace MidStateShuttleService.Controllers
             _context = context;
             _logger = logger;
             _environment = environment;
+
+            _logger.LogInformation("RoutesController initialized.");
         }
 
         // GET: RoutesController
         public ActionResult Index()
         {
+            _logger.LogInformation("Routes Index action called.");
             return View();
         }
 
         // GET: RoutesController/Details/5
         public ActionResult Details(int id)
         {
+            _logger.LogInformation("Routes Details action called for RouteId: {RouteId}", id);
             return View();
         }
 
@@ -46,6 +50,7 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Create()
         {
+            _logger.LogInformation("Routes Create GET action called.");
             LoadRouteDropdowns();
             return View();
         }
@@ -56,8 +61,11 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Create(Routes route)
         {
+            _logger.LogInformation("Routes Create POST action called.");
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Routes Create POST failed ModelState validation.");
                 LoadRouteDropdowns();
                 return View(route);
             }
@@ -67,6 +75,8 @@ namespace MidStateShuttleService.Controllers
                 RouteServices rs = new RouteServices(_context);
                 route.IsActive = true;
                 rs.AddEntity(route);
+
+                _logger.LogInformation("Route created successfully.");
 
                 HttpContext.Session.SetString("RouteSuccess", "true");
                 TempData["RouteSuccess"] = true;
@@ -86,6 +96,8 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult CreateFromRide(int rideId)
         {
+            _logger.LogInformation("CreateFromRide action called for RideId: {RideId}", rideId);
+
             Ride ride = _context.Rides.Where(r => r.RideId == rideId).FirstOrDefault();
             RequestDay rDay = _context.RequestDays.Where(d => d.RequestDayId == ride.RequestDayId).FirstOrDefault();
 
@@ -94,6 +106,7 @@ namespace MidStateShuttleService.Controllers
             //fallback incase of null
             if (ride == null)
             {
+                _logger.LogWarning("CreateFromRide could not find RideId: {RideId}", rideId);
                 RedirectToAction(nameof(Create));
             }
 
@@ -111,6 +124,8 @@ namespace MidStateShuttleService.Controllers
                 RouteServices rs = new RouteServices(_context);
                 route.IsActive = true;
                 rs.AddEntity(route);
+
+                _logger.LogInformation("Route created successfully from RideId: {RideId}", rideId);
 
                 HttpContext.Session.SetString("RouteSuccess", "true");
                 TempData["RouteSuccess"] = true;
@@ -131,10 +146,13 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id)
         {
+            _logger.LogInformation("Routes Edit GET action called for RouteId: {RouteId}", id);
+
             var route = _context.Routes.Find(id);
 
             if (route == null)
             {
+                _logger.LogWarning("Routes Edit GET could not find RouteId: {RouteId}", id);
                 return NotFound();
             }
 
@@ -148,13 +166,17 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id, Routes updatedRoute)
         {
+            _logger.LogInformation("Routes Edit POST action called for RouteId: {RouteId}", id);
+
             if (id != updatedRoute.RouteID)
             {
+                _logger.LogWarning("Routes Edit POST received mismatched RouteId. UrlId: {UrlId}, ModelId: {ModelId}", id, updatedRoute.RouteID);
                 return BadRequest();
             }
 
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Routes Edit POST failed ModelState validation for RouteId: {RouteId}", id);
                 LoadRouteDropdowns();
                 return View(updatedRoute);
             }
@@ -164,6 +186,8 @@ namespace MidStateShuttleService.Controllers
                 updatedRoute.IsActive = true;
                 _context.Update(updatedRoute);
                 _context.SaveChanges();
+
+                _logger.LogInformation("Route updated successfully for RouteId: {RouteId}", updatedRoute.RouteID);
 
                 HttpContext.Session.SetString("RouteSuccess", "true");
                 TempData["RouteSuccess"] = true;
@@ -183,6 +207,8 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin,Driver")]
         public ActionResult ViewAll(bool viewArchived = false)
         {
+            _logger.LogInformation("Routes ViewAll action called. ViewArchived: {ViewArchived}", viewArchived);
+
             var routes = _context.Routes
                 .Include(r => r.PickUpLocation)
                 .Include(r => r.DropOffLocation)
@@ -191,18 +217,22 @@ namespace MidStateShuttleService.Controllers
 
             ViewData["Archives"] = viewArchived;
 
+            _logger.LogInformation("Routes ViewAll returning {RouteCount} routes.", routes.Count);
             return View("RouteTable", routes);
         }
 
         [HttpGet]
         public ActionResult ViewScheduleTable()
         {
+            _logger.LogInformation("Routes ViewScheduleTable action called.");
+
             var routes = _context.Routes
                 .Include(r => r.PickUpLocation)
                 .Include(r => r.DropOffLocation)
                 .Where(r => r.IsActive)
                 .ToList();
 
+            _logger.LogInformation("Routes ViewScheduleTable returning {RouteCount} routes.", routes.Count);
             return View("ScheduleTable", routes);
         }
 
@@ -210,6 +240,8 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id)
         {
+            _logger.LogInformation("Routes Delete GET action called for RouteId: {RouteId}", id);
+
             try
             {
                 var route = _context.Routes.Find(id);
@@ -218,10 +250,13 @@ namespace MidStateShuttleService.Controllers
                 {
                     route.IsActive = !route.IsActive; // Toggle IsActive from true to false or false to true
                     _context.SaveChanges();
+
+                    _logger.LogInformation("Route IsActive toggled successfully for RouteId: {RouteId}", id);
                 }
                 else
                 {
                     // Handle the case where the route with the specified id is not found
+                    _logger.LogWarning("Routes Delete GET could not find RouteId: {RouteId}", id);
                     ModelState.AddModelError("", "Route not found.");
                     return View();
                 }
@@ -250,12 +285,15 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Delete(int id, IFormCollection collection)
         {
+            _logger.LogInformation("Routes Delete POST action called for RouteId: {RouteId}", id);
+
             try
             {
                 var route = _context.Routes.Find(id);
 
                 if (route == null)
                 {
+                    _logger.LogWarning("Routes Delete POST could not find RouteId: {RouteId}", id);
                     TempData["ErrorMessage"] = "Route not found.";
                     return RedirectToAction("ViewAll");
                 }
@@ -263,6 +301,7 @@ namespace MidStateShuttleService.Controllers
                 route.IsActive = !route.IsActive;
                 _context.SaveChanges();
 
+                _logger.LogInformation("Route IsActive toggled successfully for RouteId: {RouteId}", id);
                 return RedirectToAction("ViewAll");
             }
             catch (Exception ex)
@@ -274,6 +313,7 @@ namespace MidStateShuttleService.Controllers
             }
             catch
             {
+                _logger.LogError("An unknown error occurred in Routes Delete POST for RouteId: {RouteId}", id);
                 return View();
             }
         }
@@ -282,20 +322,28 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult Unarchive(int id)
         {
+            _logger.LogInformation("Routes Unarchive action called for RouteId: {RouteId}", id);
+
             var route = _context.Routes.Find(id);
 
             if (route == null)
+            {
+                _logger.LogWarning("Routes Unarchive could not find RouteId: {RouteId}", id);
                 return NotFound();
+            }
 
             route.IsActive = true;
             _context.SaveChanges();
 
+            _logger.LogInformation("Route unarchived successfully for RouteId: {RouteId}", id);
             return RedirectToAction("ViewAll", new { viewArchived = true });
         }
 
         [HttpGet]
         public async Task<IActionResult> GetRoutes(int pickupId, int dropoffId, int dayOfWeek)
         {
+            _logger.LogInformation("Routes GetRoutes action called. PickupId: {PickupId}, DropoffId: {DropoffId}, DayOfWeek: {DayOfWeek}", pickupId, dropoffId, dayOfWeek);
+
             WeekDay weekDay = (WeekDay)dayOfWeek;
 
             var routes = await _context.Routes
@@ -313,6 +361,7 @@ namespace MidStateShuttleService.Controllers
                 dropoffTime = FormatTime(r.DropOffTime)
             });
 
+            _logger.LogInformation("Routes GetRoutes returning matching routes.");
             return Json(result);
         }
 
@@ -332,6 +381,8 @@ namespace MidStateShuttleService.Controllers
         // Helper method used by Create/Edit views to populate dropdown lists
         private void LoadRouteDropdowns()
         {
+            _logger.LogInformation("LoadRouteDropdowns called.");
+
             // Load all ACTIVE locations for the pickup/drop-off dropdowns
             LocationServices ls = new LocationServices(_context);
             ViewBag.Locations = ls.GetAllEntities()
@@ -359,6 +410,8 @@ namespace MidStateShuttleService.Controllers
                     Text = "Shuttle: " + bus.BusNo,     // Label shown in dropdown
                     Value = bus.BusId.ToString()        // Bus ID submitted
                 });
+
+            _logger.LogInformation("LoadRouteDropdowns completed.");
         }
     }
 }

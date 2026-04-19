@@ -22,6 +22,7 @@ namespace MidStateShuttleService.Controllers
         // GET: LocationController
         public ActionResult Index()
         {
+            _logger.LogInformation("Location Index accessed.");
             return View();
         }
 
@@ -30,6 +31,7 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public ActionResult Create()
         {
+            _logger.LogInformation("Location Create page accessed.");
             return View();
         }
 
@@ -39,8 +41,11 @@ namespace MidStateShuttleService.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(Location location)
         {
+            _logger.LogInformation("Location Create POST received for Name: {LocationName}", location?.Name);
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Location Create failed validation for Name: {LocationName}", location?.Name);
                 return View(location);
             }
 
@@ -53,6 +58,8 @@ namespace MidStateShuttleService.Controllers
                 location.IsActive = true;
 
                 locationServices.AddEntity(location);
+
+                _logger.LogInformation("Location created successfully for LocationId: {LocationId}", location.LocationId);
 
                 TempData["SuccessMessage"] = "The location has been successfully created!";
                 HttpContext.Session.SetString("LocationSuccess", "true");
@@ -78,13 +85,18 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public ActionResult Edit(int id)
         {
+            _logger.LogInformation("Location Edit GET requested for LocationId: {LocationId}", id);
+
             try
             {
                 LocationServices locationServices = new LocationServices(_context);
                 Location location = locationServices.GetEntityById(id);
 
                 if (location == null)
+                {
+                    _logger.LogWarning("Location Edit GET failed. Location not found for LocationId: {LocationId}", id);
                     return FailedLocation("Location Not Found");
+                }
 
                 return View(location);
             }
@@ -101,11 +113,19 @@ namespace MidStateShuttleService.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(Location model)
         {
+            _logger.LogInformation("Location Edit POST received for LocationId: {LocationId}", model?.LocationId);
+
             if (model == null)
+            {
+                _logger.LogWarning("Location Edit POST failed. Model was null.");
                 return FailedLocation("Updates to location could not be applied");
+            }
 
             if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Location Edit POST failed validation for LocationId: {LocationId}", model.LocationId);
                 return View(model);
+            }
 
             try
             {
@@ -113,7 +133,10 @@ namespace MidStateShuttleService.Controllers
                 Location existingLocation = locationServices.GetEntityById(model.LocationId);
 
                 if (existingLocation == null)
+                {
+                    _logger.LogWarning("Location Edit POST failed. Location not found for LocationId: {LocationId}", model.LocationId);
                     return FailedLocation("Location Not Found");
+                }
 
                 // DEV NOTE:
                 // Update only editable fields.
@@ -126,6 +149,8 @@ namespace MidStateShuttleService.Controllers
                 existingLocation.Abbreviation = model.Abbreviation;
 
                 locationServices.UpdateEntity(existingLocation);
+
+                _logger.LogInformation("Location updated successfully for LocationId: {LocationId}", existingLocation.LocationId);
 
                 HttpContext.Session.SetString("LocationSuccess", "true");
                 TempData["LocationSuccess"] = true;
@@ -143,9 +168,13 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin,Driver")]
         public ActionResult ViewAll(bool viewArchived = false)
         {
+            _logger.LogInformation("Location ViewAll requested. ViewArchived: {ViewArchived}", viewArchived);
+
             var locations = _context.Locations
             .Where(l => l.IsActive == !viewArchived)
             .ToList();
+
+            _logger.LogInformation("Location ViewAll returned {LocationCount} records.", locations.Count);
 
             ViewData["Archives"] = viewArchived;
 
@@ -158,18 +187,25 @@ namespace MidStateShuttleService.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteLocation(int id)
         {
+            _logger.LogInformation("Location Delete toggle requested for LocationId: {LocationId}", id);
+
             try
             {
                 LocationServices locationServices = new LocationServices(_context);
                 Location location = locationServices.GetEntityById(id);
 
                 if (location == null)
+                {
+                    _logger.LogWarning("Location Delete failed. Location not found for LocationId: {LocationId}", id);
                     return FailedLocation("Location Not Found");
+                }
 
                 // DEV NOTE:
                 // Soft delete only. Toggle active state instead of removing the row.
                 location.IsActive = !location.IsActive;
                 locationServices.UpdateEntity(location);
+
+                _logger.LogInformation("Location IsActive toggled successfully for LocationId: {LocationId}. New IsActive: {IsActive}", id, location.IsActive);
 
                 return RedirectToAction("ViewAll");
                 return RedirectToAction("Index", "Dashboard");
@@ -187,6 +223,7 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public ActionResult Delete(int id)
         {
+            _logger.LogInformation("Legacy Delete view accessed for LocationId: {LocationId}", id);
             return View();
         }
 
@@ -194,19 +231,28 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult Unarchive(int id)
         {
+            _logger.LogInformation("Location Unarchive requested for LocationId: {LocationId}", id);
+
             var location = _context.Locations.Find(id);
 
             if (location == null)
+            {
+                _logger.LogWarning("Location Unarchive failed. Location not found for LocationId: {LocationId}", id);
                 return NotFound();
+            }
 
             location.IsActive = true;
             _context.SaveChanges();
+
+            _logger.LogInformation("Location unarchived successfully for LocationId: {LocationId}", id);
 
             return RedirectToAction("ViewAll", new { viewArchived = true });
         }
 
         public ActionResult FailedLocation(string errorMessage)
         {
+            _logger.LogWarning("FailedLocation triggered with message: {ErrorMessage}", errorMessage);
+
             ViewBag.ErrorMessage = errorMessage;
             return View("FailedLocation");
         }

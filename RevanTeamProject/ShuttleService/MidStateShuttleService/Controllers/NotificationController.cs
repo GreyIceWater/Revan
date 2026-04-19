@@ -28,8 +28,13 @@ namespace MidStateShuttleService.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Notification notification)
         {
+            _logger.LogInformation("Notification Create POST received.");
+
             if (notification == null)
+            {
+                _logger.LogWarning("Notification Create failed because notification was null.");
                 return BadRequest("Notification is null");
+            }
 
             try
             {
@@ -38,6 +43,8 @@ namespace MidStateShuttleService.Controllers
 
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Notification created successfully with Id: {NotificationId}", notification.Id);
 
                 return Ok(notification);
             }
@@ -55,10 +62,15 @@ namespace MidStateShuttleService.Controllers
         [HttpPost]
         public async Task<IActionResult> Archive(int id)
         {
+            _logger.LogInformation("Notification Archive requested for Id: {NotificationId}", id);
+
             var notification = await _context.Notifications.FindAsync(id);
 
             if (notification == null)
+            {
+                _logger.LogWarning("Notification Archive failed. Notification not found for Id: {NotificationId}", id);
                 return RedirectToAction("Index", "Dashboard");
+            }
 
             try
             {
@@ -66,6 +78,8 @@ namespace MidStateShuttleService.Controllers
 
                 _context.Notifications.Update(notification);
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Notification archived successfully for Id: {NotificationId}", id);
 
                 return RedirectToAction("Index", "Dashboard");
             }
@@ -78,24 +92,41 @@ namespace MidStateShuttleService.Controllers
 
         public IActionResult ViewNotificationContents(int id)
         {
+            _logger.LogInformation("ViewNotificationContents requested for Id: {NotificationId}", id);
+
             var notification = _context.Notifications
                 .FirstOrDefault(n => n.Id == id);
 
             if (notification == null)
+            {
+                _logger.LogWarning("ViewNotificationContents failed. Notification not found for Id: {NotificationId}", id);
                 return RedirectToAction("Index", "Dashboard");
+            }
 
             if (notification.FeedbackId.HasValue && notification.FeedbackId.Value != 0)
+            {
+                _logger.LogInformation("Notification {NotificationId} redirected to Feedback ViewAll.", id);
                 return RedirectToAction("ViewAll", "Feedback");
+            }
 
             if (notification.MessageId.HasValue && notification.MessageId.Value != 0)
+            {
+                _logger.LogInformation("Notification {NotificationId} redirected to Communicate ViewAll.", id);
                 return RedirectToAction("ViewAll", "Communicate");
+            }
 
             if (notification.RegistrationId.HasValue && notification.RegistrationId.Value != 0)
+            {
+                _logger.LogInformation("Notification {NotificationId} redirected to Register Details for RegistrationId: {RegistrationId}", id, notification.RegistrationId);
+
                 return RedirectToAction(
                     "Details",
                     "Register",
                     new { registrationId = notification.RegistrationId }
                 );
+            }
+
+            _logger.LogInformation("Notification {NotificationId} had no linked entity. Redirecting to Dashboard Index.", id);
 
             return RedirectToAction("Index", "Dashboard");
         }

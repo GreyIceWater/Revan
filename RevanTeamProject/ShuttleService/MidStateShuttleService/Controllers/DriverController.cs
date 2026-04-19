@@ -29,6 +29,7 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public IActionResult Index()
         {
+            _logger.LogInformation("Driver index page accessed.");
             return View();
         }
 
@@ -36,10 +37,15 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public IActionResult Details(int id)
         {
+            _logger.LogInformation("Driver details requested for DriverId: {DriverId}", id);
+
             Driver existingDriver = _driverService.GetEntityById(id);
 
             if (existingDriver == null)
+            {
+                _logger.LogWarning("Driver details request failed. Driver not found for DriverId: {DriverId}", id);
                 return NotFound();
+            }
 
             return View(existingDriver);
         }
@@ -48,6 +54,7 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            _logger.LogInformation("Driver create page accessed.");
             return View();
         }
 
@@ -56,13 +63,20 @@ namespace MidStateShuttleService.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Driver submittedDriver)
         {
+            _logger.LogInformation("Driver create submitted for Name: {DriverName}", submittedDriver?.Name);
+
             if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Driver create failed validation for Name: {DriverName}", submittedDriver?.Name);
                 return View(submittedDriver);
+            }
 
             try
             {
                 submittedDriver.IsActive = true;
                 _driverService.AddEntity(submittedDriver);
+
+                _logger.LogInformation("Driver created successfully for DriverId: {DriverId}", submittedDriver.DriverId);
 
                 TempData["SuccessMessage"] = "The driver has been successfully created!";
                 HttpContext.Session.SetString("DriverSuccess", "true");
@@ -84,10 +98,15 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
+            _logger.LogInformation("Driver edit page requested for DriverId: {DriverId}", id);
+
             Driver existingDriver = _driverService.GetEntityById(id);
 
             if (existingDriver == null)
+            {
+                _logger.LogWarning("Driver edit page failed. Driver not found for DriverId: {DriverId}", id);
                 return NotFound();
+            }
 
             return View(existingDriver);
         }
@@ -97,16 +116,26 @@ namespace MidStateShuttleService.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Driver submittedDriver)
         {
+            _logger.LogInformation("Driver edit submitted for DriverId: {DriverId}", id);
+
             if (id != submittedDriver.DriverId)
+            {
+                _logger.LogWarning("Driver edit failed due to id mismatch. Route id: {RouteId}, Model id: {ModelId}", id, submittedDriver.DriverId);
                 return BadRequest();
+            }
 
             if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Driver edit failed validation for DriverId: {DriverId}", submittedDriver.DriverId);
                 return View(submittedDriver);
+            }
 
             try
             {
                 submittedDriver.IsActive = true;
                 _driverService.UpdateEntity(submittedDriver);
+
+                _logger.LogInformation("Driver updated successfully for DriverId: {DriverId}", submittedDriver.DriverId);
 
                 TempData["SuccessMessage"] = "The driver has been successfully updated!";
                 HttpContext.Session.SetString("DriverSuccess", "true");
@@ -128,11 +157,15 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult ViewAll(bool viewArchived = false)
         {
+            _logger.LogInformation("Driver ViewAll requested. ViewArchived: {ViewArchived}", viewArchived);
+
             var drivers = _context.Drivers
             .Where(d => d.IsActive == !viewArchived)
             .ToList();
 
             ViewData["Archives"] = viewArchived;
+
+            _logger.LogInformation("Driver ViewAll returned {DriverCount} records.", drivers.Count);
 
             return View("DriverTable", drivers);
         }
@@ -142,18 +175,23 @@ namespace MidStateShuttleService.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
+            _logger.LogInformation("Driver delete toggle requested for DriverId: {DriverId}", id);
+
             try
             {
                 Driver existingDriver = _driverService.GetEntityById(id);
 
                 if (existingDriver == null)
                 {
+                    _logger.LogWarning("Driver delete toggle failed. Driver not found for DriverId: {DriverId}", id);
                     TempData["ErrorMessage"] = "Driver not found.";
                     return RedirectToAction("Index", "Dashboard");
                 }
 
                 existingDriver.IsActive = !existingDriver.IsActive;
                 _driverService.UpdateEntity(existingDriver);
+
+                _logger.LogInformation("Driver IsActive toggled successfully for DriverId: {DriverId}. New IsActive: {IsActive}", id, existingDriver.IsActive);
 
                 return RedirectToAction("ViewAll");
                 return RedirectToAction("Index", "Dashboard");
@@ -174,13 +212,20 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult Unarchive(int id)
         {
+            _logger.LogInformation("Driver unarchive requested for DriverId: {DriverId}", id);
+
             var driver = _context.Drivers.Find(id);
 
             if (driver == null)
+            {
+                _logger.LogWarning("Driver unarchive failed. Driver not found for DriverId: {DriverId}", id);
                 return NotFound();
+            }
 
             driver.IsActive = true;
             _context.SaveChanges();
+
+            _logger.LogInformation("Driver unarchived successfully for DriverId: {DriverId}", id);
 
             return RedirectToAction("ViewAll", new { viewArchived = true });
         }

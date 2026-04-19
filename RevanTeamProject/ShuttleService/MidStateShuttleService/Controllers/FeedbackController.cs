@@ -21,11 +21,16 @@ namespace MidStateShuttleService.Controllers
         [AllowAnonymous]
         public IActionResult Index()
         {
+            _logger.LogInformation("Feedback Index accessed.");
+
             // Fetch all feedback entries and order them by DateSubmitted in descending order
             var feedbackList = _context.Feedbacks
                 .Where(feedback => feedback.IsActive)
                 .OrderByDescending(feedback => feedback.DateSubmitted)
                 .ToList();
+
+            _logger.LogInformation($"Feedback Index returning {feedbackList.Count} active testimonials.");
+
             return View(feedbackList);
         }
 
@@ -35,6 +40,8 @@ namespace MidStateShuttleService.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Create([Bind("Comment,CustomerName,Rating")] Feedback feedback)
         {
+            _logger.LogInformation($"Feedback Create POST received. CustomerName: {feedback?.CustomerName}, Rating: {feedback?.Rating}");
+
             if (ModelState.IsValid)
             {
                 try
@@ -58,6 +65,8 @@ namespace MidStateShuttleService.Controllers
 
                     new NotificationService(_context).SendNotification(notif);
 
+                    _logger.LogInformation($"Notification sent for FeedbackId: {feedback.FeedbackId}");
+
                     TempData["FeedbackSuccess"] = "True"; // Use TempData to signal that feedback was successful
                     return RedirectToAction("Index", "Home"); // Redirect back to the form page to show the success modal
                 }
@@ -69,6 +78,8 @@ namespace MidStateShuttleService.Controllers
             }
             else
             {
+                _logger.LogWarning("Feedback Create POST failed validation.");
+
                 // Debugging code to log ModelState errors
                 foreach (var modelStateKey in ViewData.ModelState.Keys)
                 {
@@ -87,6 +98,8 @@ namespace MidStateShuttleService.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult ViewAll()
         {
+            _logger.LogInformation("Feedback ViewAll accessed.");
+
             var feedbacks = new FeedbackServices(_context).GetAllEntities().Where(f => f.IsActive);
 
             return View("FeedbackTable", feedbacks);
@@ -97,6 +110,8 @@ namespace MidStateShuttleService.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ArchiveFeedback(int id)
         {
+            _logger.LogInformation($"ArchiveFeedback requested for FeedbackId: {id}");
+
             try
             {
                 var feedback = _context.Feedbacks.Find(id);
@@ -105,9 +120,13 @@ namespace MidStateShuttleService.Controllers
                 {
                     feedback.IsActive = !feedback.IsActive; // Toggle IsActive from true to false or false to true
                     _context.SaveChanges();
+
+                    _logger.LogInformation($"ArchiveFeedback toggled successfully for FeedbackId: {id}. New IsActive: {feedback.IsActive}");
                 }
                 else
                 {
+                    _logger.LogWarning($"ArchiveFeedback failed. Feedback not found for FeedbackId: {id}");
+
                     // Handle the case where the driver with the specified id is not found
                     ModelState.AddModelError("", "Feedback not found.");
                     return View();
@@ -138,6 +157,8 @@ namespace MidStateShuttleService.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult ApproveTestimonial(int id)
         {
+            _logger.LogInformation($"ApproveTestimonial requested for FeedbackId: {id}");
+
             try
             {
                 var feedback = _context.Feedbacks.Find(id);
@@ -146,9 +167,13 @@ namespace MidStateShuttleService.Controllers
                 {
                     feedback.DisplayTestimonial = true;
                     _context.SaveChanges();
+
+                    _logger.LogInformation($"Testimonial approved for FeedbackId: {id}");
                 }
                 else
                 {
+                    _logger.LogWarning($"ApproveTestimonial failed. Feedback not found for FeedbackId: {id}");
+
                     // Handle the case where the feedback with the specified id is not found
                     ModelState.AddModelError("", "Feedback not found.");
                     return View();

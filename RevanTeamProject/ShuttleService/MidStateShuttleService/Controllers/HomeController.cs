@@ -23,6 +23,8 @@ namespace MidStateShuttleService.Controllers
         [AllowAnonymous]
         public IActionResult Index()
         {
+            _logger.LogInformation("Home Index accessed.");
+
             // Fetch all feedback entries and order them by DateSubmitted in descending order
             //var feedbackList = _context.Feedbacks.OrderByDescending(f => f.DateSubmitted).ToList();
             //return View(feedbackList);
@@ -31,14 +33,21 @@ namespace MidStateShuttleService.Controllers
                                       .Where(f => f.IsActive && f.DisplayTestimonial)
                                       .OrderByDescending(f => f.DateSubmitted)
                                       .ToList();
+
+            _logger.LogInformation($"Home Index returning {activeFeedbackList.Count} active testimonials.");
+
             RouteServices rs = new RouteServices(_context);
             ViewBag.RouteSchedule = rs.GetScheduleRoutes();
 
+            _logger.LogInformation("Route schedule loaded for Home Index.");
+
             return View(activeFeedbackList);
         }
+
         [AllowAnonymous]
         public IActionResult Privacy()
         {
+            _logger.LogInformation("Privacy page accessed.");
             return View();
         }
 
@@ -46,6 +55,7 @@ namespace MidStateShuttleService.Controllers
         [AllowAnonymous]
         public IActionResult Error()
         {
+            _logger.LogWarning("Error page triggered.");
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
@@ -55,6 +65,8 @@ namespace MidStateShuttleService.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Create([Bind("Comment,CustomerName,Rating")] Feedback feedback)
         {
+            _logger.LogInformation($"Home Create POST received. CustomerName: {feedback?.CustomerName}, Rating: {feedback?.Rating}");
+
             // DEV NOTE: ModelState ensures incoming form data passes validation rules defined on the Feedback model.
             if (ModelState.IsValid)
             {
@@ -90,6 +102,8 @@ namespace MidStateShuttleService.Controllers
                     HttpContext.Session.SetInt32("FeedbackCount", feedbackCount);
                     HttpContext.Session.SetString("LastFeedback", "You have a new feedback!");
 
+                    _logger.LogInformation($"Feedback session updated. New FeedbackCount: {feedbackCount}");
+
                     // DEV NOTE: Redirect to Index to prevent form resubmission on page refresh.
                     return RedirectToAction(nameof(Index));
                 }
@@ -101,6 +115,8 @@ namespace MidStateShuttleService.Controllers
             }
             else
             {
+                _logger.LogWarning("Home Create POST failed validation.");
+
                 // DEV NOTE: Log validation errors to help diagnose form submission issues.
                 foreach (var modelStateKey in ViewData.ModelState.Keys)
                 {
@@ -119,15 +135,21 @@ namespace MidStateShuttleService.Controllers
                 .OrderByDescending(feedbackItem => feedbackItem.DateSubmitted)
                 .ToList();
 
+            _logger.LogInformation($"Reloading Home Index with {activeFeedbackList.Count} active testimonials after failed submission.");
+
             // DEV NOTE: Reload route schedule used by the home page.
             RouteServices routeService = new RouteServices(_context);
             ViewBag.RouteSchedule = routeService.GetScheduleRoutes();
+
+            _logger.LogInformation("Route schedule reloaded after failed submission.");
 
             return View("Index", activeFeedbackList);
         }
 
         private string getSchedule()
         {
+            _logger.LogInformation("getSchedule called.");
+
             RouteServices rs = new RouteServices(_context);
             try
             {
@@ -139,7 +161,7 @@ namespace MidStateShuttleService.Controllers
                 return "<h5>An error has occurred displaying route schedule at this time. Please try again later.";
             }
 
-
+            _logger.LogInformation("getSchedule completed successfully.");
 
             return null;
         }

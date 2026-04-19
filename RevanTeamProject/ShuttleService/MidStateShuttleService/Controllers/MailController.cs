@@ -11,16 +11,20 @@ namespace MidStateShuttleService.Controllers
     {
         private readonly MailServices _mailServices;
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<MailController> _logger;
 
-        public MailController(MailServices mailServices, ApplicationDbContext context)
+        public MailController(MailServices mailServices, ApplicationDbContext context, ILogger<MailController> logger)
         {
             _mailServices = mailServices;
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet]
         public IActionResult Create()
         {
+            _logger.LogInformation("Mail Create page accessed.");
+
             LoadLocations();
             return View(new MailItem());
         }
@@ -29,8 +33,12 @@ namespace MidStateShuttleService.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(MailItem mailItem)
         {
+            _logger.LogInformation("Mail Create POST received.");
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Mail Create POST failed validation.");
+
                 LoadLocations();
                 return View(mailItem);
             }
@@ -40,6 +48,8 @@ namespace MidStateShuttleService.Controllers
 
             _mailServices.AddMailItem(mailItem);
 
+            _logger.LogInformation("Mail entry recorded successfully by {SubmittedBy}.", mailItem.SubmittedBy);
+
             TempData["SuccessMessage"] = "Mail entry recorded successfully.";
             return RedirectToAction(nameof(Create));
         }
@@ -48,12 +58,19 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public IActionResult Report()
         {
+            _logger.LogInformation("Mail Report accessed.");
+
             var mailItems = _mailServices.GetAllMailItems();
+
+            _logger.LogInformation("Mail Report returned {MailItemCount} records.", mailItems.Count());
+
             return View(mailItems);
         }
 
         private void LoadLocations()
         {
+            _logger.LogInformation("Loading active locations for mail form.");
+
             ViewBag.Locations = _context.Locations
                 .Where(l => l.IsActive)
                 .OrderBy(l => l.Name)

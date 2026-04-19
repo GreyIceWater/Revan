@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MidStateShuttleService.Models;
 using MidStateShuttleService.Services;
 using MidStateShuttleService.Helpers;
@@ -10,10 +11,14 @@ namespace MidStateShuttleService.Controllers
     public class ReportsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<ReportsController> _logger;
 
-        public ReportsController(ApplicationDbContext context)
+        public ReportsController(ApplicationDbContext context, ILogger<ReportsController> logger)
         {
             _context = context;
+            _logger = logger;
+
+            _logger.LogInformation("ReportsController initialized.");
         }
 
         // ==========================================================
@@ -25,6 +30,8 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public async Task<IActionResult> Reports(string report = "")
         {
+            _logger.LogInformation("Reports action called. Report type requested: {ReportType}", report);
+
             // DEV NOTE:
             // Main reports page action.
             // Uses the "report" query string to decide which dataset to load.
@@ -32,6 +39,8 @@ namespace MidStateShuttleService.Controllers
 
             if (string.Equals(report, "requests", StringComparison.OrdinalIgnoreCase))
             {
+                _logger.LogInformation("Loading requests report data.");
+
                 // DEV NOTE:
                 // Load rider request records newest first for the Requests report.
                 allModels.Register = await _context.RegisterModels
@@ -42,9 +51,14 @@ namespace MidStateShuttleService.Controllers
                 // DEV NOTE:
                 // Passed to the view so it knows which report table to render.
                 ViewBag.ReportType = "requests";
+
+                var requestCount = allModels.Register == null ? 0 : allModels.Register.Count();
+                _logger.LogInformation("Loaded {Count} request records.", requestCount);
             }
             else if (string.Equals(report, "checkins", StringComparison.OrdinalIgnoreCase))
             {
+                _logger.LogInformation("Loading check-ins report data.");
+
                 // DEV NOTE:
                 // Load check-in records newest first.
                 // Include related pickup/dropoff locations so names can be shown in the view.
@@ -56,9 +70,14 @@ namespace MidStateShuttleService.Controllers
                     .ToListAsync();
 
                 ViewBag.ReportType = "checkins";
+
+                var checkInCount = allModels.CheckIn == null ? 0 : allModels.CheckIn.Count();
+                _logger.LogInformation("Loaded {Count} check-in records.", checkInCount);
             }
             else if (string.Equals(report, "mail", StringComparison.OrdinalIgnoreCase))
             {
+                _logger.LogInformation("Loading mail report data.");
+
                 // DEV NOTE:
                 // Load active mail records newest first for the Mail report.
                 allModels.MailItems = await _context.MailItems
@@ -68,9 +87,14 @@ namespace MidStateShuttleService.Controllers
                     .ToListAsync();
 
                 ViewBag.ReportType = "mail";
+
+                var mailCount = allModels.MailItems == null ? 0 : allModels.MailItems.Count();
+                _logger.LogInformation("Loaded {Count} mail records.", mailCount);
             }
             else
             {
+                _logger.LogInformation("No report type selected. Loading report picker only.");
+
                 // DEV NOTE:
                 // No report selected yet, so the page loads with just the picker.
                 ViewBag.ReportType = "";
@@ -78,6 +102,7 @@ namespace MidStateShuttleService.Controllers
 
             // IMPORTANT:
             // This returns the full Reports page that lives under the Dashboard views folder.
+            _logger.LogInformation("Returning Reports view.");
             return View("~/Views/Dashboard/Reports.cshtml", allModels);
         }
 
@@ -88,6 +113,8 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public async Task<IActionResult> ExportRiderRequestsCsv()
         {
+            _logger.LogInformation("ExportRiderRequestsCsv called.");
+
             // DEV NOTE:
             // Pull only the fields needed for CSV export.
             var riderRequests = await _context.RegisterModels
@@ -109,6 +136,8 @@ namespace MidStateShuttleService.Controllers
                 })
                 .ToListAsync();
 
+            _logger.LogInformation("Loaded {Count} rider request records for CSV export.", riderRequests.Count);
+
             // DEV NOTE:
             // Build CSV content manually with a StringBuilder.
             var stringBuilder = new System.Text.StringBuilder();
@@ -122,7 +151,7 @@ namespace MidStateShuttleService.Controllers
                     $"{riderRequest.RegistrationId}," +
                     $"{Csv(riderRequest.Name)}," +
                     $"{CsvExcelText(riderRequest.StudentId)}," +
-                    $"{Csv(riderRequest.Email)}," +
+                    $"{CsvExcelText(riderRequest.Email)}," +
                     $"{CsvExcelText(riderRequest.Phone)}," +
                     $"{BoolToYesNo(riderRequest.IsAdult)}," +
                     $"{Csv(riderRequest.isCustom ? "Special" : "Regular")}," +
@@ -132,6 +161,8 @@ namespace MidStateShuttleService.Controllers
                     $"{BoolToYesNo(riderRequest.IsArchived)}"
                 );
             }
+
+            _logger.LogInformation("Rider requests CSV built successfully.");
 
             // DEV NOTE:
             // Return the CSV as a downloadable file.
@@ -159,6 +190,8 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public async Task<IActionResult> ExportCheckInsCsv()
         {
+            _logger.LogInformation("ExportCheckInsCsv called.");
+
             // DEV NOTE:
             // Pull only the fields needed for check-in CSV export.
             var checkIns = await _context.CheckIns
@@ -179,6 +212,8 @@ namespace MidStateShuttleService.Controllers
                 })
                 .ToListAsync();
 
+            _logger.LogInformation("Loaded {Count} check-in records for CSV export.", checkIns.Count);
+
             var stringBuilder = new System.Text.StringBuilder();
             stringBuilder.AppendLine("CheckInId,Name,StudentId,Date,FirstTime,PickUpLocation,DropOffLocation,Comments");
 
@@ -187,7 +222,7 @@ namespace MidStateShuttleService.Controllers
                 stringBuilder.AppendLine(
                     $"{checkIn.CheckInId}," +
                     $"{Csv(checkIn.Name)}," +
-                    $"{Csv(checkIn.StudentId)}," +
+                    $"{CsvExcelText(checkIn.StudentId)}," +
                     $"{DateTimeHelper.ToCentralTimeString(checkIn.Date)}," +
                     $"{BoolToYesNo(checkIn.FirstTime)}," +
                     $"{Csv(checkIn.PickUpLocation)}," +
@@ -195,6 +230,8 @@ namespace MidStateShuttleService.Controllers
                     $"{Csv(checkIn.Comments)}"
                 );
             }
+
+            _logger.LogInformation("Check-ins CSV built successfully.");
 
             return File(
                 System.Text.Encoding.UTF8.GetBytes(stringBuilder.ToString()),
@@ -210,6 +247,8 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public async Task<IActionResult> ExportMailCsv()
         {
+            _logger.LogInformation("ExportMailCsv called.");
+
             // DEV NOTE:
             // Pull only the fields needed for mail CSV export.
             var mailItems = await _context.MailItems
@@ -229,6 +268,8 @@ namespace MidStateShuttleService.Controllers
                 })
                 .ToListAsync();
 
+            _logger.LogInformation("Loaded {Count} mail records for CSV export.", mailItems.Count);
+
             var stringBuilder = new System.Text.StringBuilder();
             stringBuilder.AppendLine("MailItemId,DriverName,PickupLocation,DropoffLocation,MailType,Notes,SubmittedBy,SubmittedAt");
 
@@ -245,6 +286,8 @@ namespace MidStateShuttleService.Controllers
                     $"{DateTimeHelper.ToCentralTimeString(mailItem.SubmittedAt)}"
                 );
             }
+
+            _logger.LogInformation("Mail CSV built successfully.");
 
             return File(
                 System.Text.Encoding.UTF8.GetBytes(stringBuilder.ToString()),

@@ -32,6 +32,8 @@ namespace MidStateShuttleService.Controllers
         // GET: DashboardController
         public ActionResult Index(string section = "")
         {
+            _logger.LogInformation($"Dashboard Index accessed. Section: {section}");
+
             DashboardViewModel dashboardViewModel = new DashboardViewModel();
 
             CheckInServices cis = new CheckInServices(_context);
@@ -48,6 +50,7 @@ namespace MidStateShuttleService.Controllers
 
             if (User.IsInRole("Admin"))
             {
+                _logger.LogInformation("Admin dashboard data loading.");
                 dashboardViewModel.Messages = mes.GetAllEntities().ToList();
                 dashboardViewModel.Notifications = note.GetAllEntities().Where(r => !r.IsArchived).ToList();
             }
@@ -86,18 +89,24 @@ namespace MidStateShuttleService.Controllers
             // Log the value to ensure it's being received correctly
             _logger.LogInformation($"Section received: {section}");
 
+            _logger.LogInformation($"Dashboard session values - RegistrationSuccess: {registrationSuccess}, RegistrationCount: {newRegistrations}, CheckInCount: {checkInCountFromSession}, MessageCount: {messageCountFromSession}, FeedbackCount: {feedbackCountFromSession}");
+
 
             // Decide which section to open based on the 'section' parameter
             ViewBag.OpenSection = section;
 
             if (section == "feedback")
             {
+                _logger.LogInformation("Feedback section opened. Resetting FeedbackCount session value.");
                 HttpContext.Session.SetInt32("FeedbackCount", 0); // Reset feedback count immediately when section is feedback
             }
             else if (section == "message")
             {
+                _logger.LogInformation("Message section opened. Resetting MessageCount session value.");
                 HttpContext.Session.SetInt32("MessageCount", 0); // Reset message count
             }
+
+            _logger.LogInformation($"Dashboard metrics loaded. TotalMonthlyCheckins: {dashboardViewModel.TotalMonthlyCheckins}, PastWeekRegistrations: {dashboardViewModel.PastWeekRegistrations}, TotalRequests: {dashboardViewModel.TotalRequests}");
 
             return View(dashboardViewModel);
 
@@ -105,32 +114,51 @@ namespace MidStateShuttleService.Controllers
 
         public ActionResult ViewReports()
         {
+            _logger.LogInformation("ViewReports accessed.");
             return View("Reports");
         }
 
         public ActionResult GetMessageDetails(int messageId)
         {
+            _logger.LogInformation($"GetMessageDetails requested for MessageId: {messageId}");
+
             // Fetch message details from the database based on the messageId
             var message = _context.Messages.Find(messageId);
+
+            if (message == null)
+            {
+                _logger.LogWarning($"GetMessageDetails could not find MessageId: {messageId}");
+            }
 
             // Return a partial view with the message details
             return PartialView("_MessageDetails", message);
         }
-        
+
         // Accept and reject feedback methods
         public async Task<IActionResult> AcceptFeedback(int id)
         {
+            _logger.LogInformation($"AcceptFeedback requested for FeedbackId: {id}");
+
             var feedback = await _context.Feedbacks.FindAsync(id);
             if (feedback != null)
             {
                 feedback.IsActive = true;
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Feedback accepted for FeedbackId: {id}");
             }
+            else
+            {
+                _logger.LogWarning($"AcceptFeedback could not find FeedbackId: {id}");
+            }
+
             return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> RejectFeedback(int id)
         {
+            _logger.LogInformation($"RejectFeedback requested for FeedbackId: {id}");
+
             try
             {
                 var feedback = await _context.Feedbacks.FindAsync(id);
@@ -138,6 +166,12 @@ namespace MidStateShuttleService.Controllers
                 {
                     feedback.IsActive = false;  // Set feedback as inactive
                     await _context.SaveChangesAsync();
+
+                    _logger.LogInformation($"Feedback rejected for FeedbackId: {id}");
+                }
+                else
+                {
+                    _logger.LogWarning($"RejectFeedback could not find FeedbackId: {id}");
                 }
                 return RedirectToAction("Index", "Dashboard");
             }
@@ -158,6 +192,7 @@ namespace MidStateShuttleService.Controllers
         // Add a function to explicitly reload the page when feedback is clicked
         public ActionResult FeedbackClicked()
         {
+            _logger.LogInformation("FeedbackClicked accessed. Resetting FeedbackCount and redirecting to feedback section.");
             ViewBag.OpenSection = "feedback";
             HttpContext.Session.SetInt32("FeedbackCount", 0);
             return RedirectToAction("Index", new { section = "feedback" }); // Redirect to Index to ensure changes take effect immediately
@@ -173,6 +208,8 @@ namespace MidStateShuttleService.Controllers
         [HttpGet]
         public async Task<IActionResult> ReportsPartial(string report = "")
         {
+            _logger.LogInformation($"ReportsPartial requested. Report: {report}");
+
             var allModels = new AllModels();
 
             if (string.Equals(report, "requests", StringComparison.OrdinalIgnoreCase))
@@ -181,6 +218,8 @@ namespace MidStateShuttleService.Controllers
                     .AsNoTracking()
                     .OrderByDescending(r => r.InsertDateTime)
                     .ToListAsync();
+
+                _logger.LogInformation($"Requests report loaded with {allModels.Register.Count()} records.");
 
                 ViewBag.ReportType = "requests";
             }
@@ -193,17 +232,22 @@ namespace MidStateShuttleService.Controllers
                     .OrderByDescending(c => c.Date)
                     .ToListAsync();
 
+                _logger.LogInformation($"Checkins report loaded with {allModels.CheckIn.Count()} records before time conversion.");
+
                 // Convert UTC -> Central for display consistency
                 if (allModels.CheckIn != null)
                 {
                     foreach (var checkIn in allModels.CheckIn)
                         checkIn.Date = TimeService.ConvertUtcToCentral(checkIn.Date);
+
+                    _logger.LogInformation("Checkins report dates converted from UTC to Central.");
                 }
 
                 ViewBag.ReportType = "checkins";
             }
             else
             {
+                _logger.LogWarning($"ReportsPartial received unsupported or empty report type: {report}");
                 ViewBag.ReportType = "";
             }
 
@@ -212,6 +256,7 @@ namespace MidStateShuttleService.Controllers
 
         public ActionResult ViewArchives()
         {
+            _logger.LogInformation("ViewArchives accessed.");
             return View();
         }
     }
